@@ -4,7 +4,7 @@
 %%
 %% The original source files were:
 %%
-%% merlin.mbs  (with options: `ed-au,atit-u,num-xser,isbn,issn,doi,xedn,url,url-nl,nfss,')
+%% merlin.mbs  (with options: `ed-au,atit-u,num-xser,xedn,url,url-blk,nfss,')
 %% ----------------------------------------
 %% *** Master's Thesis ***
 %% 
@@ -40,14 +40,11 @@ ENTRY
     author
     booktitle
     chapter
-    doi
     edition
     editor
     eid
     howpublished
     institution
-    isbn
-    issn
     journal
     key
     month
@@ -360,10 +357,10 @@ FUNCTION {bibinfo.warn}
     }
   if$
 }
-FUNCTION {write.url}
+FUNCTION {format.url}
 { url empty$
-    { skip$ }
-    { "\newline\urlprefix\url{" url * "}" * write$ newline$ }
+    { "" }
+    { "\urlprefix\url{" url * "}" * }
   if$
 }
 
@@ -434,35 +431,6 @@ FUNCTION {format.editors}
       " " *
       get.bbl.editor
       *
-    }
-  if$
-}
-FUNCTION {format.isbn}
-{ isbn "isbn" bibinfo.check
-  duplicate$ empty$ 'skip$
-    {
-      new.block
-      "ISBN " swap$ *
-    }
-  if$
-}
-
-FUNCTION {format.issn}
-{ issn "issn" bibinfo.check
-  duplicate$ empty$ 'skip$
-    {
-      new.block
-      "ISSN " swap$ *
-    }
-  if$
-}
-
-FUNCTION {format.doi}
-{ doi "doi" bibinfo.check
-  duplicate$ empty$ 'skip$
-    {
-      new.block
-      "\doi{" swap$ * "}" *
     }
   if$
 }
@@ -906,12 +874,11 @@ FUNCTION {article}
       format.pages output
     }
   if$
-  format.issn output
-  format.doi output
+  new.block
+  format.url output
   new.block
   format.note output
   fin.entry
-  write.url
 }
 FUNCTION {book}
 { output.bibitem
@@ -941,12 +908,11 @@ FUNCTION {book}
   if$
   format.edition output
   format.date "year" output.check
-  format.isbn output
-  format.doi output
+  new.block
+  format.url output
   new.block
   format.note output
   fin.entry
-  write.url
 }
 FUNCTION {booklet}
 { output.bibitem
@@ -957,12 +923,11 @@ FUNCTION {booklet}
   howpublished "howpublished" bibinfo.check output
   address "address" bibinfo.check output
   format.date output
-  format.isbn output
-  format.doi output
+  new.block
+  format.url output
   new.block
   format.note output
   fin.entry
-  write.url
 }
 
 FUNCTION {inbook}
@@ -996,15 +961,11 @@ FUNCTION {inbook}
   if$
   format.edition output
   format.date "year" output.check
-  crossref missing$
-    { format.isbn output }
-    'skip$
-  if$
-  format.doi output
+  new.block
+  format.url output
   new.block
   format.note output
   fin.entry
-  write.url
 }
 
 FUNCTION {incollection}
@@ -1022,17 +983,16 @@ FUNCTION {incollection}
       format.publisher.address output
       format.edition output
       format.date "year" output.check
-      format.isbn output
     }
     { format.incoll.inproc.crossref output.nonnull
       format.chapter.pages output
     }
   if$
-  format.doi output
+  new.block
+  format.url output
   new.block
   format.note output
   fin.entry
-  write.url
 }
 FUNCTION {inproceedings}
 { output.bibitem
@@ -1053,18 +1013,16 @@ FUNCTION {inproceedings}
         }
       if$
       format.date "year" output.check
-      format.isbn output
-      format.issn output
     }
     { format.incoll.inproc.crossref output.nonnull
       format.pages output
     }
   if$
-  format.doi output
+  new.block
+  format.url output
   new.block
   format.note output
   fin.entry
-  write.url
 }
 FUNCTION {conference} { inproceedings }
 FUNCTION {manual}
@@ -1098,11 +1056,11 @@ FUNCTION {manual}
   if$
   format.edition output
   format.date output
-  format.doi output
+  new.block
+  format.url output
   new.block
   format.note output
   fin.entry
-  write.url
 }
 
 FUNCTION {mastersthesis}
@@ -1116,11 +1074,11 @@ FUNCTION {mastersthesis}
   school "school" bibinfo.warn output
   address "address" bibinfo.check output
   format.date "year" output.check
-  format.doi output
+  new.block
+  format.url output
   new.block
   format.note output
   fin.entry
-  write.url
 }
 
 FUNCTION {misc}
@@ -1131,11 +1089,11 @@ FUNCTION {misc}
   howpublished new.block.checka
   howpublished "howpublished" bibinfo.check output
   format.date output
-  format.doi output
+  new.block
+  format.url output
   new.block
   format.note output
   fin.entry
-  write.url
   empty.misc.check
 }
 FUNCTION {phdthesis}
@@ -1149,11 +1107,11 @@ FUNCTION {phdthesis}
   school "school" bibinfo.warn output
   address "address" bibinfo.check output
   format.date "year" output.check
-  format.doi output
+  new.block
+  format.url output
   new.block
   format.note output
   fin.entry
-  write.url
 }
 
 FUNCTION {proceedings}
@@ -1189,13 +1147,11 @@ FUNCTION {proceedings}
      }
   if$
       format.date "year" output.check
-  format.isbn output
-  format.issn output
-  format.doi output
+  new.block
+  format.url output
   new.block
   format.note output
   fin.entry
-  write.url
 }
 
 FUNCTION {techreport}
@@ -1209,11 +1165,11 @@ FUNCTION {techreport}
   institution "institution" bibinfo.warn output
   address "address" bibinfo.check output
   format.date "year" output.check
-  format.doi output
+  new.block
+  format.url output
   new.block
   format.note output
   fin.entry
-  write.url
 }
 
 FUNCTION {unpublished}
@@ -1222,11 +1178,11 @@ FUNCTION {unpublished}
   new.block
   format.title "title" output.check
   format.date output
-  format.doi output
+  new.block
+  format.url output
   new.block
   format.note "note" output.check
   fin.entry
-  write.url
 }
 
 FUNCTION {default.type} { misc }
@@ -1397,13 +1353,7 @@ FUNCTION {begin.bib}
   write$ newline$
   "\providecommand{\url}[1]{\texttt{#1}}"
   write$ newline$
-  "\providecommand{\urlprefix}{URL }"
-  write$ newline$
-  "\expandafter\ifx\csname urlstyle\endcsname\relax"
-  write$ newline$
-  "  \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else"
-  write$ newline$
-  "  \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup \urlstyle{rm}\Url}\fi"
+  "\providecommand{\urlprefix}{}"
   write$ newline$
 }
 EXECUTE {begin.bib}
