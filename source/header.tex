@@ -9,9 +9,11 @@
 \documentclass[
   pagesize=auto,          % write pagesize to DVI or PDF
   paper=a4,               % use ISO A4
-%  BCOR13mm,               % binding correction
+  BCOR12mm,               % binding correction
   twoside,                % two sided (duplex)
 %  halfparskip,
+  chapterprefix,
+  appendixprefix,
   final                   % final version
 ]{scrbook}
 
@@ -23,8 +25,6 @@
 % Compilation with pdflatex
 \ifpdfoutput{
   \usepackage[pdftex]{graphicx}
-  \usepackage{thumbpdf}
-  \usepackage{ae}
   \usepackage[
     pdftex,
     bookmarks,
@@ -47,11 +47,12 @@
 {
   \RequirePackage[plainpages=true]{hyperref}
   \usepackage{graphicx}
-  \usepackage{pslatex}
 }
 
 % Other packages
 \usepackage{color}
+\usepackage{ae,aecompl} 
+\usepackage[Bjornstrup]{fncychap}
 
 
 %------------------------------------------------------------------------------

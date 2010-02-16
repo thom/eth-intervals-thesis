@@ -171,7 +171,7 @@ paper-format = a4
 # not. 
 # 
 # Possible values are I<yes> and I<no>. The default value is I<yes>.
-quiet = yes
+quiet = no
 
 #
 # =item force
