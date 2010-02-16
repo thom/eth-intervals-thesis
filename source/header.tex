@@ -11,6 +11,7 @@
   paper=a4,               % use ISO A4
 %  BCOR13mm,               % binding correction
   twoside,                % two sided (duplex)
+%  halfparskip,
   final                   % final version
 ]{scrbook}
 
@@ -59,16 +60,26 @@
 
 \graphicspath{{../figures/}}
 
-% Title page
-\subject{\Subject}
-\title{\Title \\ \SubTitle}
-\author{\Author}
-\date{\today}
-\publishers{\Version}
-
 
 %------------------------------------------------------------------------------
 % Commands
 %------------------------------------------------------------------------------
 
 \newcommand{\hr}{\noindent\rule{\textwidth}{1pt}}
+
+\renewcommand\uppertitleback[1]{
+  \thispagestyle{empty}
+  
+  \noindent
+  \begin{minipage}[t]{\textwidth}
+    #1
+  \end{minipage}\par
+  \vfill
+}
+
+\renewcommand\lowertitleback[1]{
+  \noindent
+  \begin{minipage}[b]{\textwidth}
+    #1
+  \end{minipage}
+}

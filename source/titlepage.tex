@@ -2,8 +2,56 @@
 % titlepage.tex
 %==============================================================================
 
+% Based on the design of the titlepage of `The Not So Short
+% Introduction to LaTeX 2E' (see: CTAN:/tex-archive/info/lshort)
+\begin{titlepage}
+  \makebox[0pt][l]{
+    \begin{minipage}{\textwidth}
+      \noindent\includegraphics[width=\textwidth]{ethz-logo}\\[-2mm]
+      \hr
+    \end{minipage}
+  }
+
+  \vspace{\stretch{1}}
+
+  \makebox[0pt][l]{
+    \begin{minipage}{\textwidth}
+      \hfill\textbf{
+        \Large \SmallTitle
+      }
+
+      \flushright{
+        \huge\bfseries \Title
+      }
+
+      \noindent\rule{\textwidth}{3pt}\\[2.5ex]
+
+      \hfill\emph{
+        \Large \Author
+      }
+    \end{minipage}
+  }
+
+  \vspace{\stretch{1}}
+
+  \makebox[0pt][l]{
+    \begin{minipage}{\textwidth}
+      \flushright{
+        {\bfseries Advisors: \Advisors}\\[10ex]
+        \Date
+      }
+    \end{minipage}
+  }
+
+  \vspace{\stretch{1}}
+
+  \makebox[0pt][l]{
+    \begin{minipage}{\textwidth}
+      \hr\\[1mm]
+      \noindent\includegraphics[width=\textwidth]{inf-logo}
+    \end{minipage}
+  }
+\end{titlepage}
+
 \uppertitleback{\UpperTitleBack}
 \lowertitleback{\LowerTitleBack}
-\dedication{\Dedication}
-
-\maketitle
