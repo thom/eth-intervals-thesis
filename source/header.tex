@@ -1,0 +1,74 @@
+%==============================================================================
+% header.tex
+%==============================================================================
+
+%------------------------------------------------------------------------------
+% Document class and packages
+%------------------------------------------------------------------------------
+
+\documentclass[
+  pagesize=auto,          % write pagesize to DVI or PDF
+  paper=a4,               % use ISO A4
+%  BCOR13mm,               % binding correction
+  twoside,                % two sided (duplex)
+  final                   % final version
+]{scrbook}
+
+% Internationalisation
+\usepackage{ucs}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+% Compilation with pdflatex
+\ifpdfoutput{
+  \usepackage[pdftex]{graphicx}
+  \usepackage{thumbpdf}
+  \usepackage{ae}
+  \usepackage[
+    pdftex,
+    bookmarks,
+    bookmarksnumbered,    % index with numbering
+    colorlinks=true,      % links with color, otherwise with border
+    linkcolor=blue,       % standard: red
+    citecolor=blue,       % standard: green
+    urlcolor=magenta,     % standard: cyan
+    filecolor=blue,
+    pagecolor=blue,
+    menucolor=blue,
+    pdftitle={\PdfTitle},
+    pdfauthor={\PdfAuthor},
+    pdfcreator={\PdfCreator},
+    pdfsubject={\PdfSubject},
+    pdfkeywords={\PdfKeywords}
+  ]{hyperref}
+}
+% Compilation with latex
+{
+  \RequirePackage[plainpages=true]{hyperref}
+  \usepackage{graphicx}
+  \usepackage{pslatex}
+}
+
+% Other packages
+\usepackage{color}
+
+
+%------------------------------------------------------------------------------
+% Configuration
+%------------------------------------------------------------------------------
+
+\graphicspath{{../figures/}}
+
+% Title page
+\subject{\Subject}
+\title{\Title \\ \SubTitle}
+\author{\Author}
+\date{\today}
+\publishers{\Version}
+
+
+%------------------------------------------------------------------------------
+% Commands
+%------------------------------------------------------------------------------
+
+\newcommand{\hr}{\noindent\rule{\textwidth}{1pt}}
