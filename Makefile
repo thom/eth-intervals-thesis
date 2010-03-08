@@ -1045,10 +1045,10 @@ $(build-dir)/latexmk.rc:
 	@if test -d $(build-dir); then true; else mkdir $(build-dir); fi
 	@echo "\$$bibtex = '$(bibtex)';" >> $@;
 	@echo "\$$makeindex = '$(makeindex)';" >> $@;
-	@echo "\$$latex = '$(latex)';" >> $@;
+	@echo "\$$latex = '$(latex) -interaction=nonstopmode';" >> $@;
 	@echo "\$$dvips = '$(dvips)';" >> $@;
 	@echo "\$$ps2pdf = '$(pstopdf)';" >> $@;
-	@echo "\$$pdflatex = '$(pdflatex)';" >> $@;
+	@echo "\$$pdflatex = '$(pdflatex) -interaction=nonstopmode';" >> $@;
 	@echo "\$$dvi_previewer = 'start $(dvi-viewer)';" >> $@;
 	@echo "\$$pdf_previewer = 'start $(pdf-viewer)';" >> $@;
 	@echo "\$$ps_previewer = 'start $(ps-viewer)';" >> $@;
