@@ -171,7 +171,7 @@ paper-format = a4
 # not. 
 # 
 # Possible values are I<yes> and I<no>. The default value is I<yes>.
-quiet = no
+quiet = yes
 
 #
 # =item force
@@ -372,7 +372,7 @@ doc-backlink = "[ back to top ]"
 # Sets the viewer used to view PDF files.
 # 
 # The default value is I<xpdf>.
-pdf-viewer = xpdf
+pdf-viewer = evince
 
 #
 # =item ps-viewer
@@ -1049,9 +1049,9 @@ $(build-dir)/latexmk.rc:
 	@echo "\$$dvips = '$(dvips)';" >> $@;
 	@echo "\$$ps2pdf = '$(pstopdf)';" >> $@;
 	@echo "\$$pdflatex = '$(pdflatex)';" >> $@;
-	@echo "\$$dvi_previewer = '$(dvi-viewer)';" >> $@;
-	@echo "\$$pdf_previewer = '$(pdf-viewer)';" >> $@;
-	@echo "\$$ps_previewer = '$(ps-viewer)';" >> $@;
+	@echo "\$$dvi_previewer = 'start $(dvi-viewer)';" >> $@;
+	@echo "\$$pdf_previewer = 'start $(pdf-viewer)';" >> $@;
+	@echo "\$$ps_previewer = 'start $(ps-viewer)';" >> $@;
 
 ifeq "$(pdf-creation)" "pdflatex"
 $(pdffile): $(dirs) $(build-dir)/latexmk.rc $(texfiles) $(bibfiles)
