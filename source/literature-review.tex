@@ -8,58 +8,196 @@
 \section{Intervals}
 \label{sec:lr-intervals}
 
-TODO
+\begin{itemize}
+\item Programming with Intervals \cite{Matsakis2009a}
+\item Handling Errors in Parallel Programs Based on Happens Before
+  Relations \cite{Matsakis2009b}
+\item Formal Definition and Safety Proof for the Interval and Effect
+  Analysis \cite{Matsakis2009}
+\item Time, clocks, and the ordering of events in a distributed system
+  \cite{Lamport1978}
+\end{itemize}
 
 
 \section{Work-stealing Scheduler}
 \label{sec:lr-work-stealing-scheduler}
 
-TODO
+\begin{itemize}
+\item Work stealing: an annotated bibliography \cite{Neill}
+\item Scheduling multithreaded computations by work stealing
+  \cite{Blumofe1999}
+\item The data locality of work stealing \cite{Acar2002}
+\item Space efficient execution of deterministic parallel programs
+  \cite{Simpson1999}
+\item Lazy binary-splitting: a run-time adaptive work-stealing
+  scheduler \cite{Tzannes2010}
+\item Mely: Efficient Workstealing for Multicore Event-Driven Systems
+  \cite{Gaud2010}
+\end{itemize}
 
 
 \section{Data Structures for Work-stealing Scheduler}
 \label{sec:lr-data-structures-for-work-stealing-scheduler}
 
-TODO
+\begin{itemize}
+\item Thread scheduling for multiprogrammed multiprocessors
+  \cite{Arora2001}
+\item Checkfence: checking consistency of concurrent data types on
+  relaxed memory models \cite{Burckhardt2007}
+\item Checkfence: checking consistency of concurrent data types on
+  relaxed memory models \cite{Burckhardt2007a}
+\item Dynamic circular work-stealing deque \cite{Chase2008}
+\item A dynamic-sized nonblocking work stealing deque
+  \cite{Hendler2005}
+\item A dynamic-sized nonblocking work stealing deque
+  \cite{Hendler2006}
+\item Non-blocking steal-half work queues \cite{Hendler2002}
+\item The design of a task parallel library \cite{Leijen2009}
+\item Nonblocking Cyclic Extendable Deque for the ABP work stealing
+  algorithm \cite{Lev2005}
+\item Idempotent work stealing \cite{Michael2009}
+\end{itemize}
 
 
 \section{Policies for Work-stealing Scheduling}
 \label{sec:lr-policies-for-work-stealing-scheduling}
 
-TODO
+\begin{itemize}
+\item An empirical evaluation of work stealing with parallelism
+  feedback \cite{Agrawal2006}
+\item Adaptive work-stealing with parallelism feedback
+  \cite{Agrawal2008}
+\item Low-contention depth-first scheduling of parallel computations
+  with write-once synchronization variables \cite{Fatourou2001}
+\item Work-first and help-first scheduling policies for async-finish
+  task parallelism \cite{Guo2009}
+\item SLAW: a Scalable Locality-aware Adaptive Work-stealing Scheduler
+  \cite{Guo}
+\item SLAW: a scalable locality-aware adaptive work-stealing scheduler
+  for multi-core systems \cite{Guo2010}
+\end{itemize}
 
 
 \section{Libraries and Languages Using Work-stealing Scheduling}
 \label{sec:lr-libaries-and-languages-using-work-stealing-scheduling}
 
-TODO
+\begin{itemize}
+\item Helper locks for fork-join parallel programming
+  \cite{Agrawal2010}
+\item Cilk: An efficient multithreaded runtime system
+  \cite{Blumofe1995}
+\item Hood: A user-level threads library for multiprogrammed
+  multiprocessors \cite{Blumofe1998}
+\item X10: an object-oriented approach to non-uniform cluster
+  computing \cite{Charles2005}
+\item Characterizing and improving the performance of intel threading
+  building blocks \cite{Contreras2008}
+\item Wool-a work stealing library \cite{Faxen2009}
+\item The implementation of the Cilk-5 multithreaded language
+  \cite{Frigo1998}
+\item A Java fork/join framework \cite{Lea2000}
+\item Efficient support for fine-grain parallelism on shared-memory
+  machines \cite{Lowenthal1998}
+\item Hood: A User-Level Thread Library for Multiprogramming
+  Multiprocessors \cite{Papadopoulos1998}
+\item Compiler Support for Work-Stealing Parallel Runtime Systems
+  \cite{Raman2009}
+\item Intel threading building blocks: outfitting C++ for multi-core
+  processor parallelism \cite{Reinders2007}
+\item StackThreads/MP: Integrating futures into calling standards
+  \cite{Taura1999}
+\end{itemize}
 
 
 \section{Phaser}
 \label{sec:lr-phaser}
 
-TODO
+\begin{itemize}
+\item Phasers: a unified deadlock-free construct for collective and
+  point-to-point synchronization \cite{Shirako2008}
+\item Hierarchical Phasers for Scalable Synchronization and Reductions
+  in Dynamic Parallelism \cite{Shirako2010}
+\end{itemize}
 
 
 \section{Locality Aware Scheduling}
 \label{sec:lr-locality-aware-scheduling}
 
-TODO
+\begin{itemize}
+\item Static Detection of Place Locality and Elimination of Runtime
+  Checks \cite{Agarwal2008}
+\item Efficient Optimization of Memory Accesses in Parallel Programs
+  \cite{Barik2009}
+\item Scalable Work Stealing \cite{Dinan2009}
+\item Thread scheduling for cache locality \cite{Philbin1996}
+\item Using processor-cache affinity information in shared-memory
+  multiprocessor scheduling \cite{Squillante1993}
+\item Thread clustering: sharing-aware scheduling on SMP-CMP-SMT
+  multiprocessors \cite{Tam2007}
+\item Hierarchical Place Trees: A Portable Abstraction for Task
+  Parallelism and Data Movement \cite{Yan2009}
+\end{itemize}
 
 
 \section{Resource Contention}
 \label{sec:lr-resource-contention}
 
-TODO
+\begin{itemize}
+\item A load balancing framework for adaptive and asynchronous
+  applications \cite{Barker2004}
+\item Characterizing the TLB Behavior of Emerging Parallel Workloads
+  on Chip Multiprocessors \cite{Bhattacharjee2009}
+\item Managing contention for shared resources on multicore processors
+  \cite{Fedorova2010}
+\item Dynamic scheduling strategies for shared-memory multiprocessors
+  \cite{Hamidzadeh1996}
+\item Contention Aware Execution: Online Contention Detection and
+  Response \cite{Soffa2010}
+\item Feedback-Driven Threading: Power-Efficient and High-Performance
+  Execution of Multi-threadedWorkloads on CMPs \cite{Suleman2008}
+\item Does Cache Sharing on Modern CMP Matter to the Performance of
+  Contemporary Multithreaded Programs? \cite{Zhang2010}
+\item Addressing shared resource contention in multicore processors
+  via scheduling \cite{Zhuravlev2010}
+\end{itemize}
 
 
 \section{Distributed Systems}
 \label{sec:lr-distributed-systems}
 
-TODO
+\begin{itemize}
+\item Performance of hierarchical load sharing in heterogeneous
+  distributed systems \cite{Lo1996}
+\item Threshold-based priority policies for parallel-server systems
+  with affinity scheduling \cite{Squillante2001}
+\end{itemize}
 
 
 \section{Benchmarks}
 \label{sec:lr-benchmarks}
 
-TODO
+\begin{itemize}
+\item Producing wrong data without doing anything obviously wrong!
+  \cite{Mytkowicz2009}
+\item SPEComp: A new benchmark suite for measuring parallel computer
+  performance \cite{Aslot2001}
+\item A Communication Characterisation of Splash-2 and Parsec
+  \cite{Barrow-Williams2009}
+\item Understanding PARSEC Performance on Contemporary CMPs
+  \cite{Bhadauria}
+\item Parsec vs. splash-2: A quantitative comparison of two
+  multithreaded benchmark suites on chip-multiprocessors
+  \cite{Bienia2008}
+\item The PARSEC benchmark suite: Characterization and architectural
+  implications \cite{Bienia2008a}
+\item PARSEC 2.0: A New Benchmark Suite for Chip-Multiprocessors
+  \cite{Bienia}
+\item Lonestar: A suite of parallel irregular programs
+  \cite{Kulkarni2009}
+\item Focused community discovery \cite{Hildrum2005}
+\end{itemize}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "thesis"
+%%% End:
