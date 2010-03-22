@@ -23,7 +23,7 @@
 \label{sec:lr-work-stealing-scheduler}
 
 \begin{itemize}
-\item Work stealing: an annotated bibliography \cite{Neill}
+\item Work stealing: an annotated bibliography \cite{Neill2001}
 \item Scheduling multithreaded computations by work stealing
   \cite{Blumofe1999}
 \item The data locality of work stealing \cite{Acar2002}
@@ -46,7 +46,7 @@
   relaxed memory models \cite{Burckhardt2007}
 \item Checkfence: checking consistency of concurrent data types on
   relaxed memory models \cite{Burckhardt2007a}
-\item Dynamic circular work-stealing deque \cite{Chase2008}
+\item Dynamic circular work-stealing deque \cite{Chase2005}
 \item A dynamic-sized nonblocking work stealing deque
   \cite{Hendler2005}
 \item A dynamic-sized nonblocking work stealing deque
@@ -67,6 +67,8 @@
   feedback \cite{Agrawal2006}
 \item Adaptive work-stealing with parallelism feedback
   \cite{Agrawal2008}
+\item Adaptive work-stealing with parallelism feedback
+  \cite{Agrawal2009}
 \item Low-contention depth-first scheduling of parallel computations
   with write-once synchronization variables \cite{Fatourou2001}
 \item Work-first and help-first scheduling policies for async-finish
@@ -106,17 +108,6 @@
   processor parallelism \cite{Reinders2007}
 \item StackThreads/MP: Integrating futures into calling standards
   \cite{Taura1999}
-\end{itemize}
-
-
-\section{Phaser}
-\label{sec:lr-phaser}
-
-\begin{itemize}
-\item Phasers: a unified deadlock-free construct for collective and
-  point-to-point synchronization \cite{Shirako2008}
-\item Hierarchical Phasers for Scalable Synchronization and Reductions
-  in Dynamic Parallelism \cite{Shirako2010}
 \end{itemize}
 
 
@@ -173,8 +164,38 @@
 \end{itemize}
 
 
+\section{Books}
+\label{sec:lr-books}
+
+\begin{itemize}
+\item The art of multiprocessor programming \cite{Herlihy2008}
+\item Java concurrency in practice \cite{Goetz2006}
+\item The little book of semaphores \cite{Downey2008}
+\item Principles of concurrent and distributed programming
+  \cite{Ben2006}
+\end{itemize}
+
+
+\section{Miscellaneous}
+\label{sec:lr-miscellaneous}
+
+\begin{itemize}
+\item Phasers: a unified deadlock-free construct for collective and
+  point-to-point synchronization \cite{Shirako2008}
+\item Hierarchical Phasers for Scalable Synchronization and Reductions
+  in Dynamic Parallelism \cite{Shirako2010}
+\item Producing wrong data without doing anything obviously wrong!
+  \cite{Mytkowicz2009}
+\item A minicourse on multithreaded programming \cite{Leiserson1998}
+\item A Simple Task Load Balancing in Parallel Scheme for Allocation
+  Machines \cite{Watson1991}
+\item Practical implementations of non-blocking synchronization
+  primitives \cite{Moir1997}
+\end{itemize}
+
+
 \section{Benchmarks (Java Grande Forum)}
-\label{sec:lr-benchmarks}
+\label{sec:lr-benchmarks-java}
 
 \begin{itemize}
 \item Analysis and development of Java Grande benchmarks
@@ -188,18 +209,16 @@
 
 
 \section{Benchmarks (C)}
-\label{sec:lr-benchmarks}
+\label{sec:lr-benchmarks-c}
 
 \begin{itemize}
 \item The PARSEC Benchmark Suite Tutorial \cite{Bienia2009}
-\item Producing wrong data without doing anything obviously wrong!
-  \cite{Mytkowicz2009}
 \item SPEComp: A new benchmark suite for measuring parallel computer
   performance \cite{Aslot2001}
 \item A Communication Characterisation of Splash-2 and Parsec
   \cite{Barrow-Williams2009}
 \item Understanding PARSEC Performance on Contemporary CMPs
-  \cite{Bhadauria}
+  \cite{Bhadauria2009}
 \item Parsec vs. splash-2: A quantitative comparison of two
   multithreaded benchmark suites on chip-multiprocessors
   \cite{Bienia2008}
