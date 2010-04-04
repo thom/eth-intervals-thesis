@@ -51,6 +51,7 @@
 
 % Other packages
 \usepackage{color}
+\usepackage{listings}
 \usepackage{ae,aecompl} 
 \usepackage{fncychap}
 \usepackage{url}
@@ -61,6 +62,19 @@
 %------------------------------------------------------------------------------
 
 \graphicspath{{../figures/}}
+
+% Listings
+\lstdefinestyle{Default}{
+  language=Java,
+  tabsize=2,
+  mathescape=true,
+%  inputencoding=utf8,
+  showstringspaces=false,
+  fontadjust=true,
+  basicstyle=\ttfamily,
+  keywordstyle=\color{blue}\bfseries,
+}
+\lstset{style=Default}
 
 
 %------------------------------------------------------------------------------

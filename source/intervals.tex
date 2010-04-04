@@ -5,9 +5,112 @@
 \chapter{Intervals}
 \label{cha:intervals}
 
-[TODO]
+\section{Introduction}
+\label{sec:intervals-introduction}
+
+Intervals are a higher-level thread primitive that replaces threads,
+signals, and barriers.
+
+The goal of intervals is to provide a flexible, high-level primitive
+for writing parallel programs. Specifying parallel tasks and their
+interdependencies using intervals is simplified. Static and dynamic
+checks can help to detect errors like race conditions or deadlocks
+before they happen.
+
+The basic unit of parallelism in the Intervals library is called,
+unsurprisingly, an interval. Each interval represents the slice of
+program time used to execute some parallel task. It may help to think
+of them as a lightweight thread.
+
+Each interval has two points: a start point and an end point. A point
+is a moment in the program's execution. The task of an interval will
+execute sometime after the start point but before the end point.
+
+The ``Sample Interval'' diagram on the left depicts an interval and
+labels its parts. The points are represented by circles and are
+connected by a vertical line. Program time flows in a downward
+direction.
+
+[TODO] Picture: Sample Interval
+
+To express scheduling constraints, it is possible to relate the
+different points on an interval to one another. For example, the
+``Interval Dependencies'' diagram on the left depicts two intervals
+whose start and end points are ordered by dependencies. These
+dependencies guarantee that the right interval will always begin
+execute sometime during the time allotted to the left interval.
+
+[TODO] Picture: Interval Dependencies
+
+Both intervals and points are first-class data-structures (i.e.,
+objects in Java or structs in C). This means they can be passed as
+parameters or stored in fields or arrays, just like any other object.
+Combining the flexibility of first-class structures with the ability
+to relate them in arbitrary ways results in a very rich and flexible
+system that unifies threads, joins, signals, barriers, etc. with a
+single primitive.
+
+\section{Java API}
+\label{sec:intervals-java-api}
+
+In Java, intervals are represented by instances of the type Interval.
+Points in time are represented by instances of type Point. Given an
+interval pointer, you can use the \lstinline|start()| and
+\lstinline|end()| methods to get access to its start and end point.
+
+The most primitive way to create an interval is the static method
+\\\lstinline|Intervals.intervalWithBound(Point bound, Task task)|. It
+creates and returns a new Interval object with the given bound bound
+that will execute task.
+
+The interval diagram on the left entitled ``Creating a New Interval''
+depicts the result of invoking intervalWithBound(bound, task). It
+contains two intervals, current and new. The interval current is the
+one whose task invoked \lstinline|intervalWithBound()|. The interval
+new is the newly created interval which is returned. We also labeled
+the two end points of new.
+
+[TODO] Picture: Creating a New Interval
+
+As you can see, the start of the new interval will always happen after
+the start of the current interval. This is simply because if the
+current interval had not started, it could not have called
+\lstinline|intervalWithBound()|! The double-headed arrow is called a
+creation edge. It indicates that the interval current is the one which
+created new, which is sometimes useful to know.
+
+The bound of an interval is a point in time that happens after the
+interval. In other words, once the bounding point happens, you can be
+sure that the newly created interval has finished. Often intervals
+working together on some task will use the same bound: then you can
+use the bound point to know when all of them have finished. In the
+diagram on the left, the bounding point is labeled bound. You can see
+that there is an end from \lstinline|new.end()| to bound, indicating
+that bound must happen after \lstinline|new.end()|. A special flat
+arrow head is used to designate the bound.
+
+\section{Interval Scheduler}
+\label{sec:intervals-interval-scheduler}
+
+In the background, an interval program relies on a scheduler that
+respects the dependencies (edges) which the user specifies. The
+scheduler can start an interval any time after the points which come
+before its start have already occurred. If there is no path leading
+from one point to another, then the two points are considered
+unordered. This means that the scheduler would be free to order them
+any way it likes.
+
+When an interval is created, it is also given a function or object to
+execute. When the scheduler determines that all incoming dependencies
+on the interval's start point have been resolved, it will arrange for
+that function to execute. The end point of the interval occurs once
+(a) the interval's associated function has terminated and (b) all
+incoming dependencies on the end point are resolved. In the diagram
+on the left, for example, the left interval would not be considered
+terminated until the right interval has started, even if the left
+interval's function had already completed.
 
 %%% Local Variables: 
 %%% mode: latex
-%%% TeX-master: "thesis"
+%%% TeX-master: "header"
 %%% End: 
