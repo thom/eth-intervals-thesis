@@ -47,6 +47,8 @@ Department of Computer Science\\
 \usepackage[utf8x]{inputenc}
 \usepackage[T1]{fontenc}
 
+\usepackage[margin=10pt,font=small,labelfont=bf,format=hang]{caption}
+
 % Compilation with pdflatex
 \ifpdfoutput{
   \usepackage[pdftex]{graphicx}
@@ -88,18 +90,57 @@ Department of Computer Science\\
 
 \graphicspath{{../figures/}}
 
+\captionsetup[lstlisting]{skip=10pt}
+
 % Listings
 \lstdefinestyle{Default}{
   language=Java,
   tabsize=2,
   mathescape=true,
-%  inputencoding=utf8,
+  escapechar=\%,
   showstringspaces=false,
   fontadjust=true,
   basicstyle=\ttfamily,
   keywordstyle=\color{blue}\bfseries,
+  captionpos=b,
+  breaklines=true,
+  breakautoindent=true,
+  prebreak=\mbox{{\color{blue}\tiny{ }$\searrow$}},
+  postbreak=\mbox{{\color{blue}\tiny$\rightarrow${ }}},
+  tabsize=2,
+  xleftmargin=0.5em,
+  xrightmargin=0.5em,
+  numbers=left,
+  numberstyle=\tiny,
+  escapeinside={//*}{\^^M},
 }
+
+\lstdefinestyle{Float}{
+  float=htb,
+}
+
 \lstset{style=Default}
+
+% Workaround for \lstlistoflistings
+\makeatletter
+\@ifundefined{float@listhead}{}{
+    \renewcommand*{\lstlistoflistings}{
+        \begingroup
+    	    \if@twocolumn
+                \@restonecoltrue\onecolumn
+            \else
+                \@restonecolfalse
+            \fi
+            \float@listhead{\lstlistlistingname}
+            \setlength{\parskip}{\z@}
+            \setlength{\parindent}{\z@}
+            \setlength{\parfillskip}{\z@ \@plus 1fil}
+            \@starttoc{lol}
+            \if@restonecol\twocolumn\fi
+        \endgroup
+    }%
+}
+\makeatother
 
 
 %------------------------------------------------------------------------------
