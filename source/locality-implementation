@@ -1,8 +1,9 @@
 %==============================================================================
-% acknowledgement.tex
+% locality-implementation.tex
 %==============================================================================
 
-\chapter*{Acknowledgement}
+\chapter{Implementation}
+\label{chap:locality-implementation}
 
 TODO
 
