@@ -10,10 +10,19 @@
 
 The performance results were obtained on the following two machines.
 
-\section{Core2 Duo}
+\section{Intel Core2 Duo}
 \label{sec:experimental-setup-marvin}
 
 TODO: Describe marvin
+
+See Figure \ref{fig:experimental-setup-marvin}.
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.5\textwidth]{experimental-setup/marvin}
+  \caption[Intel Core2 Duo]{Intel Core2 Duo}
+  \label{fig:experimental-setup-marvin}
+\end{figure}
 
 \section{Intel Nehalem}
 \label{sec:experimental-setup-mafushi}
@@ -26,9 +35,12 @@ an integrated memory controller (see Figure
 controller (IMC) provides a maximum theoretical throughput of 26 GB/s.
 
 In addition, each processor has two QuickPath Interconnect (QPI)
-interfaces \cite{TODO}, one connecting to the remote processor and one
-to the I/O hub. The interconnect has a theoretical maximum throughput
-of 11.72 GB/s in one direction and 23.44 GB/s in both directions. 
+interfaces \cite{R.A.MaddoxG.Singh2009}, one connecting to the remote
+processor and one to the I/O hub. The interconnect has a theoretical
+maximum throughput of 11.72 GB/s in one direction and 23.44 GB/s in
+both directions.
+
+% TODO: Fix reference
 
 Each core has its separate level 1 and level 2 caches, but the
 per-processor 8 MB level 3 cache is shared between all cores of the
@@ -39,8 +51,14 @@ refers to this subsystem as the uncore.
 We sometimes refer to a processor as a node to emphasize its
 participation in forming a (large-scale) parallel system.
 
-% TODO: Add figure
-% TODO: Fix reference
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.8\textwidth]{experimental-setup/mafushi}
+  \caption[Intel Nehalem in a two-processor configuration]{Intel
+    Nehalem in a two-processor configuration}
+  \label{fig:experimental-setup-mafushi}
+\end{figure}
+
 
 %%% Local Variables: 
 %%% mode: latex
