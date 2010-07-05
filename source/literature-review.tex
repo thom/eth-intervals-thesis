@@ -42,6 +42,20 @@ chapter will be removed.
 \end{itemize}
 
 
+\section{Parallel Depth First Scheduler}
+\label{sec:lr-parallel-depth-first-scheduler}
+
+\begin{itemize}
+\item Provably good multicore cache performance for divide-and-conquer
+  algorithms \cite{Blelloch2008}
+\item Brief announcement: parallel depth first vs. work stealing
+  schedulers on CMP architectures \cite{Liaskovitis2006}
+\item Effectively sharing a cache among threads \cite{Blelloch2004}
+\item Scheduling threads for constructive cache sharing on CMPs
+  \cite{Chen2007}
+\end{itemize}
+
+
 \section{Data Structures for Work-stealing Scheduler}
 \label{sec:lr-data-structures-for-work-stealing-scheduler}
 
@@ -62,8 +76,6 @@ chapter will be removed.
 \item Nonblocking Cyclic Extendable Deque for the ABP work stealing
   algorithm \cite{Lev2005}
 \item Idempotent work stealing \cite{Michael2009}
-\item Simple, fast, and practical non-blocking and blocking concurrent
-  queue algorithms \cite{Michael1996}
 \end{itemize}
 
 
@@ -104,6 +116,7 @@ chapter will be removed.
 \item The implementation of the Cilk-5 multithreaded language
   \cite{Frigo1998}
 \item A Java fork/join framework \cite{Lea2000}
+\item Fork / Join Parallelism in Java \cite{Lea2000a}
 \item Concurrency JSR-166 Interest Site \cite{Lea}
 \item Efficient support for fine-grain parallelism on shared-memory
   machines \cite{Lowenthal1998}
@@ -184,6 +197,8 @@ chapter will be removed.
 \item Principles of concurrent and distributed programming
   \cite{Ben-Ari2006}
 \item Java Threads \cite{Oaks2004}
+\item Java number cruncher: the Java programmer's guide to numerical
+  computing \cite{Mak2002}
 \end{itemize}
 
 
@@ -197,7 +212,6 @@ chapter will be removed.
   in Dynamic Parallelism \cite{Shirako2010}
 \item Producing wrong data without doing anything obviously wrong!
   \cite{Mytkowicz2009}
-\item A minicourse on multithreaded programming \cite{Leiserson1998}
 \item A Simple Task Load Balancing in Parallel Scheme for Allocation
   Machines \cite{Rudolph1991}
 \item Practical implementations of non-blocking synchronization
@@ -205,41 +219,33 @@ chapter will be removed.
 \end{itemize}
 
 
-\section{Hardware}
-\label{sec:lr-hardware}
+\section{Multicore Systems}
+\label{sec:lr-multicore-systems}
+
+\begin{itemize}
+\item Analyzing and resolving multi-core non scaling on intel core 2
+  processors \cite{Levinthal2007}
+\item Memory-Conscious Scheduling for Multicore Systems \cite{Majo2010}
+\item A first look at the Intel QuickPath Interconnect
+  \cite{Maddox2009}
+\item Efficient Data Sharing in Intel
+  \textsuperscript{\textregistered} Core Microarchitecture Based
+  Systems \cite{Shemer2007}
+\item Effectively sharing a cache among threads \cite{Blelloch2004}
+\item Scheduling threads for constructive cache sharing on CMPs
+  \cite{Chen2007}
+\item Provably good multicore cache performance for divide-and-conquer
+  algorithms \cite{Blelloch2008}
+\end{itemize}
+
+
+\section{Memory}
+\label{sec:lr-memory}
 
 \begin{itemize}
 \item What every programmer should know about memory
   \cite{Drepper2007}
 \item Understanding Application Memory Performance \cite{Drepper2008}
-\item What can performance counters do for memory subsystem analysis?
-  \cite{Eranian2008}
-\item Intel \textsuperscript{\textregistered} 64 and IA-32
-  Architectures Software Developer’s Manual - Volume 3B: System
-  Programming Guide, Part 2 \cite{Intel2010}
-\item Intel \textsuperscript{\textregistered} 64 and IA-32
-  Architectures Optimization Reference Manual \cite{Intel2009}
-\item Efficient Data Sharing in Intel
-  \textsuperscript{\textregistered} Core Microarchitecture Based
-  Systems \cite{Shemer2007}
-\item Can hardware performance counters be trusted? \cite{Weaver2008}
-\item Accuracy of performance counter measurements
-  \cite{Zaparanuks2008}
-\item Analyzing and resolving multi-core non scaling on intel core 2
-  processors \cite{Levinthal2007}
-\item Performance Analysis Guide for Intel
-  \textsuperscript{\textregistered} Core
-  \textsuperscript{\texttrademark} i7 Processor and Intel
-  \textsuperscript{\textregistered} Xeon
-  \textsuperscript{\texttrademark} 5500 processors
-  \cite{Levinthal2009}
-\item Using Intel \textsuperscript{\textregistered} VTune
-  \textsuperscript{\texttrademark} Performance Analyzer to Optimize
-  Software on Intel \textsuperscript{\textregistered} Core
-  \textsuperscript{\texttrademark} i7 Processors \cite{Intel2009a}
-\item Memory-Conscious Scheduling for Multicore Systems \cite{Majo2010}
-\item A first look at the Intel QuickPath Interconnect
-  \cite{Maddox2009}
 \end{itemize}
 
 
@@ -257,51 +263,34 @@ chapter will be removed.
   \cite{Rowand2009}
 \item Performance Characterization of SPEC CPU Benchmarks on Intel's
   Core Microarchitecture based processor \cite{Bird2007}
+\item What can performance counters do for memory subsystem analysis?
+  \cite{Eranian2008}
+\item Intel \textsuperscript{\textregistered} 64 and IA-32
+  Architectures Software Developer’s Manual - Volume 3B: System
+  Programming Guide, Part 2 \cite{Intel2010}
+\item Intel \textsuperscript{\textregistered} 64 and IA-32
+  Architectures Optimization Reference Manual \cite{Intel2009}
+\item Can hardware performance counters be trusted? \cite{Weaver2008}
+\item Accuracy of performance counter measurements
+  \cite{Zaparanuks2008}
+\item Performance Analysis Guide for Intel
+  \textsuperscript{\textregistered} Core
+  \textsuperscript{\texttrademark} i7 Processor and Intel
+  \textsuperscript{\textregistered} Xeon
+  \textsuperscript{\texttrademark} 5500 processors
+  \cite{Levinthal2009}
+\item Using Intel \textsuperscript{\textregistered} VTune
+  \textsuperscript{\texttrademark} Performance Analyzer to Optimize
+  Software on Intel \textsuperscript{\textregistered} Core
+  \textsuperscript{\texttrademark} i7 Processors \cite{Intel2009a}
 \end{itemize}
 
 
-\section{Benchmarks (Java Grande Forum)}
-\label{sec:lr-benchmarks-java}
+\section{Multi-threaded Algorithms}
+\label{sec:lr-multi-threaded-algorithms}
 
 \begin{itemize}
-\item Analysis and development of Java Grande benchmarks
-  \cite{Mathew1999}
-\item A parallel Java Grande benchmark suite \cite{Smith2001}
-\item Platform Independent Dynamic Java Virtual Machine Analysis: the
-  Java Grande Forum Benchmark Suite \cite{Gregg2003}
-\item Analysis and development of Java Grande benchmarks
-  \cite{Mathew1999a}
-\end{itemize}
-
-
-\section{Benchmarks (C)}
-\label{sec:lr-benchmarks-c}
-
-\begin{itemize}
-\item The PARSEC Benchmark Suite Tutorial \cite{Bienia2009}
-\item SPEComp: A new benchmark suite for measuring parallel computer
-  performance \cite{Aslot2001}
-\item A Communication Characterisation of Splash-2 and Parsec
-  \cite{Barrow-Williams2009}
-\item Understanding PARSEC Performance on Contemporary CMPs
-  \cite{Bhadauria2009}
-\item Parsec vs. splash-2: A quantitative comparison of two
-  multithreaded benchmark suites on chip-multiprocessors
-  \cite{Bienia2008}
-\item The PARSEC benchmark suite: Characterization and architectural
-  implications \cite{Bienia2008a}
-\item PARSEC 2.0: A New Benchmark Suite for Chip-Multiprocessors
-  \cite{Bienia2009a}
-\item Lonestar: A suite of parallel irregular programs
-  \cite{Kulkarni2009}
-\item Focused community discovery \cite{Hildrum2005}
-\end{itemize}
-
-
-\section{Matrix Multiplication}
-\label{sec:lr-matrix-multiplication}
-
-\begin{itemize}
+\item A minicourse on multithreaded programming \cite{Leiserson1998}
 \item Performance and Scalability Analysis of Parallelized Matrix
   Multiplication Using Shared Memory \cite{Dinkins2007}
 \item Cache misses prediction for high performance sparse algorithms
@@ -334,6 +323,93 @@ chapter will be removed.
   \cite{Williams2007a}
 \item High performance matrix multiplication on many cores
   \cite{Yuan2009}
+\item Simple, fast, and practical non-blocking and blocking concurrent
+  queue algorithms \cite{Michael1996}
+\item Scaling LAPACK panel operations using parallel cache assignment
+  \cite{Castaldo2010}
+\item Architecture-cognizant divide and conquer algorithms
+  \cite{Gatlin1999}
+\item Analysis of a class of parallel matrix multiplication algorithms
+  \cite{Gunnels1998}
+\item Combining building blocks for parallel multi-level matrix
+  multiplication \cite{Hunold2008}
+\item Algorithms for Multicore Computing \cite{Ramachandran2008}
+\item Cache-oblivious algorithms \cite{Frigo1999}
+\item An overview of cache optimization techniques and cache-aware
+  numerical algorithms \cite{Kowarschik2003}
+\item Parallelization of Matrix Multiply Approaches and CPU Hardware
+  Impact Scaling Calculation Performance in Java \cite{Kim2010}
+\item Data structures in Java for matrix computations
+  \cite{Gundersen2004}
+\item The Combinatorics of Cache Misses during Matrix Multiplication
+  \cite{Chatterjee2000}
+\item Performance evaluation of the sparse matrix-vector
+  multiplication on modern architectures \cite{Goumas2009}
+\item Low depth cache-oblivious algorithms \cite{Blelloch2009}
+\item Improving parallelism and locality with asynchronous algorithms
+  \cite{Liu2010}
+\item Matrix Multiplication Performance on Commodity Shared-Memory
+  Multiprocessors \cite{Tsilikas2004}
+\item Cache-oblivious algorithms \cite{Prokop1999}
+\item Fast recursive matrix multiplication for multi-core
+  architectures \cite{Runger2010}
+\item The cache-oblivious gaussian elimination paradigm: Theoretical
+  framework, parallelization and experimental evaluation
+  \cite{Chowdhury2007}
+\item Divide-and-Conquer Algorithms \cite{Gurari2010}
+\item Fundamental parallel algorithms for private-cache chip
+  multiprocessors \cite{Arge2008}
+\item Programming matrix algorithms-by-blocks for thread-level
+  parallelism \cite{Quintana-Orti2009}
+\item Hierarchical matrix-matrix multiplication based on
+  multiprocessor tasks \cite{Hunold2004}
+\item Cache and bandwidth aware matrix multiplication on the GPU
+  \cite{Hall2001}
+\item Oblivious algorithms for multicores and network of processors
+  \cite{Chowdhury2009}
+\item Cache-Oblivious Algorithms and Data Structures
+  \cite{Demaine2002}
+\item Cache Oblivious Algorithms \cite{Kumar2003}
+\end{itemize}
+
+
+\section{Benchmarks (Java Grande Forum)}
+\label{sec:lr-benchmarks-java}
+
+\begin{itemize}
+\item Analysis and development of Java Grande benchmarks
+  \cite{Mathew1999}
+\item A parallel Java Grande benchmark suite \cite{Smith2001}
+\item Platform Independent Dynamic Java Virtual Machine Analysis: the
+  Java Grande Forum Benchmark Suite \cite{Gregg2003}
+\item Analysis and development of Java Grande benchmarks
+  \cite{Mathew1999a}
+\item Implementation of the NAS parallel benchmarks in Java
+  \cite{Frumkin2000}
+\end{itemize}
+
+
+\section{Benchmarks (C)}
+\label{sec:lr-benchmarks-c}
+
+\begin{itemize}
+\item The PARSEC Benchmark Suite Tutorial \cite{Bienia2009}
+\item SPEComp: A new benchmark suite for measuring parallel computer
+  performance \cite{Aslot2001}
+\item A Communication Characterisation of Splash-2 and Parsec
+  \cite{Barrow-Williams2009}
+\item Understanding PARSEC Performance on Contemporary CMPs
+  \cite{Bhadauria2009}
+\item Parsec vs. splash-2: A quantitative comparison of two
+  multithreaded benchmark suites on chip-multiprocessors
+  \cite{Bienia2008}
+\item The PARSEC benchmark suite: Characterization and architectural
+  implications \cite{Bienia2008a}
+\item PARSEC 2.0: A New Benchmark Suite for Chip-Multiprocessors
+  \cite{Bienia2009a}
+\item Lonestar: A suite of parallel irregular programs
+  \cite{Kulkarni2009}
+\item Focused community discovery \cite{Hildrum2005}
 \end{itemize}
 
 
