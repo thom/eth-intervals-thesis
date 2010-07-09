@@ -13,9 +13,10 @@ The performance results were obtained on the following two machines.
 \section{Intel Core2 Duo}
 \label{sec:experimental-setup-marvin}
 
-TODO: Describe marvin
-
-See Figure \ref{fig:experimental-setup-marvin}.
+This system includes one Intel Core2 Duo Processor T9550 with two
+cores and 4 GB RAM. Each core has its separate level 1 cache and the 6
+MB level 2 cache is shared between the two cores (see Figure
+\ref{fig:experimental-setup-marvin}).
 
 \begin{figure}[htb]
   \centering
@@ -23,6 +24,9 @@ See Figure \ref{fig:experimental-setup-marvin}.
   \caption[Intel Core2 Duo]{Intel Core2 Duo}
   \label{fig:experimental-setup-marvin}
 \end{figure}
+
+The system runs Ubuntu 10.04 64-bit with kernel 2.6.32 and the JVM
+used is Sun Hotspot JDK 1.6.0\_20.
 
 \section{Intel Nehalem}
 \label{sec:experimental-setup-mafushi}
@@ -40,8 +44,6 @@ and one to the I/O hub. The interconnect has a theoretical maximum
 throughput of 11.72 GB/s in one direction and 23.44 GB/s in both
 directions.
 
-% TODO: Fix reference
-
 Each core has its separate level 1 and level 2 caches, but the
 per-processor 8 MB level 3 cache is shared between all cores of the
 same processor. The Intel documentation considers the level 3 cache
@@ -53,11 +55,15 @@ participation in forming a (large-scale) parallel system.
 
 \begin{figure}[htb]
   \centering
-  \includegraphics[width=0.8\textwidth]{experimental-setup/mafushi}
+  \includegraphics[width=0.5\textwidth]{experimental-setup/mafushi}
   \caption[Intel Nehalem in a two-processor configuration]{Intel
     Nehalem in a two-processor configuration}
   \label{fig:experimental-setup-mafushi}
 \end{figure}
+
+The system runs Ubuntu 10.04 64-bit with kernel 2.6.32 and the JVM
+used is Sun Hotspot JDK 1.6.0\_20. (TODO: Correct software
+description)
 
 
 %%% Local Variables: 
