@@ -5,7 +5,97 @@
 \chapter{Benchmarks}
 \label{chap:appendix-benchmarks}
 
-TODO: Describe benchmarks
+\section{Java Grande Forum}
+\label{sec:benchmarks-jgf}
+
+We evaluate the \emph{intervals} work-stealing queues on a variety of
+parallel Java Grande Forum benchmarks \cite{Smith2001}
+\cite{Mathew1999} \cite{Gregg2003} ported to use \emph{intervals}.
+
+\subsection*{Crypt}
+
+Crypt performs IDEA (International Data Encryption Algorithm)
+encryption and decryption of an array of $N$ bytes. This algorithm
+involves two principle loops, whose iterations are independent and are
+divided using fork-join sections between \emph{intervals} in a block fashion.
+
+\subsection*{LUFact}
+
+This benchmark solves an $N \times N$ linear system using LU factorization
+followed by a triangular solve. Iterations of the double loop over the
+trailing block of the matrix are independent and the work is divided
+between \emph{intervals} in a cyclic fashion using fork-join sections.
+
+\subsection*{SOR}
+
+The benchmark performs iterations of successive over-relaxations on a
+$N \times N$ grid. It involves an outer loop over iterations and two
+inner loops, each looping over the grid. In order to parallelize the
+loop over array rows, a ``red-black'' ordering mechanism is used. The
+work is distributed between \emph{intervals} in a block manner with
+help of point-to-point synchronization.
+
+\subsection*{Series}
+
+This benchmark computes the first $N$ fourier coefficients of the
+function $f(x) = (x+1)^x$ on the interval $0,2$. It uses fork-join
+sections to distribute the loop over the Fourier coefficients between
+\emph{intervals}.
+
+\subsection*{MolDyn}
+
+The MolDyn benchmark models particles interacting under a
+Lennard-Jones potential in a cubic spatial volume with periodic
+boundary conditions. The calculation is distributed between
+\emph{intervals} in a cyclic manner and synchronization is done using
+barriers.
+
+\subsection*{MonteCarlo}
+
+This benchmark is a financial simulation, using Monte Carlo techniques
+to price products derived from the price of an underlying asset. The
+work is divided between \emph{intervals} by using fork-join sections.
+
+\subsection*{RayTracer}
+
+This benchmark measures the performance of a 3D ray tracer rendering a
+scene containing 64 spheres at a resolution of $N \times N$
+pixels. The loop over rows of pixels has been distributed to
+\emph{intervals} using fork-join sections.
+
+
+\section{Locality-aware Benchmarks}
+
+We evaluate the locality-aware implementation of \emph{intervals} on a
+variety of benchmarks. To reduce the impact of JVM overheads in the
+evaluation, including JIT compilation and garbage collection, the
+execution time reported is the average of the three best benchmark
+iterations from three seperate VM incocations. Each VM invocation
+performs 10 benchmark iterations.
+
+The following benchmarks were first written to use threads and then
+ported over to use \emph{intervals}.
+
+\subsection*{Cache-stress Test}
+
+TODO: Describe benchmark
+
+\subsection*{Cache-efficient Test}
+
+TODO: Should this benchmark really be included?
+
+\subsection*{Merge Sort}
+
+TODO: Describe benchmark
+
+\subsection*{Block Matrix Multiplication}
+
+TODO: Describe benchmark
+
+\subsection*{LU Factorization}
+
+TODO: Should this benchmark really be included?
+
 
 %%% Local Variables: 
 %%% mode: latex
