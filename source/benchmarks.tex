@@ -90,21 +90,22 @@ the JVM was invoked with the following parameters:
 \end{verbatim}
 
 \verb!-XX:+UseNUMA! turns on the NUMA-aware allocator in conjunction
-with the selection of the Parallel Scavenger garbage collector. The
-allocator controls the eden space of the young generation of the heap,
-where most of the new objects are created. The allocator divides the
-space into regions each of which is placed in the memory of a specific
-node. The allocator relies on a hypothesis that a thread that
-allocates the object will be the most likely to use the object. To
-ensure the fastest access to the new object, the allocator places it
-in the region local to the allocating thread. The regions can be
-dynamically resized to reflect the allocation rate of the application
-threads running on different nodes. That makes it possible to increase
-performance even of single-threaded applications. In addition,
-``from'' and ``to'' survivor spaces of the young generation, the old
-generation, and the permanent generation have page interleaving turned
-on for them. This ensures that all threads have equal access latencies
-to these spaces on average.
+with the selection of the Parallel Scavenger garbage collector
+\cite{Oracle2010} \cite{Humble2010}. The allocator controls the eden
+space of the young generation of the heap, where most of the new
+objects are created. The allocator divides the space into regions each
+of which is placed in the memory of a specific node. The allocator
+relies on a hypothesis that a thread that allocates the object will be
+the most likely to use the object. To ensure the fastest access to the
+new object, the allocator places it in the region local to the
+allocating thread. The regions can be dynamically resized to reflect
+the allocation rate of the application threads running on different
+nodes. That makes it possible to increase performance even of
+single-threaded applications. In addition, ``from'' and ``to''
+survivor spaces of the young generation, the old generation, and the
+permanent generation have page interleaving turned on for them. This
+ensures that all threads have equal access latencies to these spaces
+on average.
 
 The following benchmarks were first written to use threads and then
 ported over to use \emph{intervals}.
