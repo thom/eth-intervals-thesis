@@ -5,20 +5,56 @@
 \chapter{Introduction}
 \label{chap:introduction}
 
-\section{Problem and Motivation}
-\label{sec:intro-problem-and-motivation}
+TODO: Refactor chapter ``intervals''
 
-TODO
 
-\section{Aim}
-\label{sec:intro-aim}
+\section{Work-stealing Scheduler}
+\label{sec:intro-work-stealing-scheduler}
 
-TODO
+TODO: Finish description of work-stealing scheduler
+
+The implementation of Intervals for Java makes use of a work-stealing
+scheduler similar to those found in Cilk \cite{Blumofe1995} or Java 7
+\cite{Lea} but extended to support locks and happens before
+edges. Each worker is implemented as a separate Java thread. The JVM
+used to benchmark the implementation is Sun Hotspot JDK 1.6 (see
+Appendix \ref{chap:experimental-setup} for information of the
+experimental setup).
+
 
 \section{Overview}
 \label{sec:intro-overview}
 
-TODO
+TODO: Finish overview
+
+The intervals implementation in Java uses a work-stealing scheduler in
+which a worker that runs out of work tries to ``steal'' work from
+others. The goal of this thesis is to improve the efficiency of the
+intervals scheduler.
+
+\minisec{Part \ref{part:queues}. Explore and profile different
+  work-stealing queue implementations}
+
+In a work-stealing scheduler, each worker keeps a pool of work items
+waiting to be executed. The current intervals implementation uses
+doubled-ended queues (deque).  
+
+In the first part of this thesis we explored alternative queue
+implementations and compared them to the current implementation.
+
+\minisec{Part \ref{part:locality}. Locality-aware work-stealing}
+
+Currently the intervals scheduler randomly schedules work items and
+when stealing a work item, the worker chooses his victim by random. To
+improve performance and reduce cache misses, work items that access
+the same data should be scheduled on the same worker or a worker
+``nearby''.
+
+In the second part of the thesis we implemented and analyzed
+locality-aware scheduling of intervals. In locality-aware scheduling,
+each interval can be given an affinity for a place, and when a worker
+belonging to a certain place obtains an interval, it gives priority to
+the intervals with affinity for the place.
 
 %%% Local Variables: 
 %%% mode: latex
