@@ -5,44 +5,39 @@
 \chapter*{Abstract}
 \label{chap:abstract}
 
-TODO
-
 Intervals are a new, higher-level primitive for parallel programming
 with which programmers directly construct the program schedule. They
 are under active development at ETH Zürich as part of the PhD research
-of Nicholas Matsakis \footnote{\url{http://intervals.inf.ethz.ch/}}.
+of Nicholas Matsakis \cite{Matsakis2010}.
 
-The Intervals implementation in Java uses a work-stealing scheduler in
+The intervals implementation in Java uses a work-stealing scheduler in
 which a worker that runs out of work tries to ``steal'' work from
-others. The goal of this project is to improve the efficiency of the
-Intervals scheduler and it consists of two parts.
+others. The goal of this thesis is to improve the efficiency of the
+intervals scheduler.
 
-\section*{Part 1: Explore and profile different work-stealing queue
+\minisec{Part I. Explore and profile different work-stealing queue
   implementations}
-\label{sec:abstract-part1}
 
 In a work-stealing scheduler, each worker keeps a pool of work items
-waiting to be executed. The current Intervals implementation uses
-doubled-ended queues (deque).
+waiting to be executed. The current intervals implementation uses
+doubled-ended queues (deque).  
 
-The first part of the thesis will be to explore alternative queue
-implementations and to compare them to the current implementation.
+In the first part of this thesis we explored alternative queue
+implementations and compared them to the current implementation.
 
-\section*{Part 2: Locality-aware work-stealing}
-\label{sec:abstract-part2}
+\minisec{Part II. Locality-aware work-stealing}
 
-Currently the Intervals scheduler randomly schedules work items and
-when stealing a work item, the worker chooses his victim by random.
-
-To improve performance and reduce cache misses, work items that access
+Currently the intervals scheduler randomly schedules work items and
+when stealing a work item, the worker chooses his victim by random. To
+improve performance and reduce cache misses, work items that access
 the same data should be scheduled on the same worker or a worker
 ``nearby''.
 
-The second part of the thesis will describe and evaluate
-locality-aware work-stealing. In locality-aware work-stealing, each
-work item can be given an affinity for a worker, and when a worker
-obtains a work item it gives priority to the work items with affinity
-to it.
+In the second part of the thesis we implemented and analyzed
+locality-aware scheduling of intervals. In locality-aware scheduling,
+each interval can be given an affinity for a place, and when a worker
+belonging to a certain place obtains an interval, it gives priority to
+the intervals with affinity for the place.
 
 %%% Local Variables: 
 %%% mode: latex
