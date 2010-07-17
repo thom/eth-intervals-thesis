@@ -15,8 +15,8 @@ which a worker that runs out of work tries to ``steal'' work from
 others. The goal of this thesis is to improve the efficiency of the
 intervals scheduler.
 
-\minisec{Part I. Explore and profile different work-stealing queue
-  implementations}
+\minisec{Part \ref{part:queues}. Explore and profile different
+  work-stealing queue implementations}
 
 In a work-stealing scheduler, each worker keeps a pool of work items
 waiting to be executed. The current intervals implementation uses
@@ -25,7 +25,7 @@ doubled-ended queues (deque).
 In the first part of this thesis we explored alternative queue
 implementations and compared them to the current implementation.
 
-\minisec{Part II. Locality-aware work-stealing}
+\minisec{Part \ref{part:locality}. Locality-aware work-stealing}
 
 Currently the intervals scheduler randomly schedules work items and
 when stealing a work item, the worker chooses his victim by random. To
