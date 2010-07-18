@@ -41,62 +41,6 @@
 \end{itemize}
 
 
-\section{Parallel Depth First Scheduler}
-\label{sec:lr-parallel-depth-first-scheduler}
-
-\begin{itemize}
-\item Provably good multicore cache performance for divide-and-conquer
-  algorithms \cite{Blelloch2008}
-\item Brief announcement: parallel depth first vs. work stealing
-  schedulers on CMP architectures \cite{Liaskovitis2006}
-\item Effectively sharing a cache among threads \cite{Blelloch2004}
-\item Scheduling threads for constructive cache sharing on CMPs
-  \cite{Chen2007}
-\end{itemize}
-
-
-\section{Data Structures for Work-stealing Scheduler}
-\label{sec:lr-data-structures-for-work-stealing-scheduler}
-
-\begin{itemize}
-\item Thread scheduling for multiprogrammed multiprocessors
-  \cite{Arora2001}
-\item Checkfence: checking consistency of concurrent data types on
-  relaxed memory models \cite{Burckhardt2007}
-\item Checkfence: checking consistency of concurrent data types on
-  relaxed memory models \cite{Burckhardt2007a}
-\item Dynamic circular work-stealing deque \cite{Chase2005}
-\item A dynamic-sized nonblocking work stealing deque
-  \cite{Hendler2006}
-\item A dynamic-sized nonblocking work stealing deque
-  \cite{Hendler2006a}
-\item Non-blocking steal-half work queues \cite{Hendler2002}
-\item The design of a task parallel library \cite{Leijen2009}
-\item Nonblocking Cyclic Extendable Deque for the ABP work stealing
-  algorithm \cite{Lev2005}
-\item Idempotent work stealing \cite{Michael2009}
-\end{itemize}
-
-
-\section{Policies for Work-stealing Scheduling}
-\label{sec:lr-policies-for-work-stealing-scheduling}
-
-\begin{itemize}
-\item An empirical evaluation of work stealing with parallelism
-  feedback \cite{Agrawal2006}
-\item Adaptive work-stealing with parallelism feedback
-  \cite{Agrawal2008}
-\item Adaptive work-stealing with parallelism feedback
-  \cite{Agrawal2008a}
-\item Low-contention depth-first scheduling of parallel computations
-  with write-once synchronization variables \cite{Fatourou2001}
-\item Work-first and help-first scheduling policies for async-finish
-  task parallelism \cite{Guo2009}
-\item SLAW: a Scalable Locality-aware Adaptive Work-stealing Scheduler
-  \cite{Guo2010}
-\end{itemize}
-
-
 \section{Libraries and Languages Using Work-stealing Scheduling}
 \label{sec:lr-libaries-and-languages-using-work-stealing-scheduling}
 
@@ -131,6 +75,64 @@
 \end{itemize}
 
 
+\section{Parallel Depth First Scheduler}
+\label{sec:lr-parallel-depth-first-scheduler}
+
+\begin{itemize}
+\item Provably good multicore cache performance for divide-and-conquer
+  algorithms \cite{Blelloch2008}
+\item Brief announcement: parallel depth first vs. work stealing
+  schedulers on CMP architectures \cite{Liaskovitis2006}
+\item Effectively sharing a cache among threads \cite{Blelloch2004}
+\item Scheduling threads for constructive cache sharing on CMPs
+  \cite{Chen2007}
+\end{itemize}
+
+
+\section{Data Structures for Work-stealing Scheduler}
+\label{sec:lr-data-structures-for-work-stealing-scheduler}
+
+\begin{itemize}
+\item Thread scheduling for multiprogrammed multiprocessors
+  \cite{Arora2001}
+\item Checkfence: checking consistency of concurrent data types on
+  relaxed memory models \cite{Burckhardt2007}
+\item Checkfence: checking consistency of concurrent data types on
+  relaxed memory models \cite{Burckhardt2007a}
+\item Dynamic circular work-stealing deque \cite{Chase2005}
+\item A dynamic-sized nonblocking work stealing deque
+  \cite{Hendler2006}
+\item A dynamic-sized nonblocking work stealing deque
+  \cite{Hendler2006a}
+\item Non-blocking steal-half work queues \cite{Hendler2002}
+\item The design of a task parallel library \cite{Leijen2009}
+\item Nonblocking Cyclic Extendable Deque for the ABP work stealing
+  algorithm \cite{Lev2005}
+\item Idempotent work stealing \cite{Michael2009}
+\item Simple, fast, and practical non-blocking and blocking concurrent
+  queue algorithms \cite{Michael1996}
+\end{itemize}
+
+
+\section{Policies for Work-stealing Scheduling}
+\label{sec:lr-policies-for-work-stealing-scheduling}
+
+\begin{itemize}
+\item An empirical evaluation of work stealing with parallelism
+  feedback \cite{Agrawal2006}
+\item Adaptive work-stealing with parallelism feedback
+  \cite{Agrawal2008}
+\item Adaptive work-stealing with parallelism feedback
+  \cite{Agrawal2008a}
+\item Low-contention depth-first scheduling of parallel computations
+  with write-once synchronization variables \cite{Fatourou2001}
+\item Work-first and help-first scheduling policies for async-finish
+  task parallelism \cite{Guo2009}
+\item SLAW: a Scalable Locality-aware Adaptive Work-stealing Scheduler
+  \cite{Guo2010}
+\end{itemize}
+
+
 \section{Locality Aware Scheduling}
 \label{sec:lr-locality-aware-scheduling}
 
@@ -148,6 +150,10 @@
   multiprocessors \cite{Tam2007}
 \item Hierarchical Place Trees: A Portable Abstraction for Task
   Parallelism and Data Movement \cite{Yan2009}
+\item Mely: Efficient Workstealing for Multicore Event-Driven Systems
+  \cite{Gaud2010}
+\item SLAW: a Scalable Locality-aware Adaptive Work-stealing Scheduler
+  \cite{Guo2010}
 \end{itemize}
 
 
@@ -214,8 +220,6 @@
   \cite{Mytkowicz2009}
 \item A Simple Task Load Balancing in Parallel Scheme for Allocation
   Machines \cite{Rudolph1991}
-\item Practical implementations of non-blocking synchronization
-  primitives \cite{Moir1997}
 \end{itemize}
 
 
@@ -363,8 +367,6 @@
   \cite{Williams2007a}
 \item High performance matrix multiplication on many cores
   \cite{Yuan2009}
-\item Simple, fast, and practical non-blocking and blocking concurrent
-  queue algorithms \cite{Michael1996}
 \item Scaling LAPACK panel operations using parallel cache assignment
   \cite{Castaldo2010}
 \item Analysis of a class of parallel matrix multiplication algorithms
@@ -388,6 +390,8 @@
   parallelism \cite{Quintana-Orti2009}
 \item Hierarchical matrix-matrix multiplication based on
   multiprocessor tasks \cite{Hunold2004}
+\item Practical implementations of non-blocking synchronization
+  primitives \cite{Moir1997}
 \end{itemize}
 
 
@@ -400,8 +404,6 @@
 \item A parallel Java Grande benchmark suite \cite{Smith2001}
 \item Platform Independent Dynamic Java Virtual Machine Analysis: the
   Java Grande Forum Benchmark Suite \cite{Gregg2003}
-\item Implementation of the NAS parallel benchmarks in Java
-  \cite{Frumkin2000}
 \end{itemize}
 
 
