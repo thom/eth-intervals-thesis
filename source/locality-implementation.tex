@@ -5,7 +5,12 @@
 \chapter{Implementation}
 \label{chap:locality-implementation}
 
-\todo[inline]{Finish chapter}
+\todo[inline]{Finish chapter ``Implementation''}
+
+The affinity of the workers is set such that they execute on different
+cores. While this eliminates interference between the worker threads,
+they will nevertheless share their assigned core with other processes
+in the system, subject to standard Linux scheduling policy.
 
 %%% Local Variables: 
 %%% mode: latex
