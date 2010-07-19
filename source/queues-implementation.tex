@@ -5,7 +5,126 @@
 \chapter{Implementation}
 \label{chap:queues-implementation}
 
-\todo[inline]{Finish chapter}
+\todo[inline]{Finish chapter ``Implementation''}
+
+\subsubsection{A Java fork/join framework \cite{Lea2000}}
+
+\minisec{Deques}
+
+To enable efficient and scalable execution, task management must be
+made as fast as possible. Creating, pushing, and later popping (or,
+much less frequently, taking) tasks are analogs of procedure call
+overhead in sequential programs. Lower overhead enables programmers to
+adopt smaller task granularities, and in turn better exploit
+parallelism.
+
+Task allocation itself is the responsibility of the JVM. Java garbage
+collection relieves us of needing to create a special-purpose memory
+allocator to maintain tasks. This substantially reduces the complexity
+and lines of code needed to implement intervals compared to similar
+frameworks in other languages. The basic structure of the deque
+employs the common scheme of using a single (although resizable) array
+per deque, along with two indices: The top index acts just like an
+array-based stack pointer, changing upon push and pop. The base index
+is modified only by take.
+
+Because the deque array is accessed by multiple threads, sometimes
+without full synchronization, yet individual Java array elements
+cannot be declared as volatile, each array element is actually a fixed
+reference to a little forwarding object maintaining a single volatile
+reference. This decision was made originally to ensure conformance
+with Java memory rules, but the level of indirection that it entails
+turns out to improve performance on tested platforms, presumably by
+reducing cache contention due to accesses of nearby elements, which
+are spread out a bit more in memory due to the indirection.
+
+The main challenges in deque implementation surround synchronization
+and its avoidance. Even on JVMs with optimized synchronization
+facilities, the need to obtain locks for every push and pop operation
+becomes a bottleneck.  However, adaptations of tactics taken in Cilk
+\cite{Frigo1998} provide a solution based on the following
+observations:
+
+\begin{itemize}
+\item The push and pop operations are only invoked by owner threads.
+\item Access to the take operation can easily be confined to one
+  stealing thread at a time via an entry lock on take. This deque lock
+  can also serve to disable take operations when necessary. Thus,
+  interference control is reduced to a two-party synchronization
+  problem.
+\item The pop and take operations can only interfere if the deque is
+  about to become empty. Otherwise they are guaranteed to operate on
+  disjoint elements of the array.
+\end{itemize}
+
+Defining the top and base indices as volatile ensures that a pop and
+take can proceed without locking if the deque is sure to have more
+than one element. This is done via a Dekker-like algorithm in which
+push pre-decrements top:
+
+\begin{lstlisting}
+if (--top >= base) ...
+\end{lstlisting}
+
+and take pre-increments base:
+
+\begin{lstlisting}
+if (++base < top) ...
+\end{lstlisting}
+
+In each case they must then check to see if this could have caused the
+deque to become empty by comparing the two indices. An asymmetric rule
+is used upon potential conflict: pop rechecks state and tries to
+continue after obtaining the deque lock (the same one as held by
+take), backing off only if the deque is truly empty. A take operation
+instead just backs off immediately, typically then trying to steal
+from a different victim. This asymmetry represents the only
+significant departure from the otherwise similar THE protocol used in
+Cilk.
+
+The use of volatile indices also enables the push operation to proceed
+without synchronization unless the deque array is about to overflow,
+in which case it must first obtain the deque lock to resize the
+array. Otherwise, simply ensuring that top is updated only after the
+deque array slot is filled in suppresses interference by any take.
+
+\minisec{Stealing and Idling}
+
+Worker threads in work-stealing frameworks know nothing about the
+synchronization demands of the programs they are running. They simply
+generate, push, pop, take, manage the status of, and execute
+tasks. The simplicity of this scheme leads to efficient execution when
+there is plenty of work for all threads. However, this streamlining
+comes at the price of relying on heuristics when there is not enough
+work; i.e., during startup of a main task, upon its completion, and
+around global full-stop synchronization points employed in some
+fork/join algorithms.
+
+The main issue here is what to do when a worker thread has no local
+tasks and cannot steal one from any other thread. If the program is
+running on a dedicated multiprocessor, then one could make the case
+for relying on hard busy-wait spins looping to try to steal
+work. However, even here, attempted steals increase contention, which
+can slow down even those threads that are not idle due to locking
+protocols.  Additionally, in more typical usage contexts of this
+framework, the operating system should somehow be convinced to try to
+run other unrelated runnable processes or threads.
+
+The tools for achieving this in Java are weak, have no guarantees
+\cite{Goetz2006}, but usually appear to be acceptable in practice (as
+do similar techniques described for Hood \cite{Blumofe1998}). A thread
+that fails to obtain work from any other thread lowers its priority
+before attempting additional steals, performs Thread.yield between
+attempts, and registers itself as inactive in its thread pool. If all
+others become inactive, they all block waiting for additional main
+tasks. Otherwise, after a given number of additional spins, threads
+enter a sleeping phase, where they sleep (for up to 100ms) rather than
+yield between steal attempts. These imposed sleeps can cause
+artificial lags in programs that take a long time to split their
+tasks. But this appears to be the best general-purpose
+compromise. Future versions of the framework may supply additional
+control methods so that programmers can override defaults when they
+impact performance.
 
 %%% Local Variables: 
 %%% mode: latex
