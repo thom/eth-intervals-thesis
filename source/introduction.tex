@@ -278,7 +278,7 @@ intervals scheduler.
 
 In a work-stealing scheduler, each worker keeps a pool of work items
 waiting to be executed. The current intervals implementation uses
-doubled-ended queues (deque). In part \ref{part:queues} of this thesis
+doubled-ended queues (deque). In \autoref{part:queues} of this thesis
 we explored alternative queue implementations and compared them to the
 current implementation.
 
@@ -286,7 +286,7 @@ current implementation.
 
 Currently the intervals scheduler randomly schedules work items and
 when stealing a work item, the worker chooses his victim by random. In
-part \ref{part:locality} of the thesis we implemented and analyzed
+\autoref{part:locality} of the thesis we implemented and analyzed
 locality-aware scheduling of intervals. In locality-aware scheduling,
 each interval can be given an affinity for a place, and when a worker
 belonging to a certain place obtains an interval, it gives priority to
