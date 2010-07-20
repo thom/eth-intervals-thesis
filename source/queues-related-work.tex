@@ -7,6 +7,115 @@
 
 \todo[inline]{Finish chapter ``Related Work''}
 
+Coroutines \cite{Conway1963} and continuations \cite{Reynolds1993} are
+two building blocks for manipulating control-flow in a sequential
+context. Either would make a useful primitive on which to build the
+intervals library and would provide an alternative to rewriting
+programs in an event-oriented style.
+
+Futures are annotations for parallel execution which act similarly to
+a lazy or deferred execution. Expressions annotated as being safe for
+parallel execution are executed in parallel; when the program reaches
+a point where the result of the expression is needed, the main thread
+blocks until the evaluation of the expression has completed. Futures
+were first implemented for MULTILISP \cite{Halstead1985} but have
+since been ported to a number of other languages, including Java
+\cite{Navabi2008}.  Futures can be seen as a subset of intervals that
+lack the extended happens before relationships. Furthermore, most
+implementations of futures make no guarantees with respect to
+deadlock-freedom or other safety properties.
+
+Jade \cite{Rinard1998} uses programmer-provided specifications to
+dynamically parallelize a program. Shared objects were specially
+integrated into the type system. Tasks declare those objects that they
+affect and how; adherence to these declarations is checked
+dynamically. The ability for intervals to be associated with locks
+works in a similar fashion, but Jade did not attempt to model happens
+before relationships in its task specifications.
+
+Erlang \cite{Erlang2010} embodies a strict share-nothing philosophy,
+in which actors with disjoint heaps communicate with messages. The
+simplicity of this approach is appealing, but we believe there are
+many scenarios where shared memory is an easier and better choice,
+given the right tools.
+
+Cilk \cite{Blumofe1995, Frigo1998} and JCilk \cite{Danaher2005} are
+supersets of C and Java respectively which add support for
+parallelism, primarily in the form of fork-join or barrier style
+computations. Cilk pioneered many of the dynamic scheduling and work
+stealing techniques used in the intervals implementation itself.
+
+Cilk \cite{Blumofe1995, Frigo1998} and OpenMP 3.0 \cite{OpenMP2008}
+both offer lightweight task frameworks where tasks are executed in a
+tree structure.  Tasks in these languages are not first-class objects,
+however, and they do not support arbitrary dependency graphs. Java's
+Fork-Join Framework \cite{Lea2006, Lea2000, Lea2000a} and Intel's
+Threading Building Blocks (TBB) \cite{Reinders2007, Contreras2008}
+both offer a more flexible alternative, but lack a higher-level
+interface to task dependencies. The fork-join framework permits
+lightweight tasks to be joined, and TBB allows tasks to delay starting
+until an associated counter is decremented to zero.
+
+JSR166 \cite{Lea2004} introduced a number of concurrency-related
+utility classes to Java, including futures, thread pools, read-write
+locks, and concurrent containers such as maps and queues. Java 7 will
+likely contain additional classes \cite{Lea2006}, among them the
+fork-join framework that intervals itself is built upon. For C\#, the
+Parallel Extensions \cite{Leijen2009} library promises a similar
+lightweight task framework.  Neither of these frameworks includes any
+mechanism for declarative or explicit happens before relationships;
+instead, users use traditional joins to wait for tasks to complete.
+
+The parallel extensions for .NET \cite{Leijen2009} offer a task
+library with a similar feeling to intervals. In addition to the usual
+join-based task routines, they also permit tasks to have
+continuations, which are dependent tasks that execute and are given
+the result of the previous task to begin (the equivalent of edges from
+the end of one interval to the start of another). This approach is
+powerful but does not permit the full range of happens before edges
+supported by intervals.
+
+X10 \cite{Charles2005, Saraswat2010} offers a revised threading model
+which includes a number of innovative synchronization
+constructs. Among them are phasers \cite{Shirako2008, Shirako2010}, a
+combination of barriers and signals which can guarantee data-race
+freedom. Intervals can be used to construct the same patterns as
+phasers with similar guarantees, but also go further by replacing
+thread joins and other constructs in the X10 toolset.
+
+X10 \cite{Charles2005, Saraswat2010} introduced a number of innovative
+synchronization constructs. The most recent, phasers
+\cite{Shirako2008, Shirako2010}, are a combination of barriers and
+signals. Threads wishing to synchronize with one another make use of a
+shared phaser object.  Threads indicate how they will use a phaser by
+placing it into different modes, such as signal-wait-next or
+wait-only, that grant different capabilities. A combination of static
+and dynamic safety checks ensures that programs cannot be deadlocked
+through using a phaser. When synchronizing on a barrier, a special
+“single” mode allows a small section of code to be executed by a
+single thread before the waiting threads resume. Intervals can be used
+to perform the same kinds of synchronizations as phasers and with
+similar safety guarantees. However, intervals are a standalone
+mechanism that also replaces threads, thread joins, and integrates
+locks, all of which are beyond the scope of phasers. On the other
+hand, phasers are closer to existing threading primitives and
+therefore can be adopted more easily.
+
+OpenMP \cite{OpenMP2008} and the Message Passing Interface (MPI)
+\cite{MPI2009} are two higher-level alternatives to threads for
+writing parallel programs. Unlike intervals, they are focussed on SIMD
+programming, although both can be used more generally.
+
+Apple's Cocoa framework includes a class NSOperation \cite{Apple2008}
+that is similar to intervals. Like an Interval, each NSOperation
+embodies a particular task, and a user may declaratively specify that
+one operation cannot execute until another has finished (the
+equivalent of a startAfterEndOf() dependency). Unlike intervals,
+however, NSOperations do not permit other kinds of dependencies nor
+are they integrated with locks. This means that they cannot easily be
+used to describe the patterns in this paper, with the exception of
+point to point synchronization.
+
 %%% Local Variables: 
 %%% mode: latex
 %%% TeX-master: "thesis"
