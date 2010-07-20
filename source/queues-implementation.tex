@@ -2,10 +2,71 @@
 % queues-implementation.tex
 %==============================================================================
 
-\chapter{Implementation}
+\chapter{Queues}
 \label{chap:queues-implementation}
 
-\todo[inline]{Finish chapter ``Implementation''}
+\begin{itemize}
+\item Thread scheduling for multiprogrammed multiprocessors
+  \cite{Arora2001}
+\item Simple, fast, and practical non-blocking and blocking concurrent
+  queue algorithms \cite{Michael1996}
+\end{itemize}
+
+\section{LazyDeque}
+\label{sec:queues-implementation-lazy-deque}
+
+\todo[inline]{Finish section ``LazyDeque''}
+
+
+\section{Work-stealing Deque}
+\label{sec:queues-implementation-ws-deque}
+
+\begin{itemize}
+\item Dynamic circular work-stealing deque \cite{Chase2005}
+\item Nonblocking Cyclic Extendable Deque for the ABP work stealing
+  algorithm \cite{Lev2005}
+\item The art of multiprocessor programming \cite{Herlihy2008}
+\end{itemize}
+
+\todo[inline]{Finish section ``Work-stealing Deque''}
+
+
+\section{Dynamic Work-stealing Deque}
+\label{sec:queues-implementation-dynamic-ws-deque}
+
+\begin{itemize}
+\item A dynamic-sized nonblocking work stealing deque
+  \cite{Hendler2006}
+\item A dynamic-sized nonblocking work stealing deque
+  \cite{Hendler2006a}
+\end{itemize}
+
+\todo[inline]{Finish section ``Dynamic Work-stealing Deque''}
+
+
+\section{Duplicating Work-stealing Deque}
+\label{sec:queues-implementation-duplicating-ws-deque}
+
+\begin{itemize}
+\item The design of a task parallel library \cite{Leijen2009}
+\item Checkfence: checking consistency of concurrent data types on
+  relaxed memory models \cite{Burckhardt2007}
+\item Checkfence: checking consistency of concurrent data types on
+  relaxed memory models \cite{Burckhardt2007a}
+\end{itemize}
+
+\todo[inline]{Finish section ``Duplicating Work-stealing Deque''}
+
+
+\section{Idempotent Work-stealing Deque}
+\label{sec:queues-implementation-idempotent-ws-deque}
+
+\begin{itemize}
+\item Idempotent work stealing \cite{Michael2009}
+\end{itemize}
+
+\todo[inline]{Finish section ``Idempotent Work-stealing Deque''}
+
 
 \subsubsection{A Java fork/join framework \cite{Lea2000}}
 
