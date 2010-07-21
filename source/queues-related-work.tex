@@ -116,6 +116,24 @@ are they integrated with locks. This means that they cannot easily be
 used to describe the patterns in this paper, with the exception of
 point to point synchronization.
 
+Intervals in Java align nicely with the Java Memory Model
+\cite{Manson2005}: The happens before relation defined by intervals
+can be seen as a deterministic subset of the full happens before
+relation defined by the memory model, which includes edges due to
+constructs like volatile fields or synchronized sections.
+
+The Java Memory Model \cite{Manson2005} defines how parallel threads
+in Java interact with shared memory. In addition to defining formally
+what it means for a Java program to be correctly synchronized, it
+describes the legal behaviors of incorrectly synchronized programs
+which include data races. In the Java Memory Model, happens before
+relationships potentially result from imperative actions such as
+acquiring locks, accessing volatile fields, or joining a thread. This
+model can be easily adapted to the explicit happens before
+relationships used by intervals. When using our data race analysis,
+however, there is no need to define the semantics of incorrectly
+synchronized programs, because they cannot occur.
+
 %%% Local Variables: 
 %%% mode: latex
 %%% TeX-master: "thesis"
