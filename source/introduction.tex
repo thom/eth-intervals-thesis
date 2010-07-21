@@ -70,12 +70,6 @@ that the point \lstinline|p1| must occur before the point
 \lstinline|p2|. It also indicates that any memory writes which
 \emph{happen before} \lstinline|p1| must be visible to \lstinline|p2|.
 
-Intervals in Java align nicely with the Java Memory Model
-\cite{Manson2005}: The happens before relation defined by intervals
-can be seen as a deterministic subset of the full happens before
-relation defined by the memory model, which includes edges due to
-constructs like volatile fields or synchronized sections.
-
 \begin{figure}[htb]
   \centering
   \includegraphics[width=0.96\textwidth]{introduction/interval-graph}
@@ -226,12 +220,12 @@ a worker finds that its pool is empty, it becomes a thief and steals a
 task from the pool of a victim worker chosen at random.
 
 To obtain work, a worker pops the ready task from the bottom of its
-deque and executes that task. If the task terminates, the worker goes
-back to the bottom of its deque to pop off another task upon which it
-can work. If the task creates a new task or unblocks a blocked task,
-then the worker pushes the newly ready task onto the bottom of its
-deque. Thus, so long as a worker's deque is not empty, the worker
-manipulates its deque in a LIFO (stack-like) manner.
+deque and executes it. If the task terminates, the worker goes back to
+the bottom of its deque to pop off another task upon which it can
+work. When assigning a new task to a worker, the worker pushes the
+newly ready task onto the bottom of its deque. Thus, so long as a
+worker's deque is not empty, the worker manipulates its deque in a
+LIFO (stack-like) manner.
 
 When a worker tries to obtain work by popping a task off the bottom of
 its deque and it finds that it is empty, then the worker becomes a
@@ -243,10 +237,8 @@ non-empty. At which point the thief continues to work on the stolen
 task as described above. Since steals take place at the top of the
 victim's deque, stealing operates in a FIFO manner.
 
-\missingfigure{Illustrate work-stealing deque}
-
-Accessing the run queues in LIFO and FIFO manner offers several
-advantages \cite{Frigo1998}:
+Accessing the run queues at different ends offers several advantages
+\cite{Frigo1998}:
 
 \begin{itemize}
 \item It reduces contention by having stealers operate on the opposite
