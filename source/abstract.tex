@@ -17,8 +17,7 @@ intervals scheduler.
 
 \todo{Rewrite abstract}
 
-\subsubsection*{\autoref{part:queues}. Explore and profile different
-  work-stealing queue implementations}
+\subsubsection*{\autoref{part:queues}. Work-Stealing Queues}
 
 In a work-stealing scheduler, each worker keeps a pool of work items
 waiting to be executed. The current intervals implementation uses
@@ -27,7 +26,7 @@ doubled-ended queues (deque).
 In the first part of this thesis we explored alternative queue
 implementations and compared them to the current implementation.
 
-\subsubsection*{\autoref{part:locality}. Locality-aware work-stealing}
+\subsubsection*{\autoref{part:locality}. Locality-Aware Work-Stealing}
 
 Currently the intervals scheduler randomly schedules work items and
 when stealing a work item, the worker chooses his victim by random. To
