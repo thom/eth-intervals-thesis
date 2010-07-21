@@ -70,6 +70,21 @@ that the point \lstinline|p1| must occur before the point
 \lstinline|p2|. It also indicates that any memory writes which
 \emph{happen before} \lstinline|p1| must be visible to \lstinline|p2|.
 
+Intervals in Java align nicely with the Java Memory Model
+\cite{Manson2005}: The happens before relation defined by intervals
+can be seen as a deterministic subset of the full happens before
+relation defined by the memory model, which includes edges due to
+constructs like volatile fields or synchronized sections.
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.96\textwidth]{introduction/interval-graph}
+  \caption[Example interval graph]{Example interval graph: Showing an
+    interval and its subintervals \lstinline|a|, \lstinline|b|,
+    \lstinline|c| and \lstinline|d|.}
+  \label{fig:interval-graph}
+\end{figure}
+
 An interval can be associated with one or more locks. The intervals
 runtime will automatically acquire those locks before the interval's
 start point occurs and release them after its end point has occurred.
@@ -82,15 +97,6 @@ parallel. These subintervals begin to execute once the
 subinterval is ready to run when it could execute without violating
 the \emph{happens before} relation. It will be executed when it is
 ready and acquired all its locks.
-
-\begin{figure}[htb]
-  \centering
-  \includegraphics[width=0.96\textwidth]{introduction/interval-graph}
-  \caption[Example interval graph]{Example interval graph: Showing an
-    interval and its subintervals \lstinline|a|, \lstinline|b|,
-    \lstinline|c| and \lstinline|d|.}
-  \label{fig:interval-graph}
-\end{figure}
 
 The interval model can be depicted as a graph, as shown in Figure
 \ref{fig:interval-graph}. The graph contains a single interval with
@@ -203,10 +209,8 @@ because the runtime automatically invokes \lstinline|schedule()| when
 the \lstinline|run()| method of an interval returns.
 
 
-\section{Work-stealing Scheduler}
+\section{Work-Stealing Scheduler}
 \label{sec:intro-work-stealing-scheduler}
-
-\todo[inline]{Finish description of work-stealing scheduler}
 
 The implementation of intervals for Java makes use of a work-stealing
 scheduler similar to those found in Cilk \cite{Blumofe1995,
@@ -215,26 +219,34 @@ Threading Building Blocks (TBB) \cite{Reinders2007, Contreras2008}, or
 Microsoft Task Parallel Library \cite{Leijen2009} but extended to
 support locks and happens before edges.
 
-Intervals in Java align nicely with the Java Memory Model
-\cite{Manson2005}: The happens before relation defined by intervals
-can be seen as a deterministic subset of the full happens before
-relation defined by the memory model, which includes edges due to
-constructs like volatile fields or synchronized sections.
-
-% Each worker is implemented as a separate Java thread. The JVM used
-% to benchmark the implementation is Sun Hotspot JDK 1.6 (see Appendix
-% \ref{chap:experimental-setup} for information about the experimental
-% setup).
-
 A work-stealing scheduler employs a fixed number of threads called
-workers. Each worker has a local deque to store tasks. When a worker's
-own deque is empty, the worker will try to steal from the top of other
-busy workers' deque. For a busy worker, tasks are pushed and popped
-from the bottom of the deque and these operations are
-synchronization-free.
+workers. Each worker has a local double-ended queue, or deque, to
+maintain its own pool of ready tasks from which it obtains work. When
+a worker finds that its pool is empty, it becomes a thief and steals a
+task from the pool of a victim worker chosen at random.
 
-Accessing the run queues at different ends offers several advantages
-\cite{Frigo1998}:
+To obtain work, a worker pops the ready task from the bottom of its
+deque and executes that task. If the task terminates, the worker goes
+back to the bottom of its deque to pop off another task upon which it
+can work. If the task creates a new task or unblocks a blocked task,
+then the worker pushes the newly ready task onto the bottom of its
+deque. Thus, so long as a worker's deque is not empty, the worker
+manipulates its deque in a LIFO (stack-like) manner.
+
+When a worker tries to obtain work by popping a task off the bottom of
+its deque and it finds that it is empty, then the worker becomes a
+thief. It picks a victim worker at random and attempts to obtain work
+by removing the task at the top of the victim worker's deque. If the
+victim worker's deque is empty, then the thief picks another victim
+worker and tries again until it finds a victim whose deque it
+non-empty. At which point the thief continues to work on the stolen
+task as described above. Since steals take place at the top of the
+victim's deque, stealing operates in a FIFO manner.
+
+\missingfigure{Illustrate work-stealing deque}
+
+Accessing the run queues in LIFO and FIFO manner offers several
+advantages \cite{Frigo1998}:
 
 \begin{itemize}
 \item It reduces contention by having stealers operate on the opposite
@@ -242,54 +254,13 @@ Accessing the run queues at different ends offers several advantages
 \item It exploits the property of recursive divide-and-conquer
   algorithms of generating ``large'' tasks early. Thus, an older
   stolen task is likely to provide a larger unit of work, leading to
-  further recursive decompositions by the stealing thread.
-\item Stealing a process also migrates its future workload, which
-  helps to increase locality.
+  further recursive decompositions by the stealing worker.
+\item Stealing a task also migrates its future workload, which helps
+  to increase locality.
 \end{itemize}
 
-\todo{Merge other parts}
-
-\subsubsection{The Performance of Work Stealing in Multiprogrammed
-  Environment \cite{Blumofe1998a} and Hood: A user-level threads
-  library for multiprogrammed multiprocessors \cite{Blumofe1998}}
-
-The work-stealing algorithm dynamically assigns threads to processes
-for execution in a provably efficient manner \cite{Blumofe1995,
-  Blumofe1999}. In this section, we review the work-stealing
-algorithm, and we state the proven performance bounds. In addition, we
-describe the non-blocking implementation of this algorithm
-\cite{Arora2001}. In the next few sections, we experiment with
-applications that are coded to use this non-blocking work stealer.
-
-\minisec{The work-stealing algorithm}
-
-In the work-stealing algorithm, each process maintains its own pool of
-ready threads from which it obtains work, and when a process finds
-that its pool is empty, it becomes a thief and steals a thread from
-the pool of a victim process chosen at random. Each process's pool is
-maintained as a double-ended queue, or deque, which has a bottom and a
-top. To obtain work, a process pops the ready thread from the bottom
-of its deque and commences executing that thread. The process
-continues to execute that thread until the thread either blocks or
-terminates, at which point the process goes back to the bottom of its
-deque to pop off another thread upon which it can work. During the
-course of executing a thread, if the thread creates a new thread or
-unblocks a blocked thread, then the process pushes the newly ready
-thread onto the bottom of its deque.  Thus, so long as a process's
-deque is not empty, the process manipulates its deque in a LIFO
-(stack-like) manner.
-
-When a process goes to obtain work by popping a thread off the bottom
-of its deque, if it finds that its deque is empty, then the process
-becomes a thief. It picks a victim process at random (using a uniform
-distribution) and attempts to obtain work by removing the thread at
-the top of the victim process's deque.  If the victim process's deque
-is empty, then the thief picks another victim process and tries
-again. The thief repeatedly attempts to steal until it finds a victim
-whose deque is non-empty, at which point the thief reforms and
-commences work on the stolen thread as described above. Since steals
-take place at the top of the victim's deque, stealing operates in a
-FIFO manner.
+The assignment of tasks to workers for execution is done in a provably
+efficient manner \cite{Blumofe1995, Blumofe1999}.
 
 
 \section{Overview}
@@ -298,9 +269,7 @@ FIFO manner.
 The goal of the thesis is to improve the implementation of the
 intervals scheduler and it is divided into two parts.
 
-\todo{Rewrite overview}
-
-\subsubsection{\autoref{part:queues}. Work-stealing Queue
+\subsubsection{\autoref{part:queues}. Work-Stealing Queue
   Implementations}
 
 The original work-stealing algorithm uses non-blocking algorithms to
@@ -310,7 +279,7 @@ deque implementation of intervals uses a lock when trying to steal. In
 non-blocking queue implementations and compare them to the current
 one.
 
-\subsubsection{\autoref{part:locality}. Locality-aware Work-stealing}
+\subsubsection{\autoref{part:locality}. Locality-Aware Work-Stealing}
 
 In \autoref{part:locality} of the thesis we implement and analyze
 locality-aware scheduling of intervals. Locality-aware scheduling
