@@ -7,6 +7,18 @@
 
 \todo[inline]{Finish chapter ``Conclusion''}
 
+We could not find a huge difference when running the benchmarks using
+the alternative queue implementations. The paper ``Enabling
+scalability and performance in a large scale CMP environment''
+\cite{Saha2007} states that there is no noticeable difference between
+the speedup of work-stealing and global shared work queue when using
+not more than 8 cores.
+
+To check this hypothesis, we rewrote the intervals scheduler to use a
+single shared work deque and use it in a LIFO (stack) manner.
+
+\todo{Mention the experiment with a single shared work deque (stack)}
+
 %%% Local Variables: 
 %%% mode: latex
 %%% TeX-master: "thesis"
