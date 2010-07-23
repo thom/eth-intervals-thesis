@@ -7,6 +7,30 @@
 
 \todo[inline]{Finish appendix ``Setting Core Affinity of Java Threads''}
 
+\lstinputlisting[style=FloatNumbers, 
+  caption={\lstinline{Affinity} class}, 
+  label=lst:core-affinity]{
+    ../listings/core-affinity/Affinity.java 
+}
+
+\lstinputlisting[style=FloatNumbersC, 
+  caption={JNI C \lstinline{Affinity} header}, 
+  label=lst:core-affinity-jni-header]{
+    ../listings/core-affinity/ch_ethz_hwloc_Affinity.h 
+}
+
+\lstinputlisting[style=FloatNumbersC, 
+  caption={JNI C \lstinline{Affinity} implementation: Set affinity},
+  label=lst:core-affinity-jni-set]{
+    ../listings/core-affinity/ch_ethz_hwloc_Affinity_set.c 
+}
+
+\lstinputlisting[style=FloatNumbersC, 
+  caption={JNI C \lstinline{Affinity} implementation: Get affinity},
+  label=lst:core-affinity-jni-get]{
+    ../listings/core-affinity/ch_ethz_hwloc_Affinity_get.c 
+}
+
 \todo[inline]{Integrate literature review}
 
 \begin{itemize}
