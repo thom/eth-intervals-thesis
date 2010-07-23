@@ -118,21 +118,29 @@ Department of Computer Science\\
 }
 
 \lstdefinestyle{Numbers}{
+  style=Default,
   numbers=left,
   numberstyle=\tiny,
 }
 
 \lstdefinestyle{Float}{
+  style=Default,
   float=htb,
 }
 
 \lstdefinestyle{FloatNumbers}{
-  numbers=left,
-  numberstyle=\tiny,
+  style=Numbers,
   float=htb,
 }
 
-\lstset{style=Default}
+\lstdefinestyle{FloatNumbersC}{
+  style=FloatNumbers,
+  language=C,
+}
+
+\lstset{
+  style=Default,
+}
 
 % Workaround for \lstlistoflistings
 \makeatletter
