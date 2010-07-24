@@ -9,15 +9,15 @@ Java_ch_ethz_hwloc_Affinity_get(JNIEnv *env, jclass class) {
 	// Runtime.getRuntime().availableProcessors()
 	online_cpus = sysconf(_SC_NPROCESSORS_ONLN);
 
+	// Create Java array
 	result = (*env)->NewIntArray(env, online_cpus);
 	if (result == NULL)
 		(*env)->ThrowNew(env, (*env)->FindClass(env,
 				"java/lang/OutOfMemoryError"), "Out of memory!");
 
-	thread = pthread_self();
+	thread = pthread_self(); //*\label{lst:core-affinity-jni-get-impl-pthread-self}
 
-	// Check the actual affinity mask assigned to the thread
-	s = pthread_getaffinity_np(thread, sizeof(cpu_set_t), 
+	s = pthread_getaffinity_np(thread, sizeof(cpu_set_t), //*\label{lst:core-affinity-jni-get-impl-get}
 			&cpuset);
 	if (s != 0)
 		(*env)->ThrowNew(env, (*env)->FindClass(env,
@@ -31,7 +31,7 @@ Java_ch_ethz_hwloc_Affinity_get(JNIEnv *env, jclass class) {
 		else
 			tmp[i] = false;
 
-	// Move from the temporary array to the java array
+	// Move from the temporary array to the Java array
 	(*env)->SetBooleanArrayRegion(env, result, 0, 
 			online_cpus, tmp);
 	return result;
