@@ -97,7 +97,7 @@ to the specified physical units (lines
 \ref{lst:core-affinity-jni-set-unit-set-cpuset}). Actual setting of
 the affinity is done in function
 \lstinline!set_affinity(JNIEnv *env, const cpu_set_t *cpuset)! on lines
-\ref{lst:core-affinity-jni-set-impl-start} to
+\ref{lst:core-affinity-jni-set-impl-start} --
 \ref{lst:core-affinity-jni-set-impl-end}.
 
 To get the thread ID, we use the \lstinline!pthread_self()! function
