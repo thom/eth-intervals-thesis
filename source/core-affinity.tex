@@ -11,7 +11,7 @@ to a separate core.
 
 In recent Java Virtual Machines, threads are implemented with native
 threads, so a Java program using threads is no different from a native
-program using threads. A Java thread is just a thread belonging to a
+program using threads: A Java thread is just a thread belonging to a
 JVM process. This means there is a 1-to-1 correspondence between Java
 and native threads. When using the GNU C library on Linux, native
 threads are implemented with NPTL (Native POSIX Threads Library). NPTL
@@ -33,11 +33,11 @@ kernel scheduling entity (see Figure
 \end{figure}
 
 Unfortunately the Java Threads API does not expose the ability to set
-the CPU or core affinity despite numerous use-cases where setting the
-affinity of threads will be desirable \cite{Love2003, Dow2005,
+the CPU or core affinity despite numerous use cases where setting the
+affinity of threads would be desirable \cite{Love2003, Dow2005,
   Foong2008}.  There exists a request for enhancement
-\cite{Oracle1999} on this issue but it was closed with the message
-``Will Not Fix''.
+\cite{Oracle1999} on this issue but it got set to the state
+\emph{``Closed, Will Not Fix''}.
 
 
 \section{Implementation}
@@ -48,12 +48,12 @@ library (see Listing \ref{lst:core-affinity} for the API). The method
 \lstinline!set(int physicalUnit)!  (line
 \ref{lst:core-affinity-set-unit}) is used to bind the current thread
 to a physical unit. With \lstinline!set(int[] physicalUnits)! the
-current thread can be bound to several physical units, for example a
-node in a NUMA system (line \ref{lst:core-affinity-set-node}). For
+current thread can be bound to several physical units, for example to
+a node in a NUMA system (line \ref{lst:core-affinity-set-node}). For
 debugging purposes we also implemented the method \lstinline!get()!
-which returns a boolean array whose elements are set to true if the
-current thread has an affinity set to the corresponding physical unit
-(line \ref{lst:core-affinity-get}).
+which returns a boolean array whose elements are true if the current
+thread has an affinity set to the corresponding physical unit (line
+\ref{lst:core-affinity-get}).
 
 \lstinputlisting[style=FloatNumbers,
   caption={\lstinline{Affinity} class with interface for the native methods}, 
@@ -96,34 +96,24 @@ to the specified physical units (lines
 \ref{lst:core-affinity-jni-set-unit-set-cpuset} and
 \ref{lst:core-affinity-jni-set-unit-set-cpuset}). Actual setting of
 the affinity is done in function
-\lstinline!set_affinity(JNIEnv *env, const cpu_set_t *cpuset)! on line
+\lstinline!set_affinity(JNIEnv *env, const cpu_set_t *cpuset)! on lines
 \ref{lst:core-affinity-jni-set-impl-start} to
 \ref{lst:core-affinity-jni-set-impl-end}.
 
 To get the thread ID, we use the \lstinline!pthread_self()! function
-(line \ref{lst:core-affinity-jni-set-impl-pthread-self}). Thread
-identifiers should be considered opaque: any attempt to use a thread
-ID other than in pthreads calls is non-portable and can lead to
-unspecified results. Thread IDs are only guaranteed to be unique
-within a process. A thread ID may be reused after a terminated thread
-has been joined, or a detached thread has terminated.
-
-The \lstinline!pthread_setaffinity_np()! function (line
+(line \ref{lst:core-affinity-jni-set-impl-pthread-self}). The function
+\lstinline!pthread_setaffinity_np()! (line
 \ref{lst:core-affinity-jni-set-impl-set}) sets the CPU affinity mask
-of the thread thread to the CPU set pointed to by \lstinline!cpuset!.
-If the call is successful, and the thread is not currently running on
-one of the CPUs in \lstinline!cpuset!, then it is migrated to one of
-those CPUs.
-
-If there is an error, \lstinline!pthread_setaffinity_np()! returs a
-nonzero error number and we throw an exception (line
+of the thread to the CPU set pointed to by \lstinline!cpuset!.  If the
+call is successful, and the thread is not currently running on one of
+the CPUs in \lstinline!cpuset!, then it is migrated to one of those
+CPUs. If there is an error, \lstinline!pthread_setaffinity_np()!
+returs a nonzero error number and we throw an exception (line
 \ref{lst:core-affinity-jni-set-impl-set-error}).
 
 Listing \ref{lst:core-affinity-jni-get} shows the implementation for
 getting the affinity of a thread. This method is mainly used for
-debugging purposes.
-
-We use \lstinline!pthread_self()! (line
+debugging purposes. We use \lstinline!pthread_self()! (line
 \ref{lst:core-affinity-jni-get-impl-pthread-self}) to get the thread
 ID and then call function \lstinline!pthread_getaffinity_np()!  (line
 \ref{lst:core-affinity-jni-get-impl-get}). The
@@ -156,30 +146,24 @@ By setting the core affinity of threads, we only control the locality
 of the work but we do not have control over data locality.
 
 On a NUMA system every processor in the system has a local memory that
-provides low access latency and high bandwidth, and remote memory that
-is considerably slower to access.
+provides low access latency and high bandwidth, and a remote memory
+that is considerably slower to access.
 
 In the Java HotSpot VM, the NUMA-aware allocator has been implemented
 to provide automatic memory placement optimisations for Java
-applications. \verb!-XX:+UseNUMA! turns on the NUMA-aware allocator in
-conjunction with the selection of the Parallel Scavenger garbage
-collector \cite{Masamitsu2008, Oracle2010, Humble2010}. On Linux, the
-implementation is based on \cite{Kleen2004}.
+applications \cite{Masamitsu2008, Oracle2010, Humble2010}. On Linux,
+the implementation is based on \cite{Kleen2004}. It can be enabled by
+using the option \verb!-XX:+UseNUMA!.
 
 The allocator controls the eden space of the young generation of the
-heap, where most of the new objects are created. The allocator divides
-the space into regions each of which is placed in the memory of a
-specific node. The allocator relies on a hypothesis that a thread that
+heap, where most of the new objects are created. It divides the space
+into regions each of which is placed in the memory of a specific
+node. The allocator relies on a hypothesis that a thread that
 allocates the object will be the most likely to use the object. To
 ensure the fastest access to the new object, the allocator places it
 in the region local to the allocating thread. The regions can be
 dynamically resized to reflect the allocation rate of the application
-threads running on different nodes. That makes it possible to increase
-performance even of single-threaded applications. In addition,
-``from'' and ``to'' survivor spaces of the young generation, the old
-generation, and the permanent generation have page interleaving turned
-on for them. This ensures that all threads have equal access latencies
-to these spaces on average.
+threads running on different nodes.
 
 %%% Local Variables: 
 %%% mode: latex
