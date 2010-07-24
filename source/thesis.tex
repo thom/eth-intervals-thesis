@@ -85,6 +85,21 @@ Department of Computer Science\\
 }
 
 \usepackage{tikz}
+\usetikzlibrary{positioning,arrows,chains}
+\tikzset{
+  >=stealth',
+  box/.style={
+    rectangle, 
+    rounded corners, 
+    fill=black!10,
+    draw=black, very thick,
+    text width=14em, 
+    minimum height=3.5em, 
+    text centered, 
+    on chain},
+  every join/.style={->, thick,shorten >=1pt},
+}
+
 \usepackage[colorinlistoftodos,shadow]{todonotes}
 
 
@@ -123,14 +138,40 @@ Department of Computer Science\\
   numberstyle=\tiny,
 }
 
+\lstdefinestyle{NumbersC}{
+  style=Numbers,
+  language=C,
+}
+
+\lstdefinestyle{Skip}{
+  style=Default,
+  aboveskip=3ex,
+}
+
+\lstdefinestyle{SkipNumbers}{
+  style=Skip,
+  numbers=left,
+  numberstyle=\tiny, 
+}
+
+\lstdefinestyle{SkipNumbersC}{
+  style=SkipNumbers,
+  language=C,
+}
+
 \lstdefinestyle{Float}{
   style=Default,
-  float=htb,
+  float=!htb,
+}
+
+\lstdefinestyle{FloatC}{
+  style=Float,
+  language=C,
 }
 
 \lstdefinestyle{FloatNumbers}{
-  style=Numbers,
-  float=htb,
+  style=Float,
+  float=!htb,
 }
 
 \lstdefinestyle{FloatNumbersC}{
