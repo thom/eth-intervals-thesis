@@ -18,11 +18,11 @@ intervals scheduler.
 \section{Intervals}
 \label{sec:intro-intervals}
 
-Existing primitives for synchronizing the control-flow of parallel
-threads, such as signals and barriers, are low-level and dangerous to
-use. They require careful attention to implementation details to
-achieve good performance, and they are prone to errors, particularly
-deadlocks and race conditions.
+Traditional primitives for synchronizing multi-threaded programs, such
+as semaphores and barriers, are low-level and dangerous to use. They
+require careful attention to implementation details to achieve good
+performance, and they are prone to errors, particularly deadlocks and
+race conditions.
 
 Intervals are a higher-level alternative that make parallel
 programming safer while retaining the flexibility and efficiency of
