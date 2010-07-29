@@ -12,6 +12,13 @@ The JVM used to benchmark the implementation is Sun Hotspot JDK 1.6
 (see Appendix \ref{chap:experimental-setup} for information about the
 experimental setup).
 
+The original work-stealing algorithm uses non-blocking algorithms to
+implement queue operations \cite{Arora2001}. However, the current
+deque implementation of intervals uses a lock when trying to steal. In
+\autoref{part:queues} of this thesis we explore alternative
+non-blocking queue implementations and compare them to the current
+one.
+
 \section{Problem and Motivation}
 \label{sec:queues-intro-problem-and-motivation}
 
