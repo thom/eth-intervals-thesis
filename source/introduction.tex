@@ -261,13 +261,6 @@ efficient manner \cite{Blumofe1995, Blumofe1999}.
 \section{Overview}
 \label{sec:intro-overview}
 
-The goal of the thesis is to improve the implementation of the
-intervals scheduler and it is divided into two parts.
-
-\todo{Rewrite overview (depending on the ordering of the parts)}
-
-\subsubsection{\autoref{part:locality}. Locality-Aware Work-Stealing}
-
 In \autoref{part:locality} of the thesis we implement and analyze
 locality-aware scheduling of intervals. Locality-aware scheduling
 allows each interval to be given an affinity for a place, and when a
@@ -275,15 +268,36 @@ worker belonging to a certain place obtains an interval, it gives
 priority to the intervals with affinity for the place \cite{Acar2002,
   Guo2010}.
 
-\subsubsection{\autoref{part:queues}. Work-Stealing Queue
-  Implementations}
+The original work-stealing algorithm uses non-blocking
+algorithms to implement queue operations \cite{Arora2001}. However,
+the current deque implementation of intervals uses a lock when trying
+to steal. As a separate effort, we explored and designed alternative
+non-blocking queue implementations with the aim to improve scheduling
+performance (see \autoref{part:queues}).
 
-The original work-stealing algorithm uses non-blocking algorithms to
-implement queue operations \cite{Arora2001}. However, the current
-deque implementation of intervals uses a lock when trying to steal. In
-\autoref{part:queues} of this thesis we explore alternative
-non-blocking queue implementations and compare them to the current
-one.
+\todo{Rewrite overview}
+
+% The goal of the thesis is to improve the implementation of the
+% intervals scheduler and it is divided into two parts.
+
+% \subsubsection{\autoref{part:locality}. Locality-Aware Work-Stealing}
+
+% In \autoref{part:locality} of the thesis we implement and analyze
+% locality-aware scheduling of intervals. Locality-aware scheduling
+% allows each interval to be given an affinity for a place, and when a
+% worker belonging to a certain place obtains an interval, it gives
+% priority to the intervals with affinity for the place \cite{Acar2002,
+%   Guo2010}.
+
+% \subsubsection{\autoref{part:queues}. Work-Stealing Queue
+%   Implementations}
+
+% The original work-stealing algorithm uses non-blocking algorithms to
+% implement queue operations \cite{Arora2001}. However, the current
+% deque implementation of intervals uses a lock when trying to steal. In
+% \autoref{part:queues} of this thesis we explore alternative
+% non-blocking queue implementations and compare them to the current
+% one.
 
 %%% Local Variables: 
 %%% mode: latex
