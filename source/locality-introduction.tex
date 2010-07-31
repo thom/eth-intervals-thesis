@@ -89,6 +89,16 @@ that have affinity for it, and attempts to steal these first. They
 also bound the number of cache misses for the work stealing algorithm,
 using a ``potential function'' argument.
 
+\minisec{Trivendi}
+
+Non-uniformity: Apart from the much discussed non uniform memory
+access (NUMA) architectures, multiple level of cache sharing is also
+common in manycore processors. Hence a flat uniform shared memory
+model may not be the best way to model this complex memory hierarchy.
+Additionally the actual cost of accessing memory depends depends upon
+interconnect topologies like Hypertransport and Quickpath, and factors
+such as hop count and routing play an important role.
+
 \todo{Finish section ``Problem and Motivation''}
 
 \section{Aim}
