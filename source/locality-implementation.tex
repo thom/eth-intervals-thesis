@@ -12,6 +12,109 @@ cores. While this eliminates interference between the worker threads,
 they will nevertheless share their assigned core with other processes
 in the system, subject to standard Linux scheduling policy.
 
+\minisec{Intel threading building blocks: outfitting C++ for
+  multi-core processor parallelism \cite{Reinders2007}}
+
+\minisec{Caches}
+
+The speed of processors has grown to be much faster than main
+memory. Making all of memory nearly as fast as a processor would
+simply prove too expensive for most computers. Instead, designers make
+small amounts of memory, known as caches, operate nearly as fast as
+the processor. The main memory can then be slower and more
+affordable. The hardware knows how to move information in and out of
+caches as needed, thereby adding to the number of places where data is
+shuffled on its journey between memory and the processor cores. Caches
+are critical in helping overcome the mismatch between memory speed and
+processor speed.
+
+Virtually all computers use caches only for a temporary copy of data
+that should eventually reside in memory. Therefore, the function of a
+memory subsystem is to move data needed as input by each processing
+core to caches near that processor core, and to move data produced by
+the processing cores out to main memory. As data is read from memory
+into the caches, some data needs to be evicted from the cache. Cache
+designers work to make the data evicted be approximately the data
+least likely to be used again.
+
+Once a processor accesses data, it is best to exhaust the program’s
+use of it while it is still in the cache. Continued usage will hold it
+in the cache, whereas prolonged inactivity will likely lead to its
+eviction and future usage will need to do a more expensive (slow)
+access to get the data. Furthermore, every time an additional thread
+runs on a processor core, data is likely to be discarded from the
+cache.
+
+Threading Building Blocks is designed with caches in mind and works to
+limit the unnecessary movement of tasks and data. When a task has to
+be passed to a different processor core for execution, Threading
+Building Blocks moves the task with the least likelihood of having
+data in the cache for the processor core from which the task is
+stolen.
+
+It is interesting to note that parallel Quicksort (Chapter 11) is an
+example in which caches beat maximum parallelism. Parallel Mergesort
+has more parallelism than parallel Quicksort. But parallel Mergesort
+is not an in-place sort, and thus has twice the cache footprint that
+parallel Quicksort does. Hence, Quicksort usually runs faster in
+practice.
+
+Keep data locality in mind when considering how to structure your
+program. Avoid using data regions sporadically when you can design the
+application to use a single set of data in focused chunks of
+time. This happens most naturally if you use data decomposition,
+especially at the higher levels in a program.
+
+\minisec{Costs of Time Slicing}
+
+Time slicing enables there to be more logical threads than physical
+threads. Each logical thread is serviced for a time slice—a short
+period of time defined by the operating system during which a thread
+can run before being preempted—by a physical thread. If a thread runs
+longer than a time slice, as most do, it relinquishes the physical
+thread until it gets another turn. This chapter details the costs
+incurred by time slicing.
+
+The most obvious cost is the time for context switching between
+logical threads. Each context switch requires that the processor save
+all its registers for the previous logical thread that it was
+executing, and load its registers with information for the next
+logical thread it runs.
+
+A subtler cost is cache cooling. Processors keep recently accessed
+data in cache memory, which is very fast, but also relatively small
+compared to main memory. When the processor runs out of cache memory,
+it has to evict items from cache and put them back into main
+memory. Typically, it chooses the least recently-used items in the
+cache. (The reality of set-associative caches is a bit more
+complicated, but this is not a cache primer.)
+
+When a logical thread gets its time slice, as it references a piece of
+data for the first time, this data is pulled into cache, taking
+hundreds of cycles. If it is referenced frequently enough not to be
+evicted, each subsequent reference will find it in cache, and take
+only a few cycles. Such data is called hot in cache.
+
+Time slicing undoes this because if Thread A finishes its time slice,
+and subsequently Thread B runs on the same physical thread, B will
+tend to evict data that was hot in cache for A, unless both threads
+need the data. When Thread A gets its next time slice, it will need to
+reload evicted data, at the cost of hundreds of cycles for each cache
+miss. Or worse yet, the next time slice for Thread A may be on a
+different physical thread that has a different cache altogether.
+
+Another cost is lock preemption. This happens if a thread acquires a
+lock on a resource and its time slice runs out before it releases the
+lock. No matter how short a time the thread intended to hold the lock,
+it is now going to hold it for at least as long as it takes for its
+next turn at a time slice to come up. Any other threads waiting on the
+lock either busy-wait pointlessly or lose the rest of their time
+slice. The effect is called convoying because the threads end up
+``bumper to bumper'' waiting for the preempted thread in front to resume
+driving.
+
+
+
 %%% Local Variables: 
 %%% mode: latex
 %%% TeX-master: "thesis"
