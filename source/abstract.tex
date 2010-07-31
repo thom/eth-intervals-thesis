@@ -5,40 +5,67 @@
 \chapter*{Abstract}
 \label{chap:abstract}
 
-Intervals are a new, higher-level primitive for parallel programming
-with which programmers directly construct the program schedule. They
-are under active development at ETH Zürich as part of the PhD research
-of Nicholas Matsakis \cite{Matsakis2010}.
+Intervals \cite{Matsakis2009b} are a new, higher-level primitive for
+parallel programming with which programmers directly construct the
+program schedule. They are under active development at ETH Zürich as
+part of the PhD research of Nicholas Matsakis \cite{Matsakis2010}.
 
 The intervals implementation in Java uses a work-stealing scheduler in
 which a worker that runs out of work tries to ``steal'' work from
-others. The goal of this thesis is to improve the efficiency of the
+others. The scope of this thesis is to improve the efficiency of the
 intervals scheduler.
+
+In this thesis we implemented and analyzed locality-aware scheduling of
+intervals. Locality-aware scheduling allows each interval to be given
+an affinity for a place, and when a worker belonging to a certain
+place obtains an interval, it gives priority to the intervals with
+affinity for the place \cite{Acar2002, Guo2010}.
+
+\begin{center}
+  $\bullet$
+\end{center}
+
+The original work-stealing algorithm uses non-blocking algorithms to
+implement queue operations \cite{Arora2001}. However, the current
+deque implementation of intervals uses a lock when trying to steal. As
+a separate effort, we explored and designed alternative non-blocking
+queue implementations with the aim to improve scheduling performance.
 
 \todo{Rewrite abstract}
 
-\subsubsection*{\autoref{part:locality}. Locality-Aware Work-Stealing}
+% Intervals are a new, higher-level primitive for parallel programming
+% with which programmers directly construct the program schedule. They
+% are under active development at ETH Zürich as part of the PhD research
+% of Nicholas Matsakis \cite{Matsakis2010}.
 
-Currently the intervals scheduler randomly schedules work items and
-when stealing a work item, the worker chooses his victim by random. To
-improve performance and reduce cache misses, work items that access
-the same data should be scheduled on the same worker or a worker
-``nearby''.
+% The intervals implementation in Java uses a work-stealing scheduler in
+% which a worker that runs out of work tries to ``steal'' work from
+% others. The goal of this thesis is to improve the efficiency of the
+% intervals scheduler.
 
-In the second part of the thesis we implemented and analyzed
-locality-aware scheduling of intervals. In locality-aware scheduling,
-each interval can be given an affinity for a place, and when a worker
-belonging to a certain place obtains an interval, it gives priority to
-the intervals with affinity for the place.
+% \subsubsection*{\autoref{part:locality}. Locality-Aware Work-Stealing}
 
-\subsubsection*{\autoref{part:queues}. Work-Stealing Queues}
+% Currently the intervals scheduler randomly schedules work items and
+% when stealing a work item, the worker chooses his victim by random. To
+% improve performance and reduce cache misses, work items that access
+% the same data should be scheduled on the same worker or a worker
+% ``nearby''.
 
-In a work-stealing scheduler, each worker keeps a pool of work items
-waiting to be executed. The current intervals implementation uses
-doubled-ended queues (deque).  
+% In the second part of the thesis we implemented and analyzed
+% locality-aware scheduling of intervals. In locality-aware scheduling,
+% each interval can be given an affinity for a place, and when a worker
+% belonging to a certain place obtains an interval, it gives priority to
+% the intervals with affinity for the place.
 
-In the first part of this thesis we explored alternative queue
-implementations and compared them to the current implementation.
+% \subsubsection*{\autoref{part:queues}. Work-Stealing Queues}
+
+% In a work-stealing scheduler, each worker keeps a pool of work items
+% waiting to be executed. The current intervals implementation uses
+% doubled-ended queues (deque).  
+
+% In the first part of this thesis we explored alternative queue
+% implementations and compared them to the current implementation.
+
 
 %%% Local Variables: 
 %%% mode: latex
