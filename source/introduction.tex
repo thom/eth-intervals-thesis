@@ -268,12 +268,12 @@ worker belonging to a certain place obtains an interval, it gives
 priority to the intervals with affinity for the place \cite{Acar2002,
   Guo2010}.
 
-The original work-stealing algorithm uses non-blocking
-algorithms to implement queue operations \cite{Arora2001}. However,
-the current deque implementation of intervals uses a lock when trying
-to steal. As a separate effort, we explored and designed alternative
-non-blocking queue implementations with the aim to improve scheduling
-performance (see \autoref{part:queues}).
+In the non-blocking work-stealing algorithm, the deques are
+implemented with non-blocking synchronization \cite{Arora2001}. The
+current deque implementation of intervals however uses a lock when
+trying to steal. As a separate effort, we designed and explored
+alternative non-blocking queue implementations with the aim to improve
+scheduling performance (see \autoref{part:queues}).
 
 \todo{Rewrite overview}
 

@@ -25,11 +25,12 @@ affinity for the place \cite{Acar2002, Guo2010}.
   $\bullet$
 \end{center}
 
-The original work-stealing algorithm uses non-blocking algorithms to
-implement queue operations \cite{Arora2001}. However, the current
-deque implementation of intervals uses a lock when trying to steal. As
-a separate effort, we explored and designed alternative non-blocking
-queue implementations with the aim to improve scheduling performance.
+In the non-blocking work-stealing algorithm, the deques are
+implemented with non-blocking synchronization \cite{Arora2001}. The
+current deque implementation of intervals however uses a lock when
+trying to steal. As a separate effort, we designed and explored
+alternative non-blocking queue implementations with the aim to improve
+scheduling performance.
 
 \todo{Rewrite abstract}
 
