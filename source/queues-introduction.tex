@@ -5,51 +5,70 @@
 \part{Work-Stealing Queue Implementations}
 \label{part:queues}
 
-% Originally, the topic of this master's thesis was to improve the heap
-% model for ownership-based verification at the example of Spec\#. The
-% goal was to find heap encodings which transfer structural information
-% from the static ownership annotations into the abstract model, such
-% that ownership related proof obligations would be simpler to solve by
-% the verifier.
-
-% None of the approaches that were developed as part of this research
-% yielded a heap model that is promising to improve verification
-% performance. Therefore, the idea was abandoned and ``Improving Cee''
-% became the new main topic of this thesis.
-
-% This part of the thesis describes the developed heap models and
-% encountered problems in order to preserve this research for future
-% reference.
-
 \chapter{Introduction}
 \label{chap:queues-introduction}
 
-The original work-stealing algorithm uses non-blocking algorithms to
-implement queue operations \cite{Arora2001}. However, the current
-deque implementation of intervals uses a lock when trying to steal. In
-\autoref{part:queues} of this thesis we explore alternative
-non-blocking queue implementations and compare them to the current
-one.
+\section{Motivation}
+\label{sec:queues-intro-motivation}
 
-\section{Problem and Motivation}
-\label{sec:queues-intro-problem-and-motivation}
+The intervals implementation uses a work-stealing scheduler. It
+employs a fixed number of threads called workers. Each worker has a
+local double-ended queue, or deque, to maintain its own pool of ready
+intervals from which it obtains work. When a worker finds that its
+pool is empty, it becomes a thief and steals an interval from the pool
+of a victim worker chosen at random.
 
-\todo[inline]{Finish section ``Problem and Motivation''}
+In the non-blocking \footnote{Non-blocking -- in contrast to wait-free
+  \cite{Herlihy1991} -- means that it is possible for a worker to
+  starve while trying to steal from other workers. Live-locks cannot
+  occur as if one worker starves, then others must be making
+  progress.} work-stealing algorithm, the deques are implemented with
+non-blocking synchronization \cite{Arora2001}. That is, instead of
+using mutual exclusion, it uses powerful atomic synchronization
+primitives such as compare-and-swap \cite{Moir1997}. The current deque
+implementation of intervals however uses mutual exclusion when trying
+to steal.
 
-\section{Aim}
-\label{sec:queues-intro-aim}
-
-\todo[inline]{Finish section ``Aim''}
+Our hypothesis was that we could improve the performance of the
+intervals scheduler with non-blocking deques. Thus, as a separate
+effort, we designed and explored alternative non-blocking queue
+implementations.
 
 \section{Overview}
 \label{sec:queues-intro-overview}
 
-\todo[inline]{Finish section ``Overview''}
+\todo{Rewrite ``Overview''}
 
-The JVM used to benchmark the implementation is Sun Hotspot JDK 1.6
-(see Appendix \ref{chap:experimental-setup} for information about the
-experimental setup).
+The goal of this part of the thesis was to find queue implementations
+such that they improve the performance of the intervals scheduler.
 
+None of the approaches that were developed as part of this research
+yielded a deque that was improving work-stealing performance on the
+machines we had to test them with (see appendix
+\ref{sec:experimental-setup-marvin} and
+\ref{sec:experimental-setup-mafushi}).
+
+\todo{List chapters and give a short description, mention
+  \cite{Saha2007}}
+
+This part of the thesis describes the developed deques and encountered
+problems in order to preserve this research for future reference.
+
+% Chapter two introduces the different terms involved when talking about
+% virtual machines and different techniques to build them. It also
+% summarizes some important hardware aspects. Chapter three analyzes
+% other implementations of virtual machines done previously. It
+% categorizes them and relates them to the techniques introduced in
+% chapter two. Chapter four offers some background on Barrelfish,
+% especially those parts which are important to understand the
+% interfaces used within VMkit. In chapter five the global approach and
+% the design is shown. It describes how the virtual machine is laid out
+% and what the properties with respect to the background on virtual
+% machines are. Chapter six describes the implementation of the whole
+% system within Barrelfish. An evaluation of the implementation is
+% presented in chapter seven and the work concludes in chapter eight
+% where the implementation is rated according to the evaluation and the
+% aim.
 
 %%% Local Variables: 
 %%% mode: latex
