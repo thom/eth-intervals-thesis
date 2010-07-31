@@ -2,15 +2,14 @@
 % benchmarks.tex
 %==============================================================================
 
-\chapter{Benchmarks}
+\chapter{Java Grande Forum Benchmarks}
 \label{chap:appendix-benchmarks}
 
-\section{Java Grande Forum}
-\label{sec:benchmarks-jgf}
-
-We evaluate the \emph{intervals} work-stealing queues on a variety of
-parallel Java Grande Forum benchmarks \cite{Smith2001, Mathew1999,
+We evaluate the \emph{intervals} scheduler implementation on a variety
+of parallel Java Grande Forum benchmarks \cite{Smith2001, Mathew1999,
   Gregg2003} ported to use \emph{intervals}.
+
+\todo{Mention that they have been ported already}
 
 The JVM used on both machines described in appendix
 \ref{chap:experimental-setup} is Sun Hotspot JDK 1.6. In both cases,
@@ -19,6 +18,8 @@ the JVM was invoked with the following parameters:
 \begin{verbatim}
     -server -Xmx2048M -Xms2048M -Xss8m
 \end{verbatim}
+
+\todo{Do we really need this appendix?}
 
 \subsection*{Crypt}
 
@@ -71,38 +72,8 @@ scene containing 64 spheres at a resolution of $N \times N$
 pixels. The loop over rows of pixels has been distributed to
 \emph{intervals} using fork-join sections.
 
-
-\section{Locality-Aware Benchmarks}
-
-We evaluate the locality-aware implementation of \emph{intervals} on a
-variety of benchmarks. To reduce the impact of JVM overheads in the
-evaluation, including JIT compilation and garbage collection, the
-execution time reported is the average of the three best benchmark
-iterations from three seperate VM incocations. Each VM invocation
-performs 10 benchmark iterations.
-
-The JVM used on both machines described in appendix
-\ref{chap:experimental-setup} is Sun Hotspot JDK 1.6. In both cases,
-the JVM was invoked with the following parameters:
-
-\begin{verbatim}
-    -server -Xmx4096M -Xms4096M -Xss8m -XX:+UseNUMA
-\end{verbatim}
-
-The following benchmarks were first written to use threads and then
-ported over to use \emph{intervals}.
-
-\subsection*{Cache-Stress Test}
-
-\todo[inline]{Describe benchmark ``Cache-Stress Test''}
-
-\subsection*{Merge Sort}
-
-\todo[inline]{Describe benchmark ``Merge Sort''}
-
-\subsection*{Block Matrix Multiplication}
-
-\todo[inline]{Describe benchmark ``Block Matrix Multiplication''}
+\todo{Mention that this is a summary of \cite{Smith2001, Mathew1999,
+    Gregg2003}}
 
 
 %%% Local Variables: 
