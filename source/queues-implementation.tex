@@ -77,6 +77,19 @@
 
 \todo[inline]{Finish section ``Dynamic Work-Stealing Deque''}
 
+Ideally, a work-stealing algorithm should provide a linearizable
+implementation whose pop methods always return a task if one is
+available. In practice, however, we can settle fro something weaker,
+allowing a \lstinline!popTop()! call to return \lstinline!null! if it
+conflicts with a concurrent \lstinline!popTop()! call. Though we could
+have the unsuccessful thief simply try again, it makes more sense in
+this context to have a thread retry the \lstinline!popTop()! operation
+on a different, randomly chosen deque each time. To support such a
+retry, a \lstiline!popTop()! call may return \lstinline!null! if it
+conflicts with a concurrent \lstinline!popTop()! call.
+
+\todo{Rephrase paragraph}
+
 
 \section{Duplicating Work-Stealing Deque}
 \label{sec:queues-implementation-duplicating-ws-deque}
@@ -224,6 +237,7 @@ tasks. But this appears to be the best general-purpose
 compromise. Future versions of the framework may supply additional
 control methods so that programmers can override defaults when they
 impact performance.
+
 
 %%% Local Variables: 
 %%% mode: latex
