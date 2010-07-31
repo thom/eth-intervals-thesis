@@ -20,7 +20,7 @@ single shared work deque and use it in a LIFO (stack) manner.
 \minisec{Limits of work-stealing scheduling \cite{Vrba2009}}
 
 The original work-stealing algorithm uses non-blocking algorithms to
-implement queue operations \cite{Arora2002}. However, we have decided
+implement queue operations \cite{Arora2001}. However, we have decided
 to simplify our scheduler implementation by protecting each run queue
 with its own lock. We believed that this would not impact scalability
 on our machine, because others \cite{Saha2007} have reported that even

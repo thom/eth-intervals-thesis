@@ -85,7 +85,7 @@ conflicts with a concurrent \lstinline!popTop()! call. Though we could
 have the unsuccessful thief simply try again, it makes more sense in
 this context to have a thread retry the \lstinline!popTop()! operation
 on a different, randomly chosen deque each time. To support such a
-retry, a \lstiline!popTop()! call may return \lstinline!null! if it
+retry, a \lstinline!popTop()! call may return \lstinline!null! if it
 conflicts with a concurrent \lstinline!popTop()! call.
 
 \todo{Rephrase paragraph}
