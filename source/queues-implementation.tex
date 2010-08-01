@@ -2,55 +2,8 @@
 % queues-implementation.tex
 %==============================================================================
 
-\chapter{Queues}
+\chapter{Investigated Queues}
 \label{chap:queues-implementation}
-
-\begin{itemize}
-\item Thread scheduling for multiprogrammed multiprocessors
-  \cite{Arora2001}
-\item Simple, fast, and practical non-blocking and blocking concurrent
-  queue algorithms \cite{Michael1996}
-\end{itemize}
-
-\section{LazyDeque}
-\label{sec:queues-implementation-lazy-deque}
-
-\todo[inline]{Finish section ``LazyDeque''}
-
-% \begin{center}
-%   \begin{tikzpicture}
-%     % \node[text centered,text width=4cm]{Description};
-    
-%     \begin{scope}[line width=4mm,rotate=270]
-%       \newcount\mycount
-%       \foreach \angle in {0,360,...,3599}
-%       {
-%         \mycount=\angle\relax
-%         \divide\mycount by 10\relax
-%         \draw[black!15,thick] (\the\mycount:2.5cm) -- (\the\mycount:4cm);
-%       }
-      
-%       \draw (162:4.2cm) node[above] {0};
-%       \draw (126:4.2cm) node[right] {1};
-%       \draw (90:4.2cm) node[right] (topindex) {2};
-%       \draw (54:4.2cm) node[below] {3};
-%       \draw (18:4.2cm) node[below] {4};
-%       \draw (342:4.2cm) node[below] {5};    
-%       \draw (306:4.2cm) node[below] {6};
-%       \draw (270:4.2cm) node[left] {7};
-%       \draw (234:4.2cm) node[left] {8};
-%       \draw (198:4.2cm) node[above] {9};
-%     \end{scope}  
-    
-%     \filldraw[gray] (3.25cm,0cm) circle (0.4cm);
-    
-%     \draw (7cm,0cm) node (topbox) {top};
-%     \draw[->] (topbox) -- (topindex);
-    
-%     \draw[gray] (0,0) circle (4cm) circle (2.5cm);
-%   \end{tikzpicture}
-% \end{center}
-
 
 \section{Work-Stealing Deque}
 \label{sec:queues-implementation-ws-deque}
@@ -62,7 +15,7 @@
 \item The art of multiprocessor programming \cite{Herlihy2008}
 \end{itemize}
 
-\todo[inline]{Finish section ``Work-Stealing Deque''}
+\todo{Finish section ``Work-Stealing Deque''}
 
 
 \section{Dynamic Work-Stealing Deque}
@@ -75,7 +28,7 @@
   \cite{Hendler2006a}
 \end{itemize}
 
-\todo[inline]{Finish section ``Dynamic Work-Stealing Deque''}
+\todo{Finish section ``Dynamic Work-Stealing Deque''}
 
 Ideally, a work-stealing algorithm should provide a linearizable
 implementation whose pop methods always return a task if one is
@@ -102,11 +55,10 @@ conflicts with a concurrent \lstinline!popTop()! call.
   relaxed memory models \cite{Burckhardt2007a}
 \end{itemize}
 
-\todo[inline]{Boolean ``Already Run'' could be helpful when using a
-  mailbox style implementation for locality-aware scheduling
-  \cite{Acar2002}}
+\todo{Boolean ``Already Run'' could be helpful when using a mailbox
+  style implementation for locality-aware scheduling \cite{Acar2002}}
 
-\todo[inline]{Finish section ``Duplicating Work-Stealing Deque''}
+\todo{Finish section ``Duplicating Work-Stealing Deque''}
 
 
 \section{Idempotent Work-Stealing Deque}
@@ -116,7 +68,7 @@ conflicts with a concurrent \lstinline!popTop()! call.
 \item Idempotent work stealing \cite{Michael2009}
 \end{itemize}
 
-\todo[inline]{Finish section ``Idempotent Work-Stealing Deque''}
+\todo{Finish section ``Idempotent Work-Stealing Deque''}
 
 
 \subsubsection{A Java fork/join framework \cite{Lea2000}}

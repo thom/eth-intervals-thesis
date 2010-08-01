@@ -1,0 +1,67 @@
+%==============================================================================
+% queues-description.tex
+%==============================================================================
+
+\chapter{Work-Stealing Queues}
+\label{chap:queues-description}
+
+\section{Interface}
+\label{sec:queues-description-interface}
+
+\lstinputlisting[style=Float,
+  caption={Work-stealing queue interface}, 
+  label=lst:work-stealing-queue-interface]{
+    ../listings/queues-implementation/WorkStealingQueue.java
+}
+
+\todo{Finish section ``Interface''}
+
+\section{Current Queue Implementation}
+\label{sec:queues-description-current-implementation}
+
+This is the deque currently used by the intervals scheduler. It is
+called ``Lazy'' because the owner of the deque only lazily updates the
+location of the head of deque, i.e., only when it tries to take
+something and finds it gone.
+
+\todo{Finish section ``LazyDeque''}
+
+% \begin{center}
+%   \begin{tikzpicture}
+%     % \node[text centered,text width=4cm]{Description};
+    
+%     \begin{scope}[line width=4mm,rotate=270]
+%       \newcount\mycount
+%       \foreach \angle in {0,360,...,3599}
+%       {
+%         \mycount=\angle\relax
+%         \divide\mycount by 10\relax
+%         \draw[black!15,thick] (\the\mycount:2.5cm) -- (\the\mycount:4cm);
+%       }
+      
+%       \draw (162:4.2cm) node[above] {0};
+%       \draw (126:4.2cm) node[right] {1};
+%       \draw (90:4.2cm) node[right] (topindex) {2};
+%       \draw (54:4.2cm) node[below] {3};
+%       \draw (18:4.2cm) node[below] {4};
+%       \draw (342:4.2cm) node[below] {5};    
+%       \draw (306:4.2cm) node[below] {6};
+%       \draw (270:4.2cm) node[left] {7};
+%       \draw (234:4.2cm) node[left] {8};
+%       \draw (198:4.2cm) node[above] {9};
+%     \end{scope}  
+    
+%     \filldraw[gray] (3.25cm,0cm) circle (0.4cm);
+    
+%     \draw (7cm,0cm) node (topbox) {top};
+%     \draw[->] (topbox) -- (topindex);
+    
+%     \draw[gray] (0,0) circle (4cm) circle (2.5cm);
+%   \end{tikzpicture}
+% \end{center}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "thesis"
+%%% End: 
