@@ -56,10 +56,10 @@ the elements into a bigger array, there is no need to update
 indexes where the elements are stored might change. Since the only
 operation that modifies \lstinline!top! is \lstinline!steal!,
 \lstinline!top! is never decremented, and there is no need for a tag
-field as in all previous work-stealing algorithms \footnote{We assume
+field as in all previous work-stealing algorithms.\footnote{We assume
   that \lstinline!top! never overflows. As explained in the previous
   section, with a 64-bit integer implementation this is a very
-  reasonable assumption.}.
+  reasonable assumption.}
 
 \minisec{The deque operations}
 
@@ -185,13 +185,13 @@ maximum size, which might result in a big waste of memory.
 
 Shrinking the array is no harder than growing the array; it only
 requires that the algorithm check against a minimum use fraction of
-the current array when performing a \lstinline!popBottom! operation
-\footnote{With the current implementation, this fraction must be
-  strictly less than $\frac{1}{2}$, to guarantee that the deque
-  elements could fit into the smaller array while leaving one array
-  cell unused.}. The code for the \lstinline!popBottom! operation with
-the possible shrinking operation appears in Figures 5 and 6. As
-illustrated by the code, Line 31 was modified to call the
+the current array when performing a \lstinline!popBottom!
+operation.\footnote{With the current implementation, this fraction
+  must be strictly less than $\frac{1}{2}$, to guarantee that the
+  deque elements could fit into the smaller array while leaving one
+  array cell unused.} The code for the \lstinline!popBottom!
+operation with the possible shrinking operation appears in Figures 5
+and 6. As illustrated by the code, Line 31 was modified to call the
 \lstinline!perhapsShrink! method just before returning the popped
 value. The \lstinline!perhapsShrink! method shrinks the array if the
 number of elements in the deque is less than some fraction
@@ -286,14 +286,14 @@ and returns the bigger array's buffer to the shared pool. When the
 returns an element from the old bigger array which was already
 reclaimed, and therefore may be used by another deque. This scenario,
 of course, could not be allowed. Therefore, to return an array's
-buffer to the shared pool when shrinking back to a smaller one
-\footnote{We assume that we do not reclaim the buffers of the smaller
- arrays when growing to bigger ones (for a faster shrink operation as
-  described in Section 3.1). It is straightforward, however, to use
-  the same solution for reclaiming buffers also when growing.}, the
-deque's owner must have some guarantee that any thieves concurrently
-referencing that array will be forced to abort and will not return
-data read from it after it was reclaimed.
+buffer to the shared pool when shrinking back to a smaller
+one,\footnote{We assume that we do not reclaim the buffers of the
+  smaller arrays when growing to bigger ones (for a faster shrink
+  operation as described in Section 3.1). It is straightforward,
+  however, to use the same solution for reclaiming buffers also when
+  growing.} the deque's owner must have some guarantee that any
+thieves concurrently referencing that array will be forced to abort
+and will not return data read from it after it was reclaimed.
 
 One way to do it is by self-stealing: the deque's owner steals an item
 from its own deque and returns that item instead of an item popped
@@ -365,13 +365,12 @@ were not modified from before reading \lstinline!bottom! at Line 12
 until right after reading \lstinline!activeArray! at Line 13, then the
 values read correspond to the memory state during the read of
 \lstinline!bottom! at Line 12. Therefore, if the test at Line 15.2
-succeeds, the method returns Empty \footnote{In the correctness proof
+succeeds, the method returns Empty;\footnote{In the correctness proof
   we show that we do not need to worry about the ABA problem on the
-  \lstinline!activeArray! value.}; otherwise, some concurrent
-operation successfully popped an element from the deque
-\footnote{Assuming the \lstinline!perhapsShrink! method is called only
-  for a successful \lstinline!popBottom! operation.}, and the method
-returns Abort.
+  \lstinline!activeArray! value.} otherwise, some concurrent operation
+successfully popped an element from the deque,\footnote{Assuming the
+  \lstinline!perhapsShrink! method is called only for a successful
+  \lstinline!popBottom! operation.} and the method returns Abort.
 
 Note that the deque's reference to the array is the first to be
 updated by the \lstinline!perhapsShrink! method (Line 39.1), but the
@@ -513,10 +512,10 @@ years of continuous operation without overflow.
 Because the active array in the deque is at least $\frac{1}{K}$
 filled, and because the total size of the smaller blocks is at most
 the size of the active array, the storage overhead of this algorithm
-is at most $2K$ times the current deque size \footnote{This upper
+is at most $2K$ times the current deque size.\footnote{This upper
   bound assumes that the \lstinline!perhapsShrink! method is called by
   the deque's owner often enough to shrink the deque’s array when
-  necessary.}.
+  necessary.}
 
 \subsubsection{Performance}
 
@@ -714,16 +713,19 @@ complexity due to the extra work required for the list's maintenance.
 }
 
 
-\section{Duplicating Work-Stealing Deque}
-\label{sec:queues-implementation-duplicating-ws-deque}
+\section{Idempotent Work-Stealing Deque}
+\label{sec:queues-implementation-idempotent-ws-deque}
 
 \begin{itemize}
+\item Idempotent work stealing \cite{Michael2009}
 \item The design of a task parallel library \cite{Leijen2009}
 \item Checkfence: checking consistency of concurrent data types on
   relaxed memory models \cite{Burckhardt2007}
 \item Checkfence: checking consistency of concurrent data types on
   relaxed memory models \cite{Burckhardt2007a}
 \end{itemize}
+
+\todo{Finish section ``Idempotent Work-Stealing Deque''}
 
 \todo{Boolean ``Already Run'' could be helpful when using a mailbox
   style implementation for locality-aware scheduling \cite{Acar2002}}
@@ -741,16 +743,6 @@ complexity due to the extra work required for the list's maintenance.
   label=lst:work-stealing-deque]{
     ../listings/queues-implementation/DuplicatingWorkStealingDeque.java
 }
-
-
-\section{Idempotent Work-Stealing Deque}
-\label{sec:queues-implementation-idempotent-ws-deque}
-
-\begin{itemize}
-\item Idempotent work stealing \cite{Michael2009}
-\end{itemize}
-
-\todo{Finish section ``Idempotent Work-Stealing Deque''}
 
 \lstinputlisting[style=Numbers,
   caption={Idempotent work-stealing deque}, 

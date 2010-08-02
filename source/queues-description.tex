@@ -29,7 +29,7 @@ load-balancing technology of choice in both industry and academia
 \cite{Arora2001, Acar2002, Blumofe1995, Frigo1998, Danaher2005}. The
 scheme implements a provably efficient work-stealing paradigm due to
 Blumofe and Leiserson \cite{Blumofe1999} that allows each process to
-maintain a local work deque \footnote{Actually, the work-stealing
+maintain a local work deque\footnote{Actually, the work-stealing
   algorithm uses a work-stealing deque, which is like a deque
   \cite{Knuth1997} except that only one process can access one end of
   the queue (the ``bottom''), and only Pop operations can be invoked
@@ -52,9 +52,9 @@ three methods in its interface:
   \lstinline!Empty!. Otherwise, returns the element successfully
   stolen from the top of the deque, or returns \lstinline!Abort! if
   this process loses a race with another process to steal the topmost
-  element \footnote{In our implementation, as we describe, Abort is
+  element.\footnote{In our implementation, as we describe, Abort is
     also returned if a steal operation lost a race with an array
-    memory reclamation caused by a concurrent popBottom operation.}.
+    memory reclamation caused by a concurrent popBottom operation.}
 \end{itemize}
 
 Note that \lstinline!pushBottom! and \lstinline!popBottom! operations
@@ -64,10 +64,10 @@ Unfortunately, the use of fixed size arrays introduces an inefficient
 memory-size/robustness tradeoff: for $n$ processes and total allocated
 memory size $m$, one can tolerate at most $\frac{m}{n}$ items in a
 deque. Using cyclic arrays, or the reset-on- empty heuristic presented
-in the original ABP algorithm \footnote{The reset-on-empty heuristic
+in the original ABP algorithm,\footnote{The reset-on-empty heuristic
   resets top and bottom to point to the beginning of the array
   whenever the deque becomes empty. It was used by the original ABP
-  algorithm to make overflow scenarios less frequent.}, reduces the
+  algorithm to make overflow scenarios less frequent.} reduces the
 chance of overflow but does not eliminate it.
 
 \subsubsection{A Java fork/join framework \cite{Lea2000}}
