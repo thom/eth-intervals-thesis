@@ -5,8 +5,9 @@
 \chapter{Work-Stealing Queues}
 \label{chap:queues-description}
 
-\subsubsection{The art of multiprocessor programming
-  \cite{Herlihy2008}}
+\section{References}
+
+\subsection{The art of multiprocessor programming \cite{Herlihy2008}}
 
 Ideally, a work-stealing algorithm should provide a linearizable
 implementation whose pop methods always return a task if one is
@@ -21,7 +22,7 @@ conflicts with a concurrent \lstinline!popTop()! call.
 
 \todo{Rephrase paragraph}
 
-\subsubsection{Dynamic circular work-stealing deque \cite{Chase2005}}
+\subsection{Dynamic circular work-stealing deque \cite{Chase2005}}
 
 The ABP work-stealing algorithm of Arora, Blumofe, and Plaxton
 \cite{Arora2001} has been gaining popularity as the multiprocessor
@@ -70,9 +71,9 @@ in the original ABP algorithm,\footnote{The reset-on-empty heuristic
   algorithm to make overflow scenarios less frequent.} reduces the
 chance of overflow but does not eliminate it.
 
-\subsubsection{A Java fork/join framework \cite{Lea2000}}
+\subsection{A Java fork/join framework \cite{Lea2000}}
 
-\minisec{Deques}
+\subsubsection{Deques}
 
 To enable efficient and scalable execution, task management must be
 made as fast as possible. Creating, pushing, and later popping (or,
@@ -151,7 +152,7 @@ in which case it must first obtain the deque lock to resize the
 array. Otherwise, simply ensuring that top is updated only after the
 deque array slot is filled in suppresses interference by any take.
 
-\minisec{Stealing and Idling}
+\subsubsection{Stealing and Idling}
 
 Worker threads in work-stealing frameworks know nothing about the
 synchronization demands of the programs they are running. They simply
