@@ -5,6 +5,8 @@
 \chapter{Work-Stealing Queues}
 \label{chap:queues-description}
 
+\todo{Change chapter title to ``Background''?}
+
 \section{References}
 
 \subsection{The art of multiprocessor programming \cite{Herlihy2008}}
@@ -277,10 +279,37 @@ something and finds it gone.
 
 \todo{Finish section ``LazyDeque''}
 
+The members of the queue are defined as (see paper about duplicating
+queues):
+
 \lstinputlisting[style=Numbers,
   caption={Lazy deque}, 
   label=lst:work-stealing-lazy-deque]{
     ../listings/queues-description/WorkStealingLazyDeque.java
+}
+
+\lstinputlisting[style=Numbers,
+  caption={Lazy deque: Put}, 
+  label=lst:work-stealing-lazy-deque-put]{
+    ../listings/queues-description/WorkStealingLazyDeque-put.java
+}
+
+\lstinputlisting[style=Numbers,
+  caption={Lazy deque: Take}, 
+  label=lst:work-stealing-lazy-deque-take]{
+    ../listings/queues-description/WorkStealingLazyDeque-take.java
+}
+
+\lstinputlisting[style=Numbers,
+  caption={Lazy deque: Steal}, 
+  label=lst:work-stealing-lazy-deque-steal]{
+    ../listings/queues-description/WorkStealingLazyDeque-steal.java
+}
+
+\lstinputlisting[style=Numbers,
+  caption={Lazy deque: Expand}, 
+  label=lst:work-stealing-lazy-deque-expand]{
+    ../listings/queues-description/WorkStealingLazyDeque-expand.java
 }
 
 % \begin{center}
