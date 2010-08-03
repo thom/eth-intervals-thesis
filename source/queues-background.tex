@@ -1,9 +1,9 @@
 %==============================================================================
-% queues-description.tex
+% queues-background.tex
 %==============================================================================
 
-\chapter{Work-Stealing Queues}
-\label{chap:queues-description}
+\chapter{Background}
+\label{chap:queues-background}
 
 \todo{Change chapter title to ``Background''?}
 
@@ -258,19 +258,19 @@ compromise. Future versions of the framework may supply additional
 control methods so that programmers can override defaults when they
 impact performance.
 
-\section{Interface}
-\label{sec:queues-description-interface}
+\section{Work-Stealing Queues}
+\label{sec:queues-background-work-stealing-queues}
 
 \lstinputlisting[style=Float,
   caption={Work-stealing queue interface}, 
   label=lst:work-stealing-queue-interface]{
-    ../listings/queues-description/WorkStealingQueue.java
+    ../listings/queues-background/WorkStealingQueue.java
 }
 
 \todo{Finish section ``Interface''}
 
 \section{Current Queue Implementation}
-\label{sec:queues-description-current-implementation}
+\label{sec:queues-background-current-implementation}
 
 This is the deque currently used by the intervals scheduler. It is
 called ``Lazy'' because the owner of the deque only lazily updates the
@@ -285,31 +285,31 @@ queues):
 \lstinputlisting[style=Numbers,
   caption={Lazy deque}, 
   label=lst:work-stealing-lazy-deque]{
-    ../listings/queues-description/WorkStealingLazyDeque.java
+    ../listings/queues-background/WorkStealingLazyDeque.java
 }
 
 \lstinputlisting[style=Numbers,
   caption={Lazy deque: Put}, 
   label=lst:work-stealing-lazy-deque-put]{
-    ../listings/queues-description/WorkStealingLazyDeque-put.java
+    ../listings/queues-background/WorkStealingLazyDeque-put.java
 }
 
 \lstinputlisting[style=Numbers,
   caption={Lazy deque: Take}, 
   label=lst:work-stealing-lazy-deque-take]{
-    ../listings/queues-description/WorkStealingLazyDeque-take.java
+    ../listings/queues-background/WorkStealingLazyDeque-take.java
 }
 
 \lstinputlisting[style=Numbers,
   caption={Lazy deque: Steal}, 
   label=lst:work-stealing-lazy-deque-steal]{
-    ../listings/queues-description/WorkStealingLazyDeque-steal.java
+    ../listings/queues-background/WorkStealingLazyDeque-steal.java
 }
 
 \lstinputlisting[style=Numbers,
   caption={Lazy deque: Expand}, 
   label=lst:work-stealing-lazy-deque-expand]{
-    ../listings/queues-description/WorkStealingLazyDeque-expand.java
+    ../listings/queues-background/WorkStealingLazyDeque-expand.java
 }
 
 % \begin{center}
