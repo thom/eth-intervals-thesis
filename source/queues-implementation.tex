@@ -319,7 +319,7 @@ contains the \lstinline!bottom! and \lstinline!top! modifications
 (Lines 39.2-39.6), right after making the new array active (Line
 39.1), and before returning the old array's buffer to the shared pool
 (Line 39.7). The order in which \lstinline!bottom! and \lstinline!top!
-are modi- fied is important, because while the deque's owner is
+are modified is important, because while the deque's owner is
 between these modifications, thieves must not spuriously return a
 value from an empty deque or report empty when elements are actually
 in the deque. Because the new \lstinline!perhapsShrink! method
@@ -348,7 +348,7 @@ and \lstinline!top! values that correspond to a deque in the
 ``intermediate state'' between the \lstinline!bottom! and
 \lstinline!top! updates of a shrink operation. These values may
 indicate an empty deque although the difference between them is
-possitive. Therefore, instead of only checking whether the difference
+positive. Therefore, instead of only checking whether the difference
 between \lstinline!bottom! and \lstinline!top! is non-positive, the
 modified \lstinline!steal! method also checks whether this difference
 modulo the array size is 0 (Line 15.1), for the array reference read
@@ -376,7 +376,7 @@ Note that the deque's reference to the array is the first to be
 updated by the \lstinline!perhapsShrink! method (Line 39.1), but the
 last to be read by the \lstinline!steal! operation (Line 13), thereby
 guaranteeing that if the \lstinline!steal! operation sees an
-intermedi- ate state, it sees the new (smaller) array. In the full
+intermediate state, it sees the new (smaller) array. In the full
 version of the paper, we prove that the shared pool version of the
 algorithm implements a linearizable ABP-style deque that cannot
 overflow. Here we only informally show that using the above
@@ -403,7 +403,7 @@ after it was returned to the shared pool.
   The only statement that returns buffers to the shared pool is Line
   39.7 in the \lstinline!perhapsShrink! method, which is executed only
   by the deque's owner. Also, the deque's owner is the only process
-  that may activate or de-activate an array (that is, replace the
+  that may activate or deactivate an array (that is, replace the
   active array of the deque). Since the \lstinline!perhapsShrink!
   method set the new smaller array to be the active array before
   executing Line 39.7, then an active array is never deallocated.
@@ -450,7 +450,7 @@ lock-free. Informally, this is correct because a \lstinline!steal!
 operation only returns Abort when either \lstinline!top! is modified
 by a concurrent pop operation (either a \lstinline!popBottom! or a
 \lstinline!steal! operation), or that \lstinline!top! or
-\lstinline!activeArray!  are modified by a \lstinline!perhapsShrink!
+\lstinline!activeArray! are modified by a \lstinline!perhapsShrink!
 operation. Note that neither a pop nor a \lstinline!perhapsShrink!
 operation can cause more than 2 \lstinline!steal! operations by the
 same process to return Abort. Therefore, if a \lstinline!steal!
@@ -492,7 +492,7 @@ arrays and $\frac{1}{K}$ is the utilization fraction under which we
 shrink the array. Each time the deque grows to $\frac{N}{2}$ elements,
 it expands out of the small array; each time it reduces to
 $\frac{N}{K}$ elements, it shrinks, and the \lstinline!top! and
-\lstinline!bottom! indices are bumped for- ward by $\frac{N}{2}$. The
+\lstinline!bottom! indices are bumped forward by $\frac{N}{2}$. The
 number of operations in a grow-shrink cycle is $2N \times (\frac{1}{2}
 - \frac{1}{K})$. Growth of \lstinline!top! is maximized if the
 operations that remove the elements from the deque are steals. The
@@ -514,7 +514,7 @@ filled, and because the total size of the smaller blocks is at most
 the size of the active array, the storage overhead of this algorithm
 is at most $2K$ times the current deque size.\footnote{This upper
   bound assumes that the \lstinline!perhapsShrink! method is called by
-  the deque's owner often enough to shrink the deque’s array when
+  the deque's owner often enough to shrink the deque's array when
   necessary.}
 
 \subsubsection{Performance}
@@ -542,13 +542,13 @@ in a DAG of maximum depth $D$ is: $B \cdot \left(1 - \frac{d}{D}
 difference between the two algorithms, we did not perform any work on
 a node other than pushing its child nodes to the process's deque.
 
-We ran the benchmark on a 16 node Sun EnterpriseTM 6500, an SMP
-machine formed from 8 boards of two 400MHz UltraSparc processors,
-connected by a crossbar UPA switch, and running a SolarisTM 9
-operating system. We chose the maximum branch of the DAG to be 13, and
-the maximum depth to be 10. We used 72-element arrays for the original
-ABP deques, and our algorithm allocated the deques with an initial
-size of 64-elements, plus a few 128-element arrays in the shared pool.
+We ran the benchmark on a 16 node Sun Enterprise 6500, an SMP machine
+formed from 8 boards of two 400MHz UltraSparc processors, connected by
+a crossbar UPA switch, and running a SolarisTM 9 operating system. We
+chose the maximum branch of the DAG to be 13, and the maximum depth to
+be 10. We used 72-element arrays for the original ABP deques, and our
+algorithm allocated the deques with an initial size of 64-elements,
+plus a few 128-element arrays in the shared pool.
 
 Figure 9 presents the throughput of both algorithms, running
 stand-alone, as a function of the number of processes. As can be
@@ -627,7 +627,7 @@ thieves can still use the \lstinline!top! field to find the next task
 to steal.
 
 The \lstinline!UnboundedDEQueue! class has three fields: tasks,
-\lstinline!bottom!, and \lstinline!top! (Fig. 16.14, Lines 3–5). The
+\lstinline!bottom!, and \lstinline!top! (Fig. 16.14, Lines 3 -- 5). The
 \lstinline!popBottom()! (Fig. 16.14) and \lstinline!popTop()! methods
 (Fig. 16.15) are almost the same as those of the BoundedDEQueue, with
 one key difference: the use of modular arithmetic to compute indexes
@@ -697,7 +697,7 @@ performance may be critical to a concurrent multithreaded system.
 
 \todo{Finish section ``Dynamic Work-Stealing Deque''}
 
-\subsubsection{Dynamic circular work-stealing deque \cite{Chase2005}}
+\subsection{Dynamic circular work-stealing deque \cite{Chase2005}}
 
 The list-based work-stealing deque algorithm presented by Hendler, Lev
 and Shavit \cite{Hendler2006, Hendler2006a} uses a list of small
@@ -705,6 +705,390 @@ arrays to eliminate the overflow problem. However, it is relatively
 complicated, does not use cyclic arrays (and therefore wastes some
 memory), and introduces a trade-off between its time and space
 complexity due to the extra work required for the list's maintenance.
+
+\subsection{A dynamic-sized nonblocking work stealing deque
+  \cite{Hendler2006, Hendler2006a}}
+
+This paper presents the first dynamic memory work-stealing
+algorithm. It is based on a novel way of building non-blocking
+dynamic-sized work stealing deques by detecting synchronization
+conflicts based on ``pointer-crossing'' rather than ``gaps between
+indexes'' as in the original ABP algorithm. As we show, the new
+algorithm dramatically increases robustness and memory efficiency,
+while causing applications no observable performance penalty. We
+therefore believe it can replace array-based ABP work stealing deques,
+eliminating the need for application-specific overflow mechanisms.
+
+\subsubsection{Introduction}
+
+Scheduling multithreaded computations on multiprocessor machines is a
+well-studied problem. To execute multithreaded computations, the
+operating system runs a collection of kernel-level processes, one per
+processor, and each of these processes controls the execution of
+multiple computational threads created dynamically by the executed
+program. The scheduling problem is that of dynamically deciding which
+thread is to be run by which process at a given time, so as to
+maximize the utilization of the available computational resources
+(processors).
+
+Most of today's multiprocessor machines run programs in a
+multiprogrammed mode, where the number of processors used by a
+computation grows and shrinks over time. In such a mode, each program
+has its own set of processes, and the operating system chooses in each
+step which subset of these processes to run, according to the number
+of processors available for that program at the time. Therefore the
+scheduling algorithm must be dynamic (as opposed to static): at each
+step it must schedule threads onto processes, without knowing which of
+the processes are going to be run.
+
+When a program is executed on a multiprocessor machine, the threads
+of computation are dynamically generated by the different processes,
+implying that the scheduling algorithm must have processes load
+balance the computational work in a distributed fashion. The
+challenge in designing such distributed work scheduling algorithms
+is that performing a re-balancing, even between a pair of processes,
+requires the use of costly synchronization operations. Rebalancing
+operations must therefore be minimized.
+
+Distributed work scheduling algorithms can be classified according to
+one of two paradigms: work-sharing or work-stealing. In work-sharing
+(also known as load-distribution), the processes continuously
+re-distribute work so as to balance the amount of work assigned to
+each [2]. In work-stealing, on the other hand, each process tries to
+work on its newly created threads locally, and attempts to steal
+threads from other processes only when it has no local threads to
+execute. This way, the computational overhead of re-balancing is paid
+by the processes that would otherwise be idle.
+
+The ABP work-stealing algorithm of Arora, Blumofe, and Plaxton
+\cite{Arora2001} has been gaining popularity as the multiprocessor
+load-balancing technology of choice in both industry and academia
+\cite{Arora2001, Acar2002, Blumofe1995, Frigo1998, Danaher2005}. The
+scheme implements a provably efficient work-stealing paradigm due to
+Blumofe and Leiserson \cite{Blumofe1999} that allows each process to
+maintain a local work deque,\footnote{Actually, the work stealing
+  algorithm uses a work stealing deque, which is like a deque
+  \cite{Knuth1997} except that only one process can access one end of
+  the queue (the ``bottom''), and only Pop operations can be invoked
+  on the other end (the ``top''). For brevity, we refer to the data
+  structure as a deque in the remainder of the paper.} and steal an
+item from others if its deque becomes empty. It has been extended in
+various ways such as stealing multiple items \cite{Hendler2002} and
+stealing in a locality-guided way \cite{Acar2002}. At the core of the
+ABP algorithm is an efficient scheme for stealing an item in a
+non-blocking manner from an array-based deque, minimizing the need for
+costly Compare-and-Swap (CAS)\footnote{The CAS (location, old-value,
+  new-value) operation atomically reads a value from location, and
+  writes new-value in location if and only if the value read is
+  old-value. The operation returns a boolean indicating whether it
+  succeeded in updating the location.} synchronization operations when
+fetching items locally.
+
+Unfortunately, the use of fixed size arrays\footnote{One may use
+  cyclic array indexing but this does not help in preventing
+  overflows.} introduces an inefficient memory-size/robustness
+tradeoff: for n processes and total allocated memory size m, one can
+tolerate at most m/n items in a deque. Moreover, if overflow does
+occur, there is no simple way to malloc additional memory and
+continue. This has, for example, forced parallel garbage collectors
+using work-stealing to implement an application-specific blocking
+overflow management mechanism [5, 10]. In multiprogrammed systems, the
+main target of ABP work-stealing \cite{Arora2001}, even inefficient
+over-allocation based on an application's maximal execution-DAG depth
+\cite{Arora2001, Blumofe1999} may not always work. If a small subset
+of non-preempted processes end up queuing most of the work items,
+since the ABP algorithm sometimes starts pushing items from the middle
+of the array even when the deque is empty, this can lead to
+overflow.\footnote{The ABP algorithm's built-in ``reset on empty''
+  mechanism helps in some, but not all, of these cases.}
+
+This state of affairs leaves open the question of designing a
+dynamic memory algorithm to overcome the above drawbacks, but to do so
+while maintaining the low-cost synchronization overhead of the ABP
+algorithm. This is not a straightforward task, since the the
+array-based ABP algorithm is unique: it is possibly the only
+real-world algorithm that allows one to transition in a lock-free
+manner from the common case of using loads and stores to using a
+costly CAS only when a potential conflict requires processes to
+synchronize. This transition rests on the ability to detect these
+boundary synchronization cases based on the relative gap among array
+indexes. There is no straightforward way of translating this
+algorithmic trick to the pointer-based world of dynamic data
+structures.
+
+\minisec{The new algorithm}
+
+This paper introduces the first lock-free\footnote{Our abstract deque
+  definition is such that the original ABP algorithm is also
+  lock-free.} dynamic-sized version of the ABP work-stealing
+algorithm. It provides a near-optimal memory-size/robustness tradeoff:
+for n processes and total pre-allocated memory size m, it can
+potentially tolerate up to $O(m)$ items in a single deque. It also
+allows one to malloc additional memory beyond m when needed, and as
+our empirical data shows, it is far more robust than the array-based
+ABP algorithm in multiprogrammed environments.
+
+An ABP-style work stealing algorithm consists of a collection of deque
+data structures with each process performing pushes and pops on the
+``bottom'' end of its local deque and multiple thieves performing pops
+on the ``top'' end. The new algorithm implements each deque as a
+doubly linked list of nodes, each of which is a short array that is
+dynamically allocated from and freed to a shared pool; see Fig. 1. It
+can also use malloc to add nodes to the shared pool in case its node
+supply is exhausted.
+
+The main technical difficulties in the design of the new algorithm
+arise from the need to provide performance comparable to that of
+ABP. This means the doubly linked list must be manipulated using only
+loads and stores in the common case, resorting to using a costly CAS
+only when a potential conflict requires it; it is challenging to make
+this transition correctly while maintaining lock-freedom.
+
+The potential conflict that requires CAS-based synchronization occurs
+when a pop by a local process and a pop by a thief might both be
+trying to remove the same item from the deque. The original ABP
+algorithm detects this scenario by examining the gap between the
+\lstinline!Top! and \lstinline!Bottom! array indexes, and uses a CAS
+operation only when they are ``too close''. Moreover, in the original
+algorithm, the empty deque scenario is checked simply by checking
+whether \lstinline!Bottom $\le$ Top!.
+
+A key algorithmic feature of our new algorithm is the creation of an
+equivalent mechanism to allow detection of these boundary situations
+in our linked list structures using the relations between the
+\lstinline!Top! and \lstinline!Bottom! pointers, even though these
+point to entries that may reside in different nodes. On a high level,
+our idea is to prove that one can restrict the number of possible ways
+the pointers interact, and therefore, given one pointer, it is
+possible to calculate the different possible positions for the other
+pointer that imply such a boundary scenario.
+
+The other key feature of our algorithm is that the dynamic insertion
+and deletion operations of nodes into the doubly linked-list (when
+needed in a push or pop) are performed in such a way that the local
+thread uses only loads and stores. This contrasts with the more
+general linked-list deque implementations [11, 12] which require a
+double-compare-and-swap synchronization operation [13] to insert and
+delete nodes.
+
+\minisec{Performance analysis}
+
+We compared our new dynamic-memory work-stealing algorithm to the
+original ABP algorithm on a 16-node shared memory multiprocessor using
+the benchmarks of the style used by Blumofe and Papadopoulos
+\cite{Blumofe1998a}. We ran several standard Splash2 [15] applications
+using the Hood scheduler \cite{Papadopoulos1998} with the ABP and new
+work-stealing algorithms. Our results, presented in Sect. 3, show that
+the new algorithm performs as well as ABP, that is, the added
+dynamic-memory feature does not slow the applications down. Moreover,
+the new algorithm provides a better memory/robustness ratio: the same
+amount of memory provides far greater robustness in the new algorithm
+than the original array-based ABP work-stealing. For example, running
+Barnes-Hut using ABP work-stealing with an 8-fold level of
+multiprogramming causes a failure in 40\% of the executions if one
+uses the deque size that works for stand-alone (non-multiprogrammed)
+runs. It causes no failures when using the new dynamic memory
+work-stealing algorithm.
+
+\subsubsection{The algorithm}
+
+\minisec{Basic description}
+
+Figure 1b presents our new deque data-structure. The doubly-linked
+list's nodes are allocated from and freed to a shared pool, and the
+only case in which one may need to malloc additional storage is if the
+shared pool is exhausted. The deque supports the
+\lstinline!PushBottom! and \lstinline!PopBottom! operations for the
+local process, and the \lstinline!PopTop! operation for the thieves.
+
+The first technical difficulty we encountered is in detecting the
+conflict that may arise when the local \lstinline!PopBottom! and a
+thief's \lstinline!PopTop! operations concurrently try to remove the
+last item from the deque. Our solution is based on the observation
+that when the deque is empty, one can restrict the number of possible
+scenarios among the pointers. Given one pointer, we show that the
+``virtual'' distance of the other, ignoring which array it resides in,
+cannot be more than 1 if the deque is empty. We can thus easily test
+for each of these scenarios. (Several such scenarios are depicted in
+parts (a) and (b) of Fig. 2).
+
+The next problem one faces is the maintenance of the deque's
+doubly-linked list structure. We wish to avoid using CAS operations
+when updating the next and previous pointers, since this would cause a
+significant performance penalty. Our solution is to allow only the
+local process to update these fields, thus preventing
+\lstinline!PopTop! operations from doing so when moving from one node
+to another. We would like to keep the deque dynamic, which means
+freeing old nodes when they're not needed anymore. This restriction
+immediately implies that an active list node may point to an already
+freed node, or even to a node which was freed and reallocated again,
+essentially ruining the list structure. As we prove, the algorithm can
+overcome this problem by having a \lstinline!PopTop! operation that
+moves to a new node free only the node preceding the old node and not
+the old node itself. This allows us to maintain the invariant that the
+doubly-linked list structure between the \lstinline!Top! and
+\lstinline!Bottom! pointers is preserved. This is true even in
+scenarios such as that depicted in parts b and c of Fig. 2 where the
+pointers cross over.
+
+\minisec{The implementation}
+
+C++-like pseudocode for our deque algorithm is given in Figs. 3 --
+5. As depicted in Fig. 3, the deque object stores the
+\lstinline!Bottom! and \lstinline!Top! pointers information in the
+\lstinline!Bottom! and \lstinline!Top! data members. This information
+includes the pointer to a list's node and an offset into that node's
+array. For the \lstinline!Top! variable, it also includes a tag value
+to prevent the ABA problem \cite{Dechev2006}. The deque methods uses
+the \lstinline!EncodeBottom!, \lstinline!DecodeBottom!,
+\lstinline!EncodeTop! and \lstinline!DecodeTop! macros to
+encode/decode this information to/from a value that fits in a CAS-able
+size word.\footnote{If the architecture does not support a 64-bit CAS
+  operation, we may not have the space to save the whole node
+  pointer. In this case, we might use the offset of the node from some
+  base address given by the shared memory pool. For example, if the
+  nodes are allocated continuously, the address of the first node can
+  be such a base address.} Underlined procedures in the pseudocode
+represent code blocks which are presented in the detailed algorithm
+presentation used for the correctness proof in Sect. 4. We now
+describe each of the methods.
+
+\textbf{\lstinline!PushBottom!}
+
+The \lstinline!PushBottom! method begins by reading \lstinline!Bottom!
+and storing the pushed value in the cell it's pointing to (Lines
+1 -- 2). Then it calculates the next value of \lstinline!Bottom! linking
+a new node to the list if necessary (Lines 3 -- 14). Finally the method
+updates \lstinline!Bottom! to its new value (Line 15). As in the
+original ABP algorithm, this method is executed only by the owner
+process, and therefore regular writes suffice (both for the value and
+\lstinline!Bottom! updates). Note that the new node is linked to the
+list before \lstinline!Bottom! is updated, so the list structure is
+preserved for the nodes between \lstinline!Bottom! and
+\lstinline!Top!.
+
+\textbf{\lstinline!PopTop!}
+
+The \lstinline!PopTop! method begins by reading the \lstinline!Top!
+and \lstinline!Bottom! values, in that order (Lines 16 -- 18). Then it
+tests whether these values indicate an empty deque, and returns
+\lstinline!EMPTY! if they do\footnote{This test may also return
+  \lstinline!ABORT! if \lstinline!Top! was modified, since then it is
+  not guaranteed that the tested values represent a consistent view of
+  the memory.} (Line 19). Otherwise, it calculates the next position
+for \lstinline!Top! (Lines 20 -- 31). Before updating \lstinline!Top! to
+its new value, the method must read the value which should be returned
+if the steal succeeds (Line 32) (this read cannot be done after the
+update of \lstinline!Top! because by then the node may already be
+freed by some other concurrent \lstinline!PopTop! execution). Finally
+the method tries to update \lstinline!Top! to its new value using a
+CAS operation (Line 34), returning the popped value if it succeeds, or
+\lstinline!ABORT! if it fails. (In the work stealing algorithm, if a
+thief process encounters contention with another, it may be preferable
+to try stealing from a different deque; returning \lstinline!ABORT! in
+this case provides the opportunity for the system to decide between
+retrying on the same deque or doing something different.) If the CAS
+succeeds, the method also checks whether there is an old node that
+needs to be freed (Line 36). As explained earlier, a node is released
+only if \lstinline!Top! moved to a new node, and the node released is
+not the old top node, but the preceding one.
+
+\textbf{\lstinline!PopBottom!}
+
+The \lstinline!PopBottom! method begins by reading \lstinline!Bottom!
+and updating it to its new value (Lines 43 -- 55) after reading the value
+to be popped (Line 54). Then it reads the value of \lstinline!Top!
+(Line 56), to check for the special cases of popping the last entry of
+the deque, and popping from an empty deque. If the \lstinline!Top!
+value read points to the old \lstinline!Bottom! position (Lines 58 -- 
+63), then the method rewrites \lstinline!Bottom! to its old position,
+and returns \lstinline!EMPTY! (since the deque was empty even without
+this \lstinline!PopBottom! operation). Otherwise, if \lstinline!Top!
+is pointing to the new \lstinline!Bottom! position (Lines 64 -- 78), then
+the popped entry was the last in the deque, and as in the original ABP
+algorithm, the method updates the \lstinline!Top! tag value using a
+CAS, to prevent a concurrent \lstinline!PopTop! operation from
+popping out the same entry. Otherwise there was at least one entry in
+the deque after the \lstinline!Bottom! update (lines 79 -- 83), in which
+case the popped entry is returned. Note that, as in the original ABP
+algorithm, most executions of the method will be short, and will not
+involve any CAS-based synchronization operations.
+
+\textbf{Memory management}
+
+We implement the shared node pool using a variation of Scott's shared
+pool [18]. It maintains a local group of g nodes per process, from
+which the process may allocate nodes without the need to
+synchronize. When the nodes in this local group are exhausted, it
+allocates a new group of $g$ nodes from a shared LIFO pool using a CAS
+operation. When a process frees a node, it returns it to its local
+group, and if the size of the local group exceeds $2g$, it returns $g$
+nodes to the shared LIFO pool. In our benchmarks we used a group size
+of 1, which means that in case of a fluctuation between pushing and
+popping, the first node is always local and CAS is not necessary.
+
+\minisec{Enhancements}
+
+We briefly describe two enhancements to the above dynamic-memory deque
+algorithm.
+
+\textbf{Reset-on-Empty}
+
+In the original ABP algorithm, the \lstinline!PopBottom! operation
+uses a mechanism that resets \lstinline!Top! and \lstinline!Bottom! to
+point back to the beginning of the array every time it detects an
+empty deque (including the case of popping the last entry by
+\lstinline!PopBottom!). This reset operation is necessary in ABP since
+it is the only ``anti-overflow'' mechanism at its disposal.
+
+Our algorithm does not need this method to prevent overflows, since it
+works with the dynamic nodes. However, adding a version of this
+resetting feature gives the potential of improving our space
+complexity, especially when working with large nodes.
+
+There are two issues to be noted when implementing the reset-on-empty
+mechanism in our dynamic deque. The first issue is that while
+performing the reset operation, we create another type of empty deque
+scenario, in which \lstinline!Top! and \lstinline!Bottom! do not point
+to the same cells nor to neighboring ones (see part c of Fig. 2). This
+scenario requires a more complicated check for the empty deque
+scenario by the \lstinline!PopTop! method (Line 19). The second issue
+is that we must be careful when choosing the array node to which
+\lstinline!Top! and \lstinline!Bottom! point after the reset. In case
+the pointers point to the same node before the reset, we simply reset
+to the beginning of that node. Otherwise, we reset to the beginning of
+the node pointed to by \lstinline!Top!. Note, however, that
+\lstinline!Top! may point to the same node as \lstinline!Bottom! and
+then be updated by a concurrent \lstinline!PopTop! operation, which
+may result in changing on-the-fly the node to which we direct
+\lstinline!Top! and \lstinline!Bottom!.
+
+\textbf{Using a base array}
+
+In the implementation described, all the deque nodes are identical and
+allocated from the shared pool. This introduces a trade-off between
+the performance of the algorithm and its space complexity: small
+arrays save space but cost in allocation overhead, while large arrays
+cost space but reduce the allocation overhead.
+
+One possible improvement is to use a large array for the initial base
+node, allocated for each of the deques, and to use the pool only when
+overflow space is needed. This base node is used only by the
+process/deque it was originally allocated to, and is never freed to
+the shared pool. Whenever a Pop operation frees this node, it raises a
+boolean flag, indicating that the base node is now free. When a
+\lstinline!PushBottom! operation needs to allocate and link a new
+node, it first checks this flag, and if true, links the base node to
+the deque (instead of a regular node allocated from the shared pool).
+
+\subsubsection{Conclusions}
+
+We have shown how to create a dynamic memory version of the ABP work
+stealing algorithm. It may be interesting to see how our
+dynamic-memory technique is applied to other schemes that improve on
+ABP-work stealing such as the locality-guided work-stealing of
+Blelloch et. al. \cite{Acar2002} or the steal-half algorithm of
+Hendler and Shavit \cite{Hendler2002}.
 
 \lstinputlisting[style=Numbers,
   caption={Dynamic work-stealing deque}, 
@@ -727,16 +1111,695 @@ complexity due to the extra work required for the list's maintenance.
 
 \todo{Finish section ``Idempotent Work-Stealing Deque''}
 
-\todo{Boolean ``Already Run'' could be helpful when using a mailbox
-  style implementation for locality-aware scheduling \cite{Acar2002}}
+\subsection{The design of a task parallel library \cite{Leijen2009}}
 
-\todo{Finish section ``Duplicating Work-Stealing Deque''}
+Under the hood, tasks and replicable tasks are assigned by the runtime
+to special worker threads. TPL uses standard work-stealing for this
+work distribution \cite{Frigo1998} where tasks are held in a thread
+local task queue. When the task queue of a thread becomes empty, the
+thread will try to steal tasks from the task queue of another
+thread. The performance of work stealing algorithms is in a large part
+determined by the efficiency of their task queue implementations.
+
+We provide a novel implementation of these task queues, called
+duplicating queues. A surprising feature of the duplicating queue is
+that it behaves in a sequentially inconsistent way on weak memory
+models. However, the nondeterminism of the queue is carefully captured
+in a benign way by sometimes duplicating elements in the queue (but
+never losing or inventing elements, and still ensuring that tasks are
+only executed once). Of course, exploiting weak memory models is
+playing with fire. That's why we verified the correctness of the
+duplicating queue formally using the Checkfence tool
+\cite{Burckhardt2007, Burckhardt2007a}.
+
+A duplicating queue is a novel data structure for implementing
+non-blocking task queues that can work efficiently on architectures
+with weak memory models. These queues are sequentially inconsistent
+but capture the resulting non-determinism in a benign way by sometimes
+duplicating elements.
+
+\subsubsection{Work Distribution}
+
+As we have seen TPL is convenient to use, but it can only be
+successful if besides elegance, it is also performant. In this section
+we focus on important high-level design decisions and focus later on
+how these decisions inform the design of the work stealing
+implementation.
+
+\minisec{Design for efficiency}
+
+The most important contributor for efficiency is the decision to give
+no concurrency guarantees. Parallel tasks are only potentially run in
+parallel. The library specifies that a task is executed between its
+creation and the first call to Wait. This means that we can give a
+valid implementation that is fully sequential. Indeed, there is a
+special debug mode where all tasks are executed sequentially when Wait
+is called (and will therefore never have race
+conditions). Effectively, there are no fairness guarantees for
+parallel tasks. In contrast with OS threads, parallel tasks are only
+good for finite CPU-bound tasks, but not for asynchronous programming.
+
+\minisec{Work stealing}
+
+The TPL runtime reuses the ideas of the well known work stealing
+techniques as implemented for example in CILK \cite{Frigo1998,
+  Danaher2005} and the Java fork-join framework \cite{Lea2000,
+  Lea2000a, Lea2004, Lea2006}. We shortly discuss its principles and
+focus on why our implementation differs.
+
+The runtime system uses one worker group per processor. Each group
+contains one or more worker threads where only one of them is running
+and where all others are blocked. Whenever this running worker thread
+becomes blocked too (due to the previous case 2 for example) an extra
+running worker thread is added to that group such that the processor
+is always busy. A worker thread can also be retired and give control
+to another worker in its group when that worker can be unblocked
+(because the task on which it was waiting has completed for example).
+
+Each worker group keeps tasks in its own doubled-ended queue. The task
+queue provides the operations \lstinline!Push!, \lstinline!Pop! and
+\lstinline!Take!. When a task is created, the running worker thread
+pushes the task onto the local queue of its group. If it finishes its
+current task, it will try to pop a task from the group queue and
+continue with that. This way, a task is always pushed and popped
+locally, which benefits both the data locality of the task and reduces
+the amount of synchronization needed. If a worker thread finds there
+are no more tasks in its queue (and none of the other workers in its
+group can be unblocked), it becomes a thief : it chooses another task
+queue of another worker group at random and tries to steal a task or
+replicable task from the (non-local) end of the task queue using
+\lstinline!Take!. For many parallel conquer-and-divide algorithms,
+this ensures that the largest tasks are stolen first. For loops,
+which are typically implemented via replicable tasks, it means that
+tasks are only replicated on demand, i.e. when another thread starts
+idling. Unfortunately, at this point we have to do more
+synchronization for our queues, since we have multiple parties that
+can try to steal at the same time from the same queue, and we can have
+interaction between the worker thread associated with that queue and
+the stealing thread.
+
+The performance of work stealing is largely dependent on the
+performance of its task queue implementation. In particular, we need
+to ensure that each pushed task is only popped or taken once such that
+each task is only executed once. To achieve atomic take and pop
+operations, most implementations, like \cite{Arora2001}, rely on the
+THE protocol \cite{Dijkstra1965}, which allow the common
+\lstinline!Push! and \lstinline!Pop! operations to be implemented
+without using expensive atomic compare-and-swap
+operations. Unfortunately, this only works on machines with a
+sequentially consistent memory model, and in practice there are just
+few architectures that support this. On the x86 for example, one needs
+to insert a memory barrier in \lstinline!Pop! operation which is
+almost as expensive as taking a lock in the first place.
+
+Moreover, there is an even bigger disadvantage to queues based on the
+THE protocol which is more subtle. As shown in Section 4.1, whenever
+f2.Value is called where the future f2 has not yet started, we should
+execute it directly on the calling thread. But if we use the THE
+protocol, there is no mechanism to get f2 exclusively: we can only
+\lstinline!Pop! it from our queue if it happens to be the last task
+that was pushed, otherwise one cannot determine whether f2 is on the
+local queue, or resides in a queue of another worker group. Without
+gaining exclusive access in some other way, we cannot execute the task
+directly or otherwise we may execute a task more than once since it
+can concurrently be taken by another worker, or popped if it resided
+on a non-local task queue.
+
+Since this is exactly the common case that we need to optimize, we
+opted for another approach where each task uses internally an atomic
+compare-and-swap operation to ensure that it only executes once. We
+assign to each task an associated state, Init, Running, and Done. The
+internal Run method on a task performs an atomic compare-and-swap
+operation to try to switch from Init to Running. If the atomic
+operation succeeds, the associated action is executed and the state is
+set to Done afterwards:
+
+\begin{lstlisting}
+  void Task.Run(){
+    if(CompareAndSwap(ref state, Init, Running)){
+      Execute(); // execute the associated action
+      state = Done;
+    }
+  }
+\end{lstlisting}
+
+Effectively, this ensures that each task is only executed once, or
+stated differently: running a task is an idempotent
+operation. Unfortunately, if we would use task queues based on the THE
+protocol we now use two mechanisms for mutual exclusion, and execute
+both a memory barrier instruction on a \lstinline!Pop! operation, and
+an interlocked instruction when calling Run. Since these are expensive
+instructions that require synchronization among the processors, we
+would like to avoid these. As shown in the previous paragraphs, the
+interlocked instruction in the Run method is essential and since we
+now ensure exclusivity on the task level, it is possible to use a
+weaker data structure for the task queues. In particular, this leads
+to the development of the duplicating queue.
+
+Note that only tasks need this additional check; for replicating tasks
+there is no need to do the atomic compare-and-swap operation since
+they already implement their own mutual exclusion.
+
+\subsubsection{Duplicating Queues}
+
+A duplicating queue is a double-ended queue that potentially returns a
+pushed element more than once. In particular, the \lstinline!Push! and
+\lstinline!Pop! operations behave like normal, but the
+\lstinline!Take! operation is allowed to either take an element (and
+remove it from the queue), or to just duplicate an element in the
+queue. While this nondeterminism might be dangerous for many clients,
+it is fine for our usage of the duplicating queue: the Task's Run
+method is idempotent and ReplicableTask's expect to be executed in
+parallel. Other properties of a duplicating queues are as usual: a
+duplicating queue never loses an element, and returns all pushed
+elements after a finite number of \lstinline!Pop! (and
+\lstinline!Take!) operations.
+
+By allowing duplication we can avoid an expensive memory barrier
+instruction in the \lstinline!Pop! operation on the x86
+architecture. More generally, our duplicating queue is designed
+specifically to be correct on architectures satisfying the Total Store
+Order (TSO) memory model (Sindhu et al. 1991) or stronger model. To
+our knowledge, this is one of the first data structures that takes
+specific advantage of weaker memory models to avoid memory
+barriers. An interesting aspect is that the non-determinism that is
+introduced by the weaker memory model is captured in a benign way
+where the number of duplicated elements is non-deterministically
+determined.
+
+\todo{Mention duplicating queues as an alternative to idempotent
+ queues}
+
+\subsubsection{Performance}
+
+Measuring the performance of the duplicating queue in isolation is not
+very useful. The reason is that the main performance benefit does not
+come from the duplicating queue, but from being able to guarantee
+mutual exclusivity in the tasks themselves, such that a task can be
+executed directly when Wait is called and the task has not started
+yet. Since the task queues no longer need to guarantee mutual
+exclusivity, the duplicating queue is mostly an optimization to avoid
+using too many expensive interlocked instructions.
+
+Therefore, it is better to measure the benefit of being able to
+directly execute a task for which Wait is called (and which has not
+started yet). We created two versions of the library: one based on a
+duplicating queue with direct execution of tasks, and a traditional
+implementation based on the standard THE protocol. The standard
+fibonacci benchmark represents one of the worst-case examples since
+most waits are for tasks that were just pushed on the stack (and
+reside on the top of the stack). We ran this benchmark on a 4
+processor machine which used 196418 tasks ($\approx$ 500.000 tasks per
+second). The implementation based on the duplicating queue was 1.4
+times faster when using all processors. Here are some statistics,
+where DUP refers to the duplicating queue implementation, and THE to
+the implementation based on the THE protocol.
+
+As we can see, the performance of THE mostly suffered because there
+were many more switches between threads, and many more thread
+migrations. This happened precisely when Wait was called for a task
+that had not yet started. Since one cannot reliably determine whether
+this task was on the local queue, a fresh worker thread was needed to
+execute the task resulting in a thread switch. Of course, this
+automatically also lead to more migration of threads where ready
+worker threads were stolen by another worker group. Interestingly,
+the number of task steals are about the same as this is mostly
+determined by the particular algorithm and sizes of the tasks.
+
+Of course, for most fork-join parallelism (including the fibonacci
+benchmark), the task to be waited upon is often right on the top of
+the local task queue. When Wait is called on a task that has not
+started yet, we can optimize for this case in the THE implementation
+by simply popping the top of the stack if that happens to be our task
+and execute it directly. When applying this simple optimization, both
+implementations perform very similar for this benchmark. Of course,
+the DUP implementation outperforms again when the parallelism is less
+structured using futures for example, and in general at any time when
+Wait is called on a task that is not on the top of the stack.
+
+\subsubsection{Related Work}
+
+There is a wealth of research into parallel scheduling algorithms,
+data structures, and language designs, and we necessarily restrict
+this section to work that is directly relevant to work stealing and
+embedded library designs.
+
+The idea of duplicating queues has recently been described as
+``idempotent'' queues \cite{Michael2009}. We were not aware of this
+work at the time of writing this paper and arrived at our results
+independently (doing our first implementation in January 2008). Their
+general motivation and the semantics of the idempotent queue seem
+largely identical, but the implementation is quite different. Their
+elegant implementation packs fields together in a memory word and
+relies strictly on atomic compare-and-swap and memory ordering
+instructions. In contrast, our implementation uses a simple lock on
+all but the critical paths which can simplify many implementation
+aspects and also removes a level of indirection on the critical path.
+
+\subsubsection{Conclusions}
+
+We described the lessons learned in the design of a library for
+parallel programming. TPL is an example of the possibilities of an
+embedded domain specific language that relies heavily on parametric
+polymorphism and first-class anonymous functions, and we hope to apply
+this to other domains as well.
+
+To the best of our knowledge, the duplicating queue is one of the
+first data structures that explicitly takes the properties of weak
+memory models into account, and it is surprising we can capture the
+resulting non-determinism in a benign way without for example losing
+or inventing elements. It would be interesting to see if we can adapt
+the structure such that it can be applied for other parallel
+algorithms too.
+
+
+\subsection{Idempotent work stealing \cite{Michael2009}}
+
+Load balancing is a technique which allows efficient parallelization
+of irregular workloads, and a key component of many applications and
+parallelizing runtimes. Work-stealing is a popular technique for
+implementing load balancing, where each parallel thread maintains its
+own work set of items and occasionally steals items from the sets of
+other threads.
+
+The conventional semantics of work stealing guarantee that each
+inserted task is eventually extracted exactly once. However,
+correctness of a wide class of applications allows for relaxed
+semantics, because either:
+
+\begin{enumerate}
+\item the application already explicitly checks that no work is
+  repeated or
+\item the application can tolerate repeated work.
+\end{enumerate}
+
+In this paper, we introduce idempotent work stealing, and present
+several new algorithms that exploit the relaxed semantics to deliver
+better performance. The semantics of the new algorithms guarantee that
+each inserted task is eventually extracted at least once -- instead of
+exactly once.
+
+On mainstream processors, algorithms for conventional work stealing
+require special atomic instructions or store-load memory ordering
+fence instructions in the owner's critical path operations. In
+general, these instructions are substantially slower than regular
+memory access instructions. By exploiting the relaxed semantics, our
+algorithms avoid these instructions in the owner's operations. We
+evaluated our algorithms using common graph problems and
+micro-benchmarks and compared them to well-known conventional work
+stealing algorithms, the THE Cilk and Chase-Lev algorithms. We found
+that our best algorithm (with LIFO extraction) outperforms existing
+algorithms in nearly all cases, and often by significant margins.
+
+\subsubsection{Introduction}
+
+Statically parallelizing applications with irregular workloads is a
+very challenging task. The key problem in trying to come up with a
+scalable static algorithmic solution is that the amount of available
+parallelism can change dramatically from one invocation of the
+algorithm to another. One answer to this challenge is the well-known
+dynamic technique of load balancing. Load balancing works by
+dynamically distributing the work to each process. It is a key
+technique used in many runtimes for parallel languages such as Cilk
+\cite{Blumofe1995, Frigo1998} and X10 \cite{Charles2005,
+  Saraswat2010}. It is also a core component of parallel garbage
+collectors \cite{Flood2001}, now a part of most modern virtual
+machines. Increased proliferation of load balancing techniques and
+their central place in most parallelizing systems dictate the need for
+high-performing load balancing algorithms.
+
+Work-stealing is a technique that implements load balancing.
+Effectively, each thread maintains its own set of tasks. The owner
+thread stores and takes items from that set. Typically, when there are
+no more tasks in the set (the owner thread has nothing more to do), to
+keep busy, the thread can steal work items from other threads. Hence,
+in this scheme, only the owner thread can add tasks to its set, but
+all threads (including the owner) can take items from the owner's set.
+
+This working set of items (called a work stealing queue from now on)
+supports three main operations: \lstinline!put! and \lstinline!take!
+which are used only by the queue's owner to insert and extract tasks,
+and \lstinline!steal! which is used by other threads to steal work.
+Current algorithms for work stealing queues comply with the following
+semantics: each inserted task is eventually extracted -- by the owner
+thread or other threads -- exactly once. However, these semantics are
+too restrictive for a wide range of applications dealing with
+irregular computation patterns. Sample domains include: parallel
+garbage collection, fixed point computations in program analysis,
+constraint solvers (e.g. SAT solvers), state space search exploration
+in model checking as well as integer and mixed programming solvers.
+
+The key observation is that the correctness invariants of these
+applications allow for a relaxation of the traditional work stealing
+semantics. The fundamental reason is that in these problems:
+
+\begin{enumerate}
+\item the application already ensures that no work is repeated, for
+  example by checking whether a task is completed, or
+\item the application tolerates repeatable work.
+\end{enumerate}
+
+Informally, the relaxed semantics state that each inserted task should
+be eventually extracted at least once -- instead of exactly once as it
+is with the conventional semantics. We exploit this invariant
+relaxation and introduce idempotent work stealing. We present several
+new algorithms that exploit the relaxed semantics to deliver better
+performance. Note that even with these relaxed semantics, subtle
+issues need to be handled in order to ensure correct and efficient
+operation. For example, the algorithms must guarantee that no tasks
+are lost and all extracted tasks contain valid and consistent
+information while at the same time avoiding the use of expensive
+synchronization instructions in the owner's operations:
+\lstinline!put! and \lstinline!take!.
+
+On mainstream processors, existing algorithms for conventional work
+stealing queues require store-load memory ordering fence instructions
+in the critical path of the owner's operations \cite{Arora2001,
+  Chase2005, Frigo1998, Hendler2006, Hendler2002}. A store-load fence
+prevents loads from being executed before the completion of stores to
+independent locations where the stores appear earlier in program
+order. In general, special atomic instructions and store-load fence
+instructions are substantially slower than regular instructions. Our
+new algorithms are designed to optimize the owner's operations by
+avoiding the high overheads of these instruction in the owner's
+operations. That is, in our algorithms, unlike existing algorithms,
+owner operations avoid using special atomic instructions and expensive
+store-load fence instructions. We have evaluated ours and existing
+state-of-the-art algorithms with both microbenchmarks and
+representative non-trivial graph applications whose correctness
+invariants allow the usage of relaxed work stealing semantics. In
+particular, we performed experimental evaluation on several
+fundamental graph problems such as transitive closure and spanning
+tree computation for various graph types and sizes. The results
+indicate performance gains of up to 5x on microbenchmarks and up to 3x
+on graph applications. On graph applications, gains of 40\% are
+common.
+
+The contributions of this paper are the following:
+\begin{itemize}
+\item Introducing the concept of idempotent work stealing, a useful
+ relaxation of the conventional semantics, applicable to a wide-class
+  of applications.
+\item New high-performance work-stealing algorithms that adhere to
+  these new relaxed semantics while avoiding expensive synchronization
+  in the critical path of the owner's operations.
+\item Experimental evaluation of our new and existing state-of-the-
+  art algorithms. The results indicate that our algorithms often
+  significantly outperform existing state-of-the-art algorithms.
+\end{itemize}
+
+The rest of the paper is organized as follows. In Section 2, we
+discuss related work and atomic and fence instructions. Section 3
+describes the new algorithms in detail. Section 4 presents our
+experimental performance results. We conclude the paper with Section
+5.
+
+\subsubsection{Background}
+
+\minisec{Atomic and Fence Instructions}
+
+To build efficient and correct concurrent algorithms, implementations
+often rely on the use of special atomic and memory fence instructions.
+
+\textbf{Atomic Instructions:} Current mainstream processor
+architectures support either Compare-and-Swap (CAS) or the pair
+Load-Linked and Store-Conditional (LL/SC).
+
+CAS was introduced on the IBM System 370 \cite{IBM1974}. It is
+supported on Intel and Sun SPARC processor architectures. In its
+simplest form, it takes three arguments: a memory location, an
+expected value, and a new value. If the memory location holds the
+expected value, the new value is written to it, atomically. A Boolean
+return value indicates whether the write occurred. If it returns true,
+it is said to succeed. Otherwise, it is said to fail.
+
+LL and SC are supported on the PowerPC architecture. LL takes one
+argument: a memory location, and returns its contents. SC takes two
+arguments: a memory location and a new value. Only if the memory
+location has not been written since the current thread last read it
+using LL, the new value is written to the memory location,
+atomically. A Boolean return value indicates whether the write
+occurred. Similar to CAS, SC is said to succeed or fail, if it returns
+true or false, respectively. For architectural reasons,
+implementations of LL/SC, do not allow the nesting or interleaving of
+LL/SC pairs, and infrequently often allow SC to fail spuriously, even
+if the target location was never written since the last LL. These
+spurious failures happen, for example, if the thread was preempted or
+a different location in the same cache line was written. For
+generality, we present the algorithms in this paper using CAS. As
+discussed in Section 3, if LL/SC is supported rather than CAS, simpler
+implementations are possible.
+
+\textbf{Fence Instructions:} Mainstream processor architectures allow
+some independent memory accesses to be executed out of program order,
+for the sake of hiding memory access latency and hence improving
+performance in the general case where reordering memory accesses has
+no effect on correctness. These architectures provide fence
+instructions that allow programmers to enforce order among memory
+accesses -- that otherwise could be reordered -- if such an ordering
+is required for correctness. This situation typically occurs in the
+implementations of concurrent algorithms.
+
+While processor architectures vary in their relaxation of memory
+access ordering, all mainstream processors require fence instructions
+for preventing loads being executed before the completion of stores to
+independent locations where the stores appear earlier in program order
+(i.e., enforce store-load ordering). For architectural and historical
+reasons, fences that enforce store-load order are typically quite
+expensive and take tens of processor cycles.
+
+\minisec{Related Work}
+
+There have been several published algorithms for work-stealing, all
+adhering to the strong semantics. In a paper by Frigo
+et. al. \cite{Frigo1998}, the authors present the THE work stealing
+algorithm implemented in the Cilk language runtime
+\cite{Blumofe1995}. That algorithm is based on Dijkstra's mutual
+exclusion protocol and uses locks in the \lstinline!steal!  operation
+and in the corner case when the queue is empty it uses locks in
+\lstinline!take!. Another algorithm presented by Arora
+et. al. \cite{Arora2001} presents a non-blocking double-ended work
+queue but in the worst-case requires unbounded memory even if the
+number of waiting tasks at any one time is bounded. The Chase-Lev
+algorithm \cite{Chase2005} rectifies this situation while preserving
+the performance of the Arora et. al. algorithm.
+
+The correctness of all of these algorithms depends on enforcing the
+order of a write before a read in the critical path of the owner's
+\lstinline!take! operation. For example, in the Chase-Lev algorithm
+\cite{Chase2005} (Figure 3), the write in line 23 must be ordered
+before the read in line 24; in the Cilk THE algorithm \cite{Frigo1998}
+(Figure 4), the write in line 5 must be ordered before the read in
+line 6. Similarly, for the algorithms by Arora
+et. al. \cite{Arora2001}, Hendler and Shavit \cite{Hendler2002}, and
+Hendler et. al. \cite{Hendler2006}.
+
+\subsubsection{Algorithms}
+
+\minisec{Overview}
+
+In this section we describe in detail our algorithms for idempotent
+work stealing. The main motivation behind these algorithms is to
+exploit the relaxed semantics to deliver better performance. In
+particular, the relaxed semantics enable us to build algorithms which
+speed up the common path consisting of the owner's operations:
+\lstinline!put! and \lstinline!take!. We present three algorithms,
+each with a different choice for how the items are extracted. In all
+of our algorithms, the owner inserts new tasks at the tail of the
+queue. In the first algorithm (idempotent LIFO) tasks are always
+extracted from the tail, while in the second algorithm (idempotent
+FIFO) tasks are always extracted from the head. In the third algorithm
+(idempotent double-ended), the owner extracts from the tail while
+thieves extract from the head of the queue. We use the term queue
+loosely to mean a structure with items stored in the order in which
+they were inserted.
+
+The key challenge we faced in designing our algorithms is how to avoid
+the need for special atomic instructions (i.e. CAS or LL/SC) and
+store-load ordering in our \lstinline!put! and \lstinline!take!
+operations while guaranteeing the following:
+
+\begin{itemize}
+\item No lost tasks: That is, each inserted tasks will eventually be
+  extracted (one or more times).
+\item No garbage task information: That is, \lstinline!steal!
+  operations always return valid task information (i.e., that is safe
+  to execute). The task information, which may span multiple words and
+  hence may be read and written non-atomically, must be complete and
+  consistent and represent an actual task that was inserted into the
+  work queue.
+\end{itemize}
+
+\textbf{Ordering Requirements:} In all three of our algorithms, the
+\lstinline!take! operation does not require any special ordering among
+memory accesses beyond what is implied by data dependence. This is in
+contrast to existing work stealing algorithms \cite{Arora2001,
+  Chase2005, Frigo1998, Hendler2006, Hendler2002}, which all require a
+store-load fence in the critical path of the \lstinline!take!
+operation. Store-load ordering requires a fence instruction on all
+mainstream architectures (e.g., \lstinline!sync! on PowerPC and
+\lstinline!mfence! or \lstinline!lock! prefix instructions on Intel
+X86). The avoidance of these fence instructions in the common case is
+crucial to improving performance.
+
+In the \lstinline!put! operation of each of the three new algorithms,
+the writing of the task information into the queue structure must be
+completed before updating the tail index, in order to guarantee that
+interference with concurrent \lstinline!steal! operations does not
+lead to lost items (and hence a violation of the correctness
+criteria), or the extraction by a \lstinline!steal! operation of
+invalid task information that may lead to unpredictable errors or
+failures. On architectures such as Intel X86 and Sun Sparc (with total
+store order), no special fence instructions are needed. On PowerPC, a
+light-weight fence instruction (lwsync) is needed. Existing work
+stealing algorithms \cite{Arora2001, Chase2005, Frigo1998,
+  Hendler2006, Hendler2002} require the same store-store ordering in
+their \lstinline!put! operations for the same reasons why it is needed
+in ours. Hence, this is not a new overhead added in our algorithms.
+
+Ordering requirements for the \lstinline!steal! operations are
+indicated in each of the algorithm listings in Figures 1, 2, and 3.
+
+\textbf{ABA Problem and Prevention:} The ABA problem is common in
+non-blocking algorithms, mostly in relation to the use of CAS. It was
+first encountered in a free list implementation listed in the IBM
+System 370 documentation \cite{IBM1974}. Typically, the ABA problem
+occurs when a thread reads some value A from a shared variable, and
+then other threads write to the variable some value B, and then A
+again. Later, when the original thread checks if the variable holds
+the value A, e.g., using CAS, the comparison succeeds, while the
+intention of the algorithm designer is for such a comparison to fail
+in this case, and to succeed only if the variable has not been written
+after the initial read. However, the semantics of CAS prevent it from
+distinguishing the two cases. The classic solution for the ABA problem
+\cite{IBM1974} is to pack a tag with the shared variable and increment
+the tag when the associated variable is updated, so that other threads
+can detect that the variable has been updated. This solution assumes
+that the tag is large enough that it is unlikely to wrap around and
+reach the same value while a thread is executing the read-check
+scenario mentioned above. The packing of a tag with index variables in
+one atomic word limits the size of the index.
+
+Two of the algorithms (idempotent LIFO and idempotent double-ended)
+need to guard against the ABA problem in the \lstinline!steal!
+operation as discussed below in more detail.
+
+Our algorithms are presented using CAS and ABA prevention
+tags. However, the tag is a specific implementation choice. At the
+abstract level, the algorithms do not require the use of the tag
+mechanism but can use any ABA prevention mechanism. For example, the
+PowerPC architectures supports the LL/SC instructions, which are
+inherently immune to the ABA problem. In such a case, there is no need
+for the tag, because we can replace the read and the CAS of the index
+variable in the \lstinline!steal! operations by LL and SC,
+respectively. In the absence of hardware support for LL/SC, software
+mechanisms can be used to simulate them without using tags packed with
+values \cite{Moir1997}.
+
+\textbf{Expanding and shrinking:} We present in detail for each
+algorithm how to expand the queue size, where task arrays are replaced
+by new larger ones. The shown algorithm code assumes support for
+automatic garbage collection, where old arrays are freed
+automatically. Without garbage collection, buffer pools as described
+by Chase and Lev \cite{Chase2005} can be used. The old array can be
+remembered in the \lstinline!expand()! operation and then freed to the
+buffer pools right after the end of the \lstinline!put! operation. As
+for the actual tasks, they are not dynamic objects. They are written
+and read directly to and from elements of the task array.
+
+\minisec{Algorithm with Double-Ended Extraction}
+
+In the idempotent double-ended algorithm (Figure 3), the queue is
+represented by an array of tasks, and an anchor variable that is
+packed with three subfields indicating the index of the head of the
+queue, the size of the queue, and an ABA-prevention tag. The task
+array is encapsulated in a structure that contains both the array and
+its size.
+
+\textbf{\lstinline!Put!:} The owner starts the \lstinline!put!
+operation by reading the anchor variable in line 1. In line 2, the
+owner checks if there is enough space to \lstinline!put! the new task
+by checking if the size subfield is less than the size of the tasks
+array. If not, it expands the array and restarts. Otherwise, it
+proceeds to line 3 and writes the task information into the task array
+at the tail of the queue (i.e., h+s modulo the size of the array). The
+writing of the task information which can span multiple words need not
+be atomic.
+
+Finally, in line 4, the owner writes to the anchor variable the three
+packed values as read in line 1 with the size and tag subfields each
+incremented by one, indicating the addition of a task and to prevent
+the ABA problem in concurrent \lstinline!steal! operations as
+discussed below.
+
+\textbf{\lstinline!Take!:} The owner starts the \lstinline!take!
+operation by reading the anchor variable in line 1, then checking in
+line 2 if the queue is empty (i.e., if s = 0). If so, the operation
+returns an indicator of an empty queue. Otherwise, it proceeds to
+line 3 and reads the task information at the tail of the queue, i.e.,
+from the array element with index h+s−1 modulo the array size.
+
+In line 4, the owner writes to the anchor variable the three packed
+subfield values read in line 1 with the size subfield decremented by
+one to indicate the extraction of a task.
+
+\textbf{\lstinline!Steal!:} A thread starts the \lstinline!steal!
+operation by reading the anchor variable in line 1. In line 2, the
+thread checks if the queue is empty (i.e., if s = 0). If so, the
+operation returns an indicator of an empty queue. Otherwise, it
+proceeds to step 3 and reads a pointer to the tasks array. The read in
+line 3 must be ordered after the read in line 1. Otherwise, a thief
+may dereference a stale pointer to the tasks array after it has been
+replaced by the owner in order to expand the queue, which may lead to
+a lost task scenario.
+
+In line 4, the thread reads the array element with index h. Reading
+the task information which can span multiple words need not be atomic,
+as the reading is synchronized by being ordered in between the read in
+line 1 and the CAS in line 5.
+
+Finally, the CAS in line 6 checks that values of three subfield of
+anchor are the same as when read in line 1. The checking of the tag
+subfield (or ABA prevention in general) guarantees that since the read
+in line 1 the owner has not overwritten the array element with index h
+modulo the array size. That is, the task information read in line 4
+was indeed consistent and that no task was lost. The CAS in line 6, if
+successful, updates the anchor variable with the values read in line 1
+except with the head subfield incremented (modulo some size bound) to
+indicate the stealing of a task.
+
+\textbf{\lstinline!Expand!:} Array expansion for this algorithm is
+similar to the array expansion for the idempotent FIFO algorithm.
+
+\subsubsection{Conclusion}
+
+In this paper we introduced the concept of idempotent work stealing, a
+useful relaxation of the conventional work stealing semantics. The
+relaxation of the semantics, where tasks are extracted at least once
+instead of exactly once, is applicable to a wide class of irregular
+applications relying on work stealing. We presented new concurrent
+algorithms that exploit the relaxed semantics to deliver lower
+overheads than existing algorithms that support the conventional work
+stealing semantics. Our algorithms do not require the use of special
+atomic instructions or costly store-load fence instructions in the
+common case, that is, the owner \lstinline!put! and \lstinline!take!
+operations on the work stealing structure. The benefits are
+demonstrated by our experimental evaluation in comparison to existing
+state-of-the-art work stealing algorithms using graph applications and
+microbenchmarks. The performance gains of our algorithms are evident
+even on graphs with millions of vertices. In particular, our
+idempotent LIFO algorithm outperforms the existing algorithms in
+nearly all cases, sometimes by a factor of 3 and gains of 40\% are
+common.
 
 \lstinputlisting[style=Numbers,
   caption={Interval}, 
   label=lst:interval]{
     ../listings/queues-implementation/Interval.java
 }
+
+\todo{Boolean ``Already Run'' could be helpful when using a mailbox
+  style implementation for locality-aware scheduling \cite{Acar2002}}
 
 \lstinputlisting[style=Numbers,
   caption={Duplicating work-stealing deque}, 
@@ -750,6 +1813,93 @@ complexity due to the extra work required for the list's maintenance.
     ../listings/queues-implementation/IdempotentWorkStealingDeque.java
 }
 
+
+\subsection{Lock-free dynamically resizable arrays \cite{Dechev2006}}
+
+\subsubsection{Background}
+
+As defined by Herlihy \cite{Herlihy1993}, a concurrent object is
+lock-free if it guarantees that some process in the system will make
+progress in a finite number of steps. An object that guarantees that
+each process will make progress in a finite number of steps is defined
+as wait-free. Lock-free and wait-free algorithms do not apply mutual
+exclusion locks. Instead they rely on a set of atomic primitives such
+as the word-size CAS instruction or Load-Linked (LL) / Store
+Conditional (SC) operations. Common CAS implementations require three
+arguments: a memory location, $Mem$, an old value, $V_{old}$, and a
+new value, $V_{new}$. The instruction's purpose is to atomically
+exchange the value stored in $Mem$ with $V_{new}$, provided that its
+current value corresponds to $V_{old}$. The architecture ensures the
+atomicity of the operation by applying a fine-grained hardware lock
+such as a cache or a bus lock (e.g.: IA-32). The use of a hardware
+lock does not violate the non-blocking property as defined by
+Herlihy. Common locking synchronization methods such as semaphores,
+mutexes, monitors, and critical sections utilize the same atomic
+primitives to manipulate a control token. Such an application of the
+atomic instructions introduces interdependencies of the contending
+processes. In the most common scenario, lock-free systems utilize CAS
+in order to implement a speculative manipulation of a shared
+object. Each contending process speculates by applying a set of writes
+on a local copy of the shared data and attempts to CAS the shared
+object with the updated copy. Such an approach guarantees that from
+within a set of contending processes, there is at least one that
+succeeds within a finite number of steps. Therefore, the system is
+non-blocking and the performed operations could be implemented in a
+linearizable fashion at the expense of some extra work performed by
+the contending processes.
+
+\subsubsection{ABA Problem}
+
+The ABA problem is fundamental to all CAS-based systems. In our
+current implementation we have not incorporated a remedy to prevent
+it. The ABA problem occurs when a thread $T_1$ reads a value $A$ from
+a shared object and then an interrupting thread $T_2$ modifies the
+value of the shared object from $A$ to $B$ and then back to $A$. When
+$T_1$ resumes, it erroneously assumes that the object has not been
+modified. Given such behavior, there is a serious risk that $T_2$'s
+execution is going to violate the correctness of the object's
+semantics. Practical solutions to the ABA problem include the use of
+hazard pointers \cite{Michael2004} or the association of a version
+counter to each element in the platforms supporting a double-word
+compare-and-swap primitive (CAS2) such as IA-64 \cite{Intel2010}.
+
+The semantics of the lock-free vector's operations can be corrupted by
+the occurrence of the ABA problem. Consider the following execution:
+assume a thread $T_0$ attempts to perform a push back and stores in
+the vector's ``Descriptor'' object a write-descriptor announcing that
+the value of the object at position $i$ should be changed from $A$ to
+$B$. Then a thread $T_1$ interrupts and reads the
+write-descriptor. Later, after $T_0$ resumes and successfully
+completes the operation, a third thread $T_2$ can modify the value at
+position $i$ from $B$ back to $A$. When, $T_1$ resumes its CAS is
+going to succeed and erroneously execute the update from A to B. There
+are two particular instances when the ABA problem can affect the
+correctness of the vector's operations:
+
+\begin{enumerate}
+\item the user intends to store a memory address value $A$ in multiple
+  locations.
+\item the memory allocator reuses the address of an already freed
+  object.
+\end{enumerate}
+
+The use of tags or version counters eliminates the dangers in both
+cases. However, this solution is applicable only on a limited set of
+architectures supporting a CAS2 instruction. The application of
+Michael's hazard pointers prevents the reuse of memory addresses that
+are likely to cause the ABA problem. Thus, hazard pointers solve the
+problem stated in Scenario 2. There are a number of possibilities in
+order to eliminate the vector's vulnerability to the ABA problem in
+the former scenario. One option is to require the vector to copy the
+objects and store pointers to them. Such behavior complies with the
+STL value-semantics, however it can incur higher overhead in some
+cases due to the additional heap allocation and object
+construction. In a lock-free system, both the object construction and
+heap allocation can execute concurrently with other operations. In a
+scenario where the vector is under high contention, the additional
+overhead would not cause a significant delay of the operation's
+performance. In our future work we intend to evaluate the impact on
+performance of such ABA prevention techniques.
 
 %%% Local Variables: 
 %%% mode: latex
