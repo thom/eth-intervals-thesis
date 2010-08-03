@@ -8,6 +8,5 @@ public class WorkStealingLazyDeque
 		new AtomicReferenceArray<WorkItem>(1024);
 	int ownerHead = 0, ownerTail = 0;
 	private final ThiefData thief = new ThiefData();
-
 	// ...
 }

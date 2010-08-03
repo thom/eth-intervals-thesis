@@ -5,9 +5,14 @@
 \chapter{Background}
 \label{chap:queues-background}
 
-\todo{Change chapter title to ``Background''?}
+\section{Work-Stealing Queues}
+\label{sec:queues-background-work-stealing-queues}
 
-\section{References}
+\lstinputlisting[style=Float,
+  caption={Work-stealing queue interface}, 
+  label=lst:work-stealing-queue-interface]{
+    ../listings/queues-background/WorkStealingQueue.java
+}
 
 \subsection{The art of multiprocessor programming \cite{Herlihy2008}}
 
@@ -141,8 +146,6 @@ structures.
 
 \subsection{A Java fork/join framework \cite{Lea2000}}
 
-\subsubsection{Deques}
-
 To enable efficient and scalable execution, task management must be
 made as fast as possible. Creating, putting, and later taking (or,
 much less frequently, stealing) tasks are analogs of procedure call
@@ -220,93 +223,49 @@ in which case it must first obtain the deque lock to resize the
 array. Otherwise, simply ensuring that top is updated only after the
 deque array slot is filled in suppresses interference by any steal.
 
-\subsubsection{Stealing and Idling}
-
-Worker threads in work-stealing frameworks know nothing about the
-synchronization demands of the programs they are running. They simply
-generate, put, take, steal, manage the status of, and execute
-tasks. The simplicity of this scheme leads to efficient execution when
-there is plenty of work for all threads. However, this streamlining
-comes at the price of relying on heuristics when there is not enough
-work; i.e., during startup of a main task, upon its completion, and
-around global full-stop synchronization points employed in some
-fork/join algorithms.
-
-The main issue here is what to do when a worker thread has no local
-tasks and cannot steal one from any other thread. If the program is
-running on a dedicated multiprocessor, then one could make the case
-for relying on hard busy-wait spins looping to try to steal
-work. However, even here, attempted steals increase contention, which
-can slow down even those threads that are not idle due to locking
-protocols.  Additionally, in more typical usage contexts of this
-framework, the operating system should somehow be convinced to try to
-run other unrelated runnable processes or threads.
-
-The tools for achieving this in Java are weak, have no guarantees
-\cite{Goetz2006}, but usually appear to be acceptable in practice (as
-do similar techniques described for Hood \cite{Blumofe1998}). A thread
-that fails to obtain work from any other thread lowers its priority
-before attempting additional steals, performs \lstinline!Thread.yield!
-between attempts, and registers itself as inactive in its thread
-pool. If all others become inactive, they all block waiting for
-additional main tasks. Otherwise, after a given number of additional
-spins, threads enter a sleeping phase, where they sleep (for up to
-100ms) rather than yield between steal attempts. These imposed sleeps
-can cause artificial lags in programs that take a long time to split
-their tasks. But this appears to be the best general-purpose
-compromise. Future versions of the framework may supply additional
-control methods so that programmers can override defaults when they
-impact performance.
-
-\section{Work-Stealing Queues}
-\label{sec:queues-background-work-stealing-queues}
-
-\lstinputlisting[style=Float,
-  caption={Work-stealing queue interface}, 
-  label=lst:work-stealing-queue-interface]{
-    ../listings/queues-background/WorkStealingQueue.java
-}
-
-\todo{Finish section ``Interface''}
 
 \section{Current Queue Implementation}
 \label{sec:queues-background-current-implementation}
 
-This is the deque currently used by the intervals scheduler. It is
-called ``Lazy'' because the owner of the deque only lazily updates the
-location of the head of deque, i.e., only when it tries to take
-something and finds it gone.
+The queue currently used by the intervals scheduler is the lazy
+work-stealing deque. It is called ``lazy'' because the owner of the
+deque only lazily updates the location of the deque's head. This means
+it only updates the head when it tries to take something and finds it
+is gone.
 
 \todo{Finish section ``LazyDeque''}
 
-The members of the queue are defined as (see paper about duplicating
-queues):
+The members of the queue are defined as:
 
-\lstinputlisting[style=Numbers,
-  caption={Lazy deque}, 
-  label=lst:work-stealing-lazy-deque]{
+\lstinputlisting[label=lst:work-stealing-lazy-deque]{
     ../listings/queues-background/WorkStealingLazyDeque.java
 }
 
-\lstinputlisting[style=Numbers,
+The \lstinline!tasks! array contains the work items of the queue. The
+\lstinline!ownerHead! and \lstinline!ownerTail! are indices in the
+array and represent the head and tail of the queue for the
+owner. \lstinline!thief! is both the lock object used when a thief
+tries to steal a work item and also represents the head for the thief.
+
+\lstinputlisting[style=FloatNumbers,
   caption={Lazy deque: Put}, 
   label=lst:work-stealing-lazy-deque-put]{
     ../listings/queues-background/WorkStealingLazyDeque-put.java
 }
 
-\lstinputlisting[style=Numbers,
+\lstinputlisting[style=FloatNumbers,
   caption={Lazy deque: Take}, 
   label=lst:work-stealing-lazy-deque-take]{
     ../listings/queues-background/WorkStealingLazyDeque-take.java
 }
 
-\lstinputlisting[style=Numbers,
+\lstinputlisting[style=FloatNumbers,
   caption={Lazy deque: Steal}, 
   label=lst:work-stealing-lazy-deque-steal]{
     ../listings/queues-background/WorkStealingLazyDeque-steal.java
 }
 
-\lstinputlisting[style=Numbers,
+\lstinputlisting[style=FloatNumbers,
   caption={Lazy deque: Expand}, 
   label=lst:work-stealing-lazy-deque-expand]{
     ../listings/queues-background/WorkStealingLazyDeque-expand.java
