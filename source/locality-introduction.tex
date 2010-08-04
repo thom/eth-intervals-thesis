@@ -11,8 +11,10 @@
 \section{Problem and Motivation}
 \label{sec:locality-intro-problem-and-motivation}
 
-\minisec{Brief announcement: parallel depth first vs. work stealing
-  schedulers on CMP architectures \cite{Liaskovitis2006}}
+\subsection{References}
+
+\subsubsection{Brief announcement: parallel depth first vs. work
+  stealing schedulers on CMP architectures \cite{Liaskovitis2006}}
 
 In the work-stealing scheduler the interval implementation is using,
 each processing core maintains a local work double-ended queue (deque)
@@ -23,8 +25,8 @@ when there is plenty of parallelism, stealing is quite rare. However,
 work-stealing is not designed for constructive cache sharing, because
 the cores tend to have disjoint working sets.
 
-\minisec{Scheduling threads for constructive cache sharing on CMPs
-  \cite{Chen2007}}
+\subsubsection{Scheduling threads for constructive cache sharing on
+  CMPs \cite{Chen2007}}
 
 Work Stealing (WS) is a popular greedy thread scheduling
 algorithm\footnote{In a greedy schedule, a ready job remains
@@ -47,7 +49,8 @@ by any one processor. However, WS is not designed for constructive
 cache sharing, because the processors tend to have disjoint working
 sets.
 
-\minisec{Work stealing: an annotated bibliography \cite{Neill2001}}
+\subsubsection{Work stealing: an annotated bibliography
+  \cite{Neill2001}}
 
 Affinity scheduling: \cite{Squillante1993}, \cite{Squillante2001},
 \cite{Acar2002}
@@ -87,7 +90,7 @@ that have affinity for it, and attempts to steal these first. They
 also bound the number of cache misses for the work stealing algorithm,
 using a ``potential function'' argument.
 
-\minisec{Trivendi}
+\subsubsection{Trivendi}
 
 Non-uniformity: Apart from the much discussed non uniform memory
 access (NUMA) architectures, multiple level of cache sharing is also
@@ -97,7 +100,7 @@ Additionally the actual cost of accessing memory depends depends upon
 interconnect topologies like Hypertransport and Quickpath, and factors
 such as hop count and routing play an important role.
 
-\todo{Finish section ``Problem and Motivation''}
+\todo[inline]{Finish section ``Problem and Motivation''}
 
 \section{Aim}
 \label{sec:locality-intro-aim}
