@@ -51,7 +51,7 @@ only by the queue's owner.
 \section{Current Queue Implementation}
 \label{sec:queues-background-current-implementation}
 
-\todo{Finish section ``LazyDeque''}
+\todo[inline]{Finish section ``Current Queue Implementation''}
 
 The queue currently used by the intervals scheduler is the lazy
 work-stealing deque. It is called ``lazy'' because the owner of the
@@ -85,7 +85,7 @@ tries to steal a work item and also represents the head for the thief.
   process loses a race with another process to steal the topmost
   element. \lstinline!null! is also returned if a \lstinline!steal!
   operation lost a race with an array memory reclamation caused by a
-  concurrent \lstinline!take! operation.}
+  concurrent \lstinline!take! operation.
 \end{itemize}
 
 \lstinputlisting[style=FloatNumbers,

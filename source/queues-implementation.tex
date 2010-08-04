@@ -8,14 +8,14 @@
 \section{Work-Stealing Deque}
 \label{sec:queues-implementation-ws-deque}
 
+\todo[inline]{Finish section ``Work-Stealing Deque''}
+
 \begin{itemize}
 \item Dynamic circular work-stealing deque \cite{Chase2005}
 \item Nonblocking Cyclic Extendable Deque for the ABP work stealing
   algorithm \cite{Lev2005}
 \item The art of multiprocessor programming \cite{Herlihy2008}
 \end{itemize}
-
-\todo{Finish section ``Work-Stealing Deque''}
 
 \subsection{Dynamic circular work-stealing deque \cite{Chase2005}}
 
@@ -586,7 +586,6 @@ ABP-work stealing such as the locality-guided work-stealing of Acar,
 Blelloch and Blumofe \cite{Acar2002} or the steal-half algorithm of
 Hendler and Shavit \cite{Hendler2002}.
 
-
 \subsection{The art of multiprocessor programming \cite{Herlihy2008}}
 
 A limitation of the \lstinline!BoundedDEQueue! class is that the queue
@@ -688,14 +687,14 @@ performance may be critical to a concurrent multithreaded system.
 \section{Dynamic Work-Stealing Deque}
 \label{sec:queues-implementation-dynamic-ws-deque}
 
+\todo[inline]{Finish section ``Dynamic Work-Stealing Deque''}
+
 \begin{itemize}
 \item A dynamic-sized nonblocking work stealing deque
   \cite{Hendler2006}
 \item A dynamic-sized nonblocking work stealing deque
   \cite{Hendler2006a}
 \end{itemize}
-
-\todo{Finish section ``Dynamic Work-Stealing Deque''}
 
 \subsection{Dynamic circular work-stealing deque \cite{Chase2005}}
 
@@ -1100,6 +1099,10 @@ Hendler and Shavit \cite{Hendler2002}.
 \section{Idempotent Work-Stealing Deque}
 \label{sec:queues-implementation-idempotent-ws-deque}
 
+\todo[inline]{Finish section ``Idempotent Work-Stealing Deque''}
+
+\minisec{References}
+
 \begin{itemize}
 \item Idempotent work stealing \cite{Michael2009}
 \item The design of a task parallel library \cite{Leijen2009}
@@ -1109,7 +1112,16 @@ Hendler and Shavit \cite{Hendler2002}.
   relaxed memory models \cite{Burckhardt2007a}
 \end{itemize}
 
-\todo{Finish section ``Idempotent Work-Stealing Deque''}
+\minisec{Things to mention}
+
+\begin{itemize}
+\item Idempotent FIFO queues: Idempotent queue
+\item Idempotent LIFO queues: Idempotent stack
+\item Duplicating queues as an alternative to idempotent queues
+\item State of interval task (init, running, done) could be helpful
+  when using a mailbox style implementation for locality-aware
+  scheduling \cite{Acar2002}
+\end{itemize}
 
 \subsection{The design of a task parallel library \cite{Leijen2009}}
 
@@ -1286,9 +1298,6 @@ barriers. An interesting aspect is that the non-determinism that is
 introduced by the weaker memory model is captured in a benign way
 where the number of duplicated elements is non-deterministically
 determined.
-
-\todo{Mention duplicating queues as an alternative to idempotent
- queues}
 
 \subsubsection{Performance}
 
@@ -1798,9 +1807,6 @@ common.
     ../listings/queues-implementation/Interval.java
 }
 
-\todo{Boolean ``Already Run'' could be helpful when using a mailbox
-  style implementation for locality-aware scheduling \cite{Acar2002}}
-
 \lstinputlisting[style=Numbers,
   caption={Duplicating work-stealing deque}, 
   label=lst:work-stealing-deque]{
@@ -1900,6 +1906,7 @@ scenario where the vector is under high contention, the additional
 overhead would not cause a significant delay of the operation's
 performance. In our future work we intend to evaluate the impact on
 performance of such ABA prevention techniques.
+
 
 %%% Local Variables: 
 %%% mode: latex

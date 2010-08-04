@@ -5,7 +5,7 @@
 \chapter{Conclusions}
 \label{chap:queues-conclusions}
 
-\todo{Finish chapter ``Conclusions''}
+\todo[inline]{Finish chapter ``Conclusions''}
 
 We could not find a huge difference when running the benchmarks using
 the alternative queue implementations. The paper ``Enabling
@@ -17,7 +17,10 @@ not more than 8 cores.
 To check this hypothesis, we rewrote the intervals scheduler to use a
 single shared work deque and use it in a LIFO (stack) manner.
 
-\minisec{Limits of work-stealing scheduling \cite{Vrba2009}}
+\todo[inline]{Mention the experiment with a single shared work queue}
+
+\section{References}
+\subsection{Limits of work-stealing scheduling \cite{Vrba2009}}
 
 The original work-stealing algorithm uses non-blocking algorithms to
 implement queue operations \cite{Arora2001}. However, we have decided
@@ -45,13 +48,11 @@ of a message unblocks a proces, placing it at the front of the ready
 queue increases probability that the required data will remain in the
 CPU’s caches.
 
-\todo{Mention the experiment with a single shared work deque (stack)}
-
 
 \section{Related Work}
 \label{sec:queues-conclusion-related-work}
 
-\todo{Finish section ``Related Work''}
+\todo[inline]{Finish section ``Related Work''}
 
 Coroutines \cite{Conway1963} and continuations \cite{Reynolds1993} are
 two building blocks for manipulating control-flow in a sequential
@@ -184,11 +185,11 @@ synchronized programs, because they cannot occur.
 \section{Limitations and Future Work}
 \label{sec:queues-conclusion-future-work}
 
-\todo{Finish section ``Limitations and Future Work''. Things to
-  mention: steal-half, let it run on more than 8 cores}
+\todo[inline]{Finish section ``Limitations and Future Work''}
 
 \begin{itemize}
 \item Non-blocking steal-half work queues \cite{Hendler2002}
+\item Let benchmarks run on more than 8 cores
 \end{itemize}
 
 
