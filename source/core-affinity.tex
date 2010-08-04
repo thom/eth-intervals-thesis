@@ -45,14 +45,14 @@ affinity of threads would be desirable \cite{Love2003, Dow2005,
 
 For binding the workers to a specific core, we wrote a small JNI
 library (see Listing \ref{lst:core-affinity} for the API). The method
-\lstinline!set(int physicalUnit)!  (line
+\lstinline!set(int physicalUnit)!  (Line
 \ref{lst:core-affinity-set-unit}) is used to bind the current thread
 to a physical unit. With \lstinline!set(int[] physicalUnits)! the
 current thread can be bound to several physical units, for example to
-a node in a NUMA system (line \ref{lst:core-affinity-set-node}). For
+a node in a NUMA system (Line \ref{lst:core-affinity-set-node}). For
 debugging purposes we also implemented the method \lstinline!get()!
 which returns a boolean array whose elements are true if the current
-thread has an affinity set to the corresponding physical unit (line
+thread has an affinity set to the corresponding physical unit (Line
 \ref{lst:core-affinity-get}).
 
 \lstinputlisting[style=FloatNumbers,
@@ -66,10 +66,10 @@ declarations which are implemented in Listing
 \ref{lst:core-affinity-jni-set} and
 \ref{lst:core-affinity-jni-get}. Line
 \ref{lst:core-affinity-jni-h-set-unit} declares
-\lstinline!set(int physicalUnit)!. On line
+\lstinline!set(int physicalUnit)!. On Line
 \ref{lst:core-affinity-jni-h-set-node} we declared the method
 \lstinline!set(int[] physicalUnits)! and \lstinline!get()! is declared
-on line \ref{lst:core-affinity-jni-h-get}.
+on Line \ref{lst:core-affinity-jni-h-get}.
 
 \lstinputlisting[style=SkipNumbersC, 
   caption={\lstinline{Affinity} class: JNI C header}, 
@@ -89,33 +89,33 @@ on line \ref{lst:core-affinity-jni-h-get}.
 
 The implementation for setting the affinity is shown in Listing
 \ref{lst:core-affinity-jni-set}. When setting the affinity, we first
-initialize the CPU set structure (lines
+initialize the CPU set structure (Lines
 \ref{lst:core-affinity-jni-set-unit-init-cpuset} and
 \ref{lst:core-affinity-jni-set-node-init-cpuset}) and then we set it
-to the specified physical units (lines
+to the specified physical units (Lines
 \ref{lst:core-affinity-jni-set-unit-set-cpuset} and
 \ref{lst:core-affinity-jni-set-unit-set-cpuset}). Actual setting of
 the affinity is done in function
-\lstinline!set_affinity(JNIEnv *env, const cpu_set_t *cpuset)! on lines
+\lstinline!set_affinity(JNIEnv *env, const cpu_set_t *cpuset)! on Lines
 \ref{lst:core-affinity-jni-set-impl-start} --
 \ref{lst:core-affinity-jni-set-impl-end}.
 
 To get the thread ID, we use the \lstinline!pthread_self()! function
 (line \ref{lst:core-affinity-jni-set-impl-pthread-self}). The function
-\lstinline!pthread_setaffinity_np()! (line
+\lstinline!pthread_setaffinity_np()! (Line
 \ref{lst:core-affinity-jni-set-impl-set}) sets the CPU affinity mask
 of the thread to the CPU set pointed to by \lstinline!cpuset!.  If the
 call is successful, and the thread is not currently running on one of
 the CPUs in \lstinline!cpuset!, then it is migrated to one of those
 CPUs. If there is an error, \lstinline!pthread_setaffinity_np()!
-returs a nonzero error number and we throw an exception (line
+returs a nonzero error number and we throw an exception (Line
 \ref{lst:core-affinity-jni-set-impl-set-error}).
 
 Listing \ref{lst:core-affinity-jni-get} shows the implementation for
 getting the affinity of a thread. This method is mainly used for
-debugging purposes. We use \lstinline!pthread_self()! (line
+debugging purposes. We use \lstinline!pthread_self()! (Line
 \ref{lst:core-affinity-jni-get-impl-pthread-self}) to get the thread
-ID and then call function \lstinline!pthread_getaffinity_np()!  (line
+ID and then call function \lstinline!pthread_getaffinity_np()!  (Line
 \ref{lst:core-affinity-jni-get-impl-get}). The
 \lstinline!pthread_getaffinity_np()! function returns the CPU affinity
 mask of the thread thread in the buffer pointed to by
