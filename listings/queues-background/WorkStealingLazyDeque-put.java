@@ -4,8 +4,7 @@ public void put(WorkItem workItem) {
 		final int length = workItems.length();
 		final int tail = ownerTail;
 
-		if (tail - ownerHead >= length || //*\label{lst:work-stealing-lazy-deque-put-expand-1}
-				tail == Integer.MAX_VALUE) { //*\label{lst:work-stealing-lazy-deque-put-expand-2}
+		if (tail - ownerHead >= length) { //*\label{lst:work-stealing-lazy-deque-put-expand}
 			expand();
 			continue;
 		}
