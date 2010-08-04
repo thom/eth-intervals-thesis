@@ -5,25 +5,25 @@ public WorkItem take() {
 	if (ownerHead == ownerTail)
 		return null;
 
-	// Pop the last item from the deque.
+	// Pop the last work item from the deque.
 	final int lastTail = ownerTail - 1;
-	final int lastIndex = lastTail % tasks.length;
+	final int lastIndex = lastTail % workItems.length;
 
-	// Read the item popped.
-	// Note: if we get back null, the item must have been 
-	// stolen, since otherwise we never store null into 
-	// the array, and we know this location was initialized.
-	WorkItem item = tasks.get(lastIndex);
-	if (!tasks.compareAndSet(lastIndex, item, null))
-		item = null;
+	// Read the work item popped.
+	// Note: if we get back null, the work item must have been 
+	// stolen, since otherwise we never store null into the 
+	// array, and we know this location was initialized.
+	WorkItem workItem = workItems.get(lastIndex);
+	if (!workItems.compareAndSet(lastIndex, workItem, null))
+		workItem = null;
 
-	// Only updates the location of the head of the deque 
-	// when it tries to take something and finds it gone
-	if (item == null) {
-		// The item we put here was stolen!
-		// If this item was stolen, then all previous entries 
-		// must have been stolen too. Update our notion of the 
-		// head of the deque.
+	// Only updates the location of the head of the deque when 
+	// it tries to take something and finds it gone
+	if (workItem == null) {
+		// The work item we put here was stolen!
+		// If this work item was stolen, then all previous 
+		// entries must have been stolen too. Update our 
+		// notion of the head of the deque.
 		ownerHead = ownerTail;
 
 		// Deque is now empty.
@@ -31,5 +31,5 @@ public WorkItem take() {
 	}
 
 	ownerTail = lastTail;
-	return item;
+	return workItem;
 }

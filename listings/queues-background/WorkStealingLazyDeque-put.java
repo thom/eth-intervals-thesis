@@ -1,8 +1,8 @@
-public void put(WorkItem task) {
-	assert task != null;
+public void put(WorkItem workItem) {
+	assert workItem != null;
 
 	while (true) {
-		final int length = tasks.length();
+		final int length = workItems.length();
 		final int tail = ownerTail;
 
 		// Would be full or would roll-over
@@ -12,7 +12,7 @@ public void put(WorkItem task) {
 			continue;
 		}
 
-		tasks.set(tail % length, task);
+		workItems.set(tail % length, workItem);
 		ownerTail = tail + 1;
 		return;
 	}

@@ -4,7 +4,7 @@ private void expand() {
 		assert ownerHead <= thief.head && 
 			thief.head <= ownerTail;
 		ownerHead = thief.head;
-		final int length = tasks.length();
+		final int length = workItems.length();
 		final int thold = length >> 4;
 		final int size = (ownerTail - ownerHead);
 
@@ -20,17 +20,18 @@ private void expand() {
 }
 
 private void replaceTaskArray(int size) {
-	AtomicReferenceArray<WorkItem> newTasks = 
+	AtomicReferenceArray<WorkItem> newWorkItems = 
 		new AtomicReferenceArray<WorkItem>(size);
-	final int length = tasks.length();
+	final int length = workItems.length();
 	int newTail = 0;
 
 	for (int i = ownerHead; i < ownerTail; i++) {
-		newTasks.set(newTail % size, tasks.get(i % length));
+		newWorkItems.set(newTail % size, 
+			workItems.get(i % length));
 		newTail++;
 	}
 
 	ownerTail = newTail;
 	ownerHead = thief.head = 0;
-	tasks = newTasks;
+	workItems = newWorkItems;
 }

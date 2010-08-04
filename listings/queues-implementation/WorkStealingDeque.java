@@ -2,52 +2,55 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class WorkStealingDeque 
 		implements WorkStealingQueue {
-	private volatile WorkItem[] tasks = new WorkItem[1024];
+	private volatile WorkItem[] workItems = 
+		new WorkItem[1024];
 	private volatile int bottom = 0;
 	private AtomicInteger top = new AtomicInteger(0);
 
-	public void put(WorkItem task) {
+	public void put(WorkItem workItem) {
 		int oldBottom = bottom;
 		int oldTop = top.get();
-		WorkItem[] currentTasks = tasks;
+		WorkItem[] currentWorkItems = workItems;
 		int size = oldBottom - oldTop;
-		if (size >= currentTasks.length - 1) {
-			currentTasks = expand(
-				currentTasks, oldBottom, oldTop
+		if (size >= currentWorkItems.length - 1) {
+			currentWorkItems = expand(
+				currentWorkItems, oldBottom, oldTop
 			);
-			tasks = currentTasks;
+			workItems = currentWorkItems;
 		}
-		currentTasks[oldBottom % currentTasks.length] = task;
+		currentWorkItems[oldBottom % currentWorkItems.length] = 
+			workItem;
 		bottom = oldBottom + 1;
 	}
 
 	public WorkItem steal(Worker thiefWorker) {
 		int oldTop, oldBottom;
-		WorkItem task;
+		WorkItem workItem;
 		
 		while (true) {
 			// important that top read before bottom
 			oldTop = top.get();
 			oldBottom = bottom;
-			WorkItem[] currentTasks = tasks;
+			WorkItem[] currentWorkItems = workItems;
 			int size = oldBottom - oldTop;
 			
 			if (size <= 0)
 				return null; // empty
 			
-			task = currentTasks[oldTop % currentTasks.length];
+			workItem = currentWorkItems[oldTop % 
+				currentWorkItems.length];
 			
 			 // fetch and increment
 			if (top.compareAndSet(oldTop, oldTop + 1))
 				break;
 		}
 		
-		return task;
+		return workItem;
 	}
 
 	public WorkItem take() {
 		int oldBottom = this.bottom;
-		WorkItem[] currentTasks = tasks;
+		WorkItem[] currentWorkItems = workItems;
 		oldBottom = oldBottom - 1;
 		this.bottom = oldBottom;
 		int oldTop = top.get();
@@ -58,33 +61,33 @@ public class WorkStealingDeque
 			return null;
 		}
 
-		WorkItem task = currentTasks[
-			bottom % currentTasks.length
+		WorkItem workItem = currentWorkItems[
+			bottom % currentWorkItems.length
 		];
 
 		if (size > 0) {
-			return task;
+			return workItem;
 		}
 
 		// fetch and increment
 		if (!top.compareAndSet(oldTop, oldTop + 1))
-			task = null; // queue is empty
+			workItem = null; // queue is empty
 
 		bottom = oldTop + 1;
-		return task;
+		return workItem;
 	}
 
-	private WorkItem[] expand(WorkItem[] currentTasks, 
+	private WorkItem[] expand(WorkItem[] currentWorkItems, 
 			int bottom, int top) {
-		WorkItem[] newTasks = new WorkItem[
-			currentTasks.length * 2
+		WorkItem[] newWorkItems = new WorkItem[
+			currentWorkItems.length * 2
 		];
 
 		for (int i = top; i < bottom; i++) {
-			newTasks[i % newTasks.length] = currentTasks[i
-					% currentTasks.length];
+			newWorkItems[i % newWorkItems.length] = 
+				currentWorkItems[i % currentWorkItems.length];
 		}
 
-		return newTasks;
+		return newWorkItems;
 	}
 }

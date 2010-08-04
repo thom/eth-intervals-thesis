@@ -18,7 +18,9 @@ intervals from which it obtains work. When a worker finds that its
 pool is empty, it becomes a thief and steals an interval from the pool
 of a victim worker chosen at random.
 
-In the non-blocking\footnote{Non-blocking -- in contrast to wait-free
+To enable efficient and scalable execution, management of the work
+queues must be made as fast as possible. In the
+non-blocking\footnote{Non-blocking -- in contrast to wait-free
   \cite{Herlihy1991} -- means that it is possible for a worker to
   starve while trying to steal from other workers. Live-locks cannot
   occur as if one worker starves, then others must be making

@@ -4,7 +4,7 @@ public class DynamicWorkStealingDeque
 		implements WorkStealingQueue {
 	class Node {
 		static final int SIZE = 1024;
-		WorkItem[] tasks = new WorkItem[SIZE];
+		WorkItem[] workItems = new WorkItem[SIZE];
 		Node next, prev;
 	}
 
@@ -32,13 +32,13 @@ public class DynamicWorkStealingDeque
 				new Index(node1, Node.SIZE - 1), 0);
 	}
 
-	public void put(WorkItem task) {
+	public void put(WorkItem workItem) {
 		// Read bottom data
 		Node currentNode = bottom.node;
 		int currentIndex = bottom.index;
 
 		// Write data in current bottom cell
-		currentNode.tasks[currentIndex] = task;
+		currentNode.workItems[currentIndex] = workItem;
 
 		Node newNode;
 		int newIndex;
@@ -59,7 +59,7 @@ public class DynamicWorkStealingDeque
 	}
 
 	public WorkItem steal() {
-		WorkItem task;
+		WorkItem workItem;
 
 		while (true) {
 			// Read top
@@ -104,7 +104,7 @@ public class DynamicWorkStealingDeque
 			}
 
 			// Read value
-			task = currentTopNode.tasks[currentTopIndex];
+			workItem = currentTopNode.workItems[currentTopIndex];
 
 			// New top
 			Index newTop = new Index(newTopNode, newTopIndex);
@@ -116,7 +116,7 @@ public class DynamicWorkStealingDeque
 			}
 		}
 
-		return task;
+		return workItem;
 	}
 
 	public WorkItem take() {
@@ -139,7 +139,8 @@ public class DynamicWorkStealingDeque
 		}
 
 		// Read data to be taken
-		WorkItem task = newBottomNode.tasks[newBottomIndex];
+		WorkItem workItem = 
+			newBottomNode.workItems[newBottomIndex];
 
 		// Update bottom
 		bottom.node = newBottomNode;
@@ -170,7 +171,7 @@ public class DynamicWorkStealingDeque
 				currentTopIndex);
 			if (top.compareAndSet(currentTop, newTop, 
 					currentTopTag, currentTopTag + 1)) {
-				return task;
+				return workItem;
 			}
 			// If CAS failed (i.e. a concurrent steal operation 
 			// already took the last entry)
@@ -181,10 +182,10 @@ public class DynamicWorkStealingDeque
 				return null;
 			}
 		}
-		// Case 3: Regular case (i.e. there was at least one entry in the deque
-		// after bottom's update)
+		// Case 3: Regular case (i.e. there was at least one 
+		// entry in the deque after bottom's update)
 		else {
-			return task;
+			return workItem;
 		}
 	}
 

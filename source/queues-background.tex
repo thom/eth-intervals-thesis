@@ -8,182 +8,50 @@
 \section{Work-Stealing Queues}
 \label{sec:queues-background-work-stealing-queues}
 
+A work-stealing scheduler employs a fixed number of threads called
+workers. Each worker has a local queue to maintain its own pool of
+ready tasks from which it obtains work. When a worker finds that its
+pool is empty, it becomes a thief and steals a task from the pool of a
+victim worker chosen at random.
+
+There are different implementations for work-stealing queues. While
+some use LIFO or FIFO extraction \cite{Michael2009}, most
+work-stealing schedulers use work-stealing deques to manage ready
+tasks \cite{Arora2001, Acar2002, Blumofe1995, Frigo1998,
+  Danaher2005}. A work-stealing deque is like a deque \cite{Knuth1997}
+except that only the deque's owner thread puts and takes local work to
+and from the deque's bottom end. To minimize synchronization overhead
+for the deque's owner, elements are stolen from the top end of the
+deque.
+
+All work-stealing queues provide the following three methods in their
+interface:
+
+\begin{itemize}
+\item \lstinline!put(WorkItem workItem)!: Puts \lstinline!workItem!
+  into the queue.
+\item \lstinline!WorkItem take()!: Takes an object from the queue if
+  the queue is not empty, otherwise returns \lstinline!null!.
+\item \lstinline!WorkItem steal()!: If the queue is empty, returns
+  \lstinline!null!. Otherwise, returns the element successfully stolen
+  from the queue, or returns \lstinline!null! if this worker loses a
+  race with another worker to steal or take a work item.
+\end{itemize}
+
 \lstinputlisting[style=Float,
   caption={Work-stealing queue interface}, 
   label=lst:work-stealing-queue-interface]{
     ../listings/queues-background/WorkStealingQueue.java
 }
 
-\subsection{The art of multiprocessor programming \cite{Herlihy2008}}
-
-Ideally, a work-stealing algorithm should provide a linearizable
-implementation whose take and steal methods always return a task if
-one is available. In practice, however, we can settle for something
-weaker, allowing a \lstinline!steal()! call to return \lstinline!null!
-if it conflicts with a concurrent \lstinline!steal()! call. Though we
-could have the unsuccessful thief simply try again, it makes more
-sense in this context to have a thread retry the \lstinline!steal()!
-operation on a different, randomly chosen deque each time. To support
-such a retry, a \lstinline!steal()! call may return \lstinline!null!
-if it conflicts with a concurrent \lstinline!steal()! call.
-
-\todo{Rephrase paragraph}
-
-\subsection{Dynamic circular work-stealing deque \cite{Chase2005}}
-
-The ABP work-stealing algorithm of Arora, Blumofe, and Plaxton
-\cite{Arora2001} has been gaining popularity as the multiprocessor
-load-balancing technology of choice in both industry and academia
-\cite{Arora2001, Acar2002, Blumofe1995, Frigo1998, Danaher2005}. The
-scheme implements a provably efficient work-stealing paradigm due to
-Blumofe and Leiserson \cite{Blumofe1999} that allows each process to
-maintain a local work deque\footnote{Actually, the work-stealing
-  algorithm uses a work-stealing deque, which is like a deque
-  \cite{Knuth1997} except that only one process can access one end of
-  the queue (the ``bottom''), and only pop operations can be invoked
-  on the other end (the ``top'').  For brevity, we refer to the data
-  structure as a deque in the remainder of the paper.} and steal an
-item from others if its deque becomes empty. The deque's owner process
-puts and takes local work to and from the deque's bottom end. To
-minimize synchronization overhead for the deque's owner, elements are
-stolen from the top end of the deque. No elements are added to the top
-end of the deque. An ABP deque thus presents three methods in its
-interface:
-
-\begin{itemize}
-\item \lstinline!put(Object o)!: Puts \lstinline!o! onto the bottom
-  of the deque.
-\item \lstinline!Object take()!: Takes an object from the bottom of the
-  deque if the deque is not empty, otherwise returns
-  \lstinline!Empty!.
-\item \lstinline!Object steal()!: If the deque is empty, returns
-  \lstinline!Empty!. Otherwise, returns the element successfully
-  stolen from the top of the deque, or returns \lstinline!Abort! if
-  this process loses a race with another process to steal the topmost
-  element.\footnote{In our implementation, as we describe, Abort is
-    also returned if a steal operation lost a race with an array
-    memory reclamation caused by a concurrent \lstinline!take!
-    operation.}
-\end{itemize}
-
-Note that \lstinline!put! and \lstinline!take! operations
-are invoked only by the deque's owner.
-
-\subsection{A dynamic-sized nonblocking work stealing deque
-  \cite{Hendler2006, Hendler2006a}}
-
-In work-stealing scheduling, each process tries to work on its newly
-created threads locally, and attempts to steal threads from other
-processes only when it has no local threads to execute. This way, the
-computational overhead of re-balancing is paid by the processes that
-would otherwise be idle.
-
-The ABP work-stealing algorithm of Arora, Blumofe, and Plaxton
-\cite{Arora2001} has been gaining popularity as the multiprocessor
-load-balancing technology of choice in both industry and academia
-\cite{Arora2001, Acar2002, Blumofe1995, Frigo1998, Danaher2005}. The
-scheme implements a provably efficient work-stealing paradigm due to
-Blumofe and Leiserson \cite{Blumofe1999} that allows each process to
-maintain a local work deque,\footnote{Actually, the work stealing
-  algorithm uses a work stealing deque, which is like a deque
-  \cite{Knuth1997} except that only one process can access one end of
-  the queue (the ``bottom''), and only pop operations can be invoked
-  on the other end (the ``top''). For brevity, we refer to the data
-  structure as a deque in the remainder of the paper.} and steal an
-item from others if its deque becomes empty. It has been extended in
-various ways such as stealing multiple items \cite{Hendler2002} and
-stealing in a locality-guided way \cite{Acar2002}. At the core of the
-ABP algorithm is an efficient scheme for stealing an item in a
-non-blocking manner from an array-based deque, minimizing the need for
-costly Compare-and-Swap (CAS)\footnote{The CAS (location, old-value,
-  new-value) operation atomically reads a value from location, and
-  writes new-value in location if and only if the value read is
-  old-value. The operation returns a boolean indicating whether it
-  succeeded in updating the location.} synchronization operations when
-fetching items locally.
-
-\subsection{A Java fork/join framework \cite{Lea2000}}
-
-To enable efficient and scalable execution, task management must be
-made as fast as possible. Creating, putting, and later taking (or,
-much less frequently, stealing) tasks are analogs of procedure call
-overhead in sequential programs. Lower overhead enables programmers to
-adopt smaller task granularities, and in turn better exploit
-parallelism.
-
-Task allocation itself is the responsibility of the JVM. Java garbage
-collection relieves us of needing to create a special-purpose memory
-allocator to maintain tasks. This substantially reduces the complexity
-and lines of code needed to implement intervals compared to similar
-frameworks in other languages. The basic structure of the deque
-employs the common scheme of using a single (although resizable) array
-per deque, along with two indices: The top index acts just like an
-array-based stack pointer, changing upon put and take. The bottom
-index is modified only by steal.
-
-Because the deque array is accessed by multiple threads, sometimes
-without full synchronization, yet individual Java array elements
-cannot be declared as volatile, each array element is actually a fixed
-reference to a little forwarding object maintaining a single volatile
-reference. This decision was made originally to ensure conformance
-with Java memory rules, but the level of indirection that it entails
-turns out to improve performance on tested platforms, presumably by
-reducing cache contention due to accesses of nearby elements, which
-are spread out a bit more in memory due to the indirection.
-
-The main challenges in deque implementation surround synchronization
-and its avoidance. Even on JVMs with optimized synchronization
-facilities, the need to obtain locks for every put and take operation
-becomes a bottleneck.  However, adaptations of tactics taken in Cilk
-\cite{Frigo1998} provide a solution based on the following
-observations:
-
-\begin{itemize}
-\item The put and take operations are only invoked by owner threads.
-\item Access to the steal operation can easily be confined to one
-  stealing thread at a time via an entry lock on steal. This deque
-  lock can also serve to disable steal operations when
-  necessary. Thus, interference control is reduced to a two-party
-  synchronization problem.
-\item The take and steal operations can only interfere if the deque is
-  about to become empty. Otherwise they are guaranteed to operate on
-  disjoint elements of the array.
-\end{itemize}
-
-Defining the top and bottom indices as volatile ensures that a take
-and steal can proceed without locking if the deque is sure to have
-more than one element. This is done via a Dekker-like algorithm in
-which put pre-decrements top:
-
-\begin{lstlisting}
-if (--top >= bottom) ...
-\end{lstlisting}
-
-and steal pre-increments bottom:
-
-\begin{lstlisting}
-if (++bottom < top) ...
-\end{lstlisting}
-
-In each case they must then check to see if this could have caused the
-deque to become empty by comparing the two indices. An asymmetric rule
-is used upon potential conflict: take rechecks state and tries to
-continue after obtaining the deque lock (the same one as held by
-steal), backing off only if the deque is truly empty. A steal
-operation instead just backs off immediately, typically then trying to
-steal from a different victim. This asymmetry represents the only
-significant departure from the otherwise similar THE protocol used in
-Cilk.
-
-The use of volatile indices also enables the put operation to proceed
-without synchronization unless the deque array is about to overflow,
-in which case it must first obtain the deque lock to resize the
-array. Otherwise, simply ensuring that top is updated only after the
-deque array slot is filled in suppresses interference by any steal.
+Note that the \lstinline!put! and \lstinline!take! methods are invoked
+only by the queue's owner.
 
 
 \section{Current Queue Implementation}
 \label{sec:queues-background-current-implementation}
+
+\todo{Finish section ``LazyDeque''}
 
 The queue currently used by the intervals scheduler is the lazy
 work-stealing deque. It is called ``lazy'' because the owner of the
@@ -191,19 +59,34 @@ deque only lazily updates the location of the deque's head. This means
 it only updates the head when it tries to take something and finds it
 is gone.
 
-\todo{Finish section ``LazyDeque''}
+The members of the lazy deque are defined as:
 
-The members of the queue are defined as:
-
-\lstinputlisting[label=lst:work-stealing-lazy-deque]{
+\lstinputlisting[
+  caption={Lazy deque}, 
+  label=lst:work-stealing-lazy-deque]{
     ../listings/queues-background/WorkStealingLazyDeque.java
 }
 
-The \lstinline!tasks! array contains the work items of the queue. The
-\lstinline!ownerHead! and \lstinline!ownerTail! are indices in the
-array and represent the head and tail of the queue for the
+The \lstinline!workItems! array contains the work items of the
+queue. The \lstinline!ownerHead! and \lstinline!ownerTail! are indices
+in the array and represent the head and tail of the queue for the
 owner. \lstinline!thief! is both the lock object used when a thief
 tries to steal a work item and also represents the head for the thief.
+
+\begin{itemize}
+\item \lstinline!put(WorkItem item)!: Puts \lstinline!item! onto the
+  bottom of the deque.
+\item \lstinline!WorkItem take()!: Takes an object from the bottom of
+  the deque if the deque is not empty, otherwise returns
+  \lstinline!null!.
+\item \lstinline!WorkItem steal()!: If the deque is empty, returns
+  \lstinline!null!. Otherwise, returns the element successfully stolen
+  from the top of the deque, or returns \lstinline!null! if this
+  process loses a race with another process to steal the topmost
+  element. \lstinline!null! is also returned if a \lstinline!steal!
+  operation lost a race with an array memory reclamation caused by a
+  concurrent \lstinline!take! operation.}
+\end{itemize}
 
 \lstinputlisting[style=FloatNumbers,
   caption={Lazy deque: Put}, 
@@ -228,6 +111,87 @@ tries to steal a work item and also represents the head for the thief.
   label=lst:work-stealing-lazy-deque-expand]{
     ../listings/queues-background/WorkStealingLazyDeque-expand.java
 }
+
+% At the core of the ABP algorithm is an efficient scheme for stealing
+% an item in a non-blocking manner from an array-based deque, minimizing
+% the need for costly Compare-and-Swap (CAS)\footnote{The CAS (location,
+%   old-value, new-value) operation atomically reads a value from
+%   location, and writes new-value in location if and only if the value
+%   read is old-value. The operation returns a boolean indicating
+%   whether it succeeded in updating the location.} synchronization
+% operations when fetching items locally.
+
+% \subsection{A Java fork/join framework \cite{Lea2000}}
+
+% Task allocation itself is the responsibility of the JVM. Java garbage
+% collection relieves us of needing to create a special-purpose memory
+% allocator to maintain tasks. This substantially reduces the complexity
+% and lines of code needed to implement intervals compared to similar
+% frameworks in other languages. The basic structure of the deque
+% employs the common scheme of using a single (although resizable) array
+% per deque, along with two indices: The top index acts just like an
+% array-based stack pointer, changing upon put and take. The bottom
+% index is modified only by steal.
+
+% Because the deque array is accessed by multiple threads, sometimes
+% without full synchronization, yet individual Java array elements
+% cannot be declared as volatile, each array element is actually a fixed
+% reference to a little forwarding object maintaining a single volatile
+% reference. This decision was made originally to ensure conformance
+% with Java memory rules, but the level of indirection that it entails
+% turns out to improve performance on tested platforms, presumably by
+% reducing cache contention due to accesses of nearby elements, which
+% are spread out a bit more in memory due to the indirection.
+
+% The main challenges in deque implementation surround synchronization
+% and its avoidance. Even on JVMs with optimized synchronization
+% facilities, the need to obtain locks for every put and take operation
+% becomes a bottleneck.  However, adaptations of tactics taken in Cilk
+% \cite{Frigo1998} provide a solution based on the following
+% observations:
+
+% \begin{itemize}
+% \item The put and take operations are only invoked by owner threads.
+% \item Access to the steal operation can easily be confined to one
+%   stealing thread at a time via an entry lock on steal. This deque
+%   lock can also serve to disable steal operations when
+%   necessary. Thus, interference control is reduced to a two-party
+%   synchronization problem.
+% \item The take and steal operations can only interfere if the deque is
+%   about to become empty. Otherwise they are guaranteed to operate on
+%   disjoint elements of the array.
+% \end{itemize}
+
+% Defining the top and bottom indices as volatile ensures that a take
+% and steal can proceed without locking if the deque is sure to have
+% more than one element. This is done via a Dekker-like algorithm in
+% which put pre-decrements top:
+
+% \begin{lstlisting}
+% if (--top >= bottom) ...
+% \end{lstlisting}
+
+% and steal pre-increments bottom:
+
+% \begin{lstlisting}
+% if (++bottom < top) ...
+% \end{lstlisting}
+
+% In each case they must then check to see if this could have caused the
+% deque to become empty by comparing the two indices. An asymmetric rule
+% is used upon potential conflict: take rechecks state and tries to
+% continue after obtaining the deque lock (the same one as held by
+% steal), backing off only if the deque is truly empty. A steal
+% operation instead just backs off immediately, typically then trying to
+% steal from a different victim. This asymmetry represents the only
+% significant departure from the otherwise similar THE protocol used in
+% Cilk.
+
+% The use of volatile indices also enables the put operation to proceed
+% without synchronization unless the deque array is about to overflow,
+% in which case it must first obtain the deque lock to resize the
+% array. Otherwise, simply ensuring that top is updated only after the
+% deque array slot is filled in suppresses interference by any steal.
 
 % \begin{center}
 %   \begin{tikzpicture}

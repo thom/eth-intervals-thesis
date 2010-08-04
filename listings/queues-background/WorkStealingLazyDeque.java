@@ -4,7 +4,7 @@ public class WorkStealingLazyDeque
 		int head = 0;
 	}
 
-	private AtomicReferenceArray<WorkItem> tasks = 
+	private AtomicReferenceArray<WorkItem> workItems = 
 		new AtomicReferenceArray<WorkItem>(1024);
 	int ownerHead = 0, ownerTail = 0;
 	private final ThiefData thief = new ThiefData();

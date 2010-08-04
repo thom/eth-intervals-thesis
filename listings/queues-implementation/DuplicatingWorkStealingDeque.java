@@ -1,29 +1,29 @@
 public class DuplicatingWorkStealingDeque 
 		implements WorkStealingQueue {
 	private int size = 1024;
-	private WorkItem[] tasks = new WorkItem[size];
+	private WorkItem[] workItems = new WorkItem[size];
 	private int tailMin = Integer.MAX_VALUE;
 	private volatile int tail = 0;
 	private volatile int head = 0;
 
-	public void put(WorkItem task) {
-		assert task != null;
+	public void put(WorkItem workItem) {
+		assert workItem != null;
 
 		// If queue full or index overflow: expand
 		if (!((tail < Math.min(tailMin, head) + size) 
 				&& (tail < Integer.MAX_VALUE / 2)))
 			expand();
 
-		tasks[tail % size] = task;
+		workItems[tail % size] = workItem;
 		tail = tail + 1;
 	}
 
 	public WorkItem steal() {
 		synchronized (this) {
 			if (head < tail) {
-				WorkItem task = tasks[head % size];
+				WorkItem workItem = workItems[head % size];
 				head = head + 1;
-				return task;
+				return workItem;
 			} else {
 				return null;
 			}
@@ -32,14 +32,14 @@ public class DuplicatingWorkStealingDeque
 
 	public WorkItem take() {
 		tail = tail - 1;
-		WorkItem task = null;
+		WorkItem workItem = null;
 
 		// can we pop safely?
 		if (head <= Math.min(tailMin, tail)) {
 			if (tailMin > tail)
 				tailMin = tail;
-			task = tasks[tail % size];
-			tasks[tail % size] = null;
+			workItem = workItems[tail % size];
+			workItems[tail % size] = null;
 		} else {
 			synchronized (this) {
 				// adjust head and reset tailMin
@@ -49,15 +49,15 @@ public class DuplicatingWorkStealingDeque
 
 				// try to pop again
 				if (head <= tail) {
-					task = tasks[tail % size];
-					tasks[tail % size] = null;
+					workItem = workItems[tail % size];
+					workItems[tail % size] = null;
 				} else {
 					tail = tail + 1; // restore tail when empty
 				}
 			}
 		}
 
-		return task;
+		return workItem;
 	}
 
 	private void expand() {
@@ -72,13 +72,13 @@ public class DuplicatingWorkStealingDeque
 			head = head % size;
 			tail = head + count;
 
-			// Replace tasks array
+			// Replace workItems array
 			int newSize = 2 * size;
-			WorkItem[] newTasks = new WorkItem[newSize];
+			WorkItem[] newWorkItems = new WorkItem[newSize];
 			for (int i = head; i < tail; i++)
-				newTasks[i % newSize] = tasks[i % size];
+				newWorkItems[i % newSize] = workItems[i % size];
 			size = newSize;
-			tasks = newTasks;
+			workItems = newWorkItems;
 		}
 	}
 }

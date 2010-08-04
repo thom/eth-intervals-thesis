@@ -1,5 +1,5 @@
 interface WorkStealingQueue {
-	public void put(WorkItem task);
+	public void put(WorkItem workItem);
 	public WorkItem take();
 	public WorkItem steal();
 }

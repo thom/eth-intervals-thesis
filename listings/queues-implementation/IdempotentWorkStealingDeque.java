@@ -12,15 +12,15 @@ public class IdempotentWorkStealingDeque
 	}
 
 	private AtomicStampedReference<ArrayData> anchor;
-	private WorkItem[] tasks;
+	private WorkItem[] workItems;
 
 	public IdempotentWorkStealingDeque() {
 		anchor = new AtomicStampedReference<ArrayData>(
 			new ArrayData(0, 0), 0);
-		tasks = new WorkItem[1024];
+		workItems = new WorkItem[1024];
 	}
 
-	public void put(WorkItem task) {
+	public void put(WorkItem workItem) {
 		// Order write in (1) before write in (2)
 		int head, size, tag;
 		
@@ -29,7 +29,7 @@ public class IdempotentWorkStealingDeque
 			head = arrayData.head;
 			size = arrayData.size;
 			tag = anchor.getStamp();
-			if (size == tasks.length) {
+			if (size == workItems.length) {
 				expand();
 			} else {
 				break;
@@ -37,7 +37,7 @@ public class IdempotentWorkStealingDeque
 		}
 		
 		// (1)
-		tasks[(head + size) % tasks.length] = task;
+		workItems[(head + size) % workItems.length] = workItem;
 		
 		// (2)
 		anchor.set(new ArrayData(head, size + 1), tag + 1);
@@ -48,7 +48,7 @@ public class IdempotentWorkStealingDeque
 		// Order read in (3) before CAS in (4)
 		ArrayData arrayData;
 		int head, size, tag;
-		WorkItem task;
+		WorkItem workItem;
 		
 		while (true) {
 			// (1)
@@ -61,10 +61,10 @@ public class IdempotentWorkStealingDeque
 			}
 			
 			// (2)
-			WorkItem[] tempTasks = tasks;
+			WorkItem[] tempWorkItems = workItems;
 			
 			// (3)
-			task = tempTasks[head % tempTasks.length];
+			workItem = tempWorkItems[head % tempWorkItems.length];
 			int newHead = head + 1 % Integer.MAX_VALUE;
 			
 			// (4)
@@ -74,7 +74,7 @@ public class IdempotentWorkStealingDeque
 			}
 		}
 		
-		return task;
+		return workItem;
 	}
 
 	public WorkItem take() {
@@ -87,9 +87,10 @@ public class IdempotentWorkStealingDeque
 			return null;
 		}
 		
-		WorkItem task = tasks[(head + size - 1) % tasks.length];
+		WorkItem workItem = 
+			workItems[(head + size - 1) % workItems.length];
 		anchor.set(new ArrayData(head, size - 1), tag);
-		return task;
+		return workItem;
 	}
 
 	private void expand() {
@@ -100,15 +101,15 @@ public class IdempotentWorkStealingDeque
 		int size = arrayData.size;
 		
 		// (1)
-		WorkItem[] tempTasks = new WorkItem[2 * size];
+		WorkItem[] tempWorkItems = new WorkItem[2 * size];
 		
 		for (int i = 0; i < size; i++) {
 			// (2)
-			tempTasks[(head + i) % tempTasks.length] = 
-				tasks[(head + i) % tasks.length];
+			tempWorkItems[(head + i) % tempWorkItems.length] = 
+				workItems[(head + i) % workItems.length];
 		}
 		
 		// (3)
-		tasks = tempTasks;
+		workItems = tempWorkItems;
 	}
 }
