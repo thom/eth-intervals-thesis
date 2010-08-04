@@ -69,16 +69,6 @@ interface:
 Note that \lstinline!put! and \lstinline!take! operations
 are invoked only by the deque's owner.
 
-Unfortunately, the use of fixed size arrays introduces an inefficient
-memory-size/robustness tradeoff: for $n$ processes and total allocated
-memory size $m$, one can tolerate at most $\frac{m}{n}$ items in a
-deque. Using cyclic arrays, or the reset-on- empty heuristic presented
-in the original ABP algorithm,\footnote{The reset-on-empty heuristic
-  resets top and bottom to point to the beginning of the array
-  whenever the deque becomes empty. It was used by the original ABP
-  algorithm to make overflow scenarios less frequent.} reduces the
-chance of overflow but does not eliminate it.
-
 \subsection{A dynamic-sized nonblocking work stealing deque
   \cite{Hendler2006, Hendler2006a}}
 
@@ -111,38 +101,6 @@ costly Compare-and-Swap (CAS)\footnote{The CAS (location, old-value,
   old-value. The operation returns a boolean indicating whether it
   succeeded in updating the location.} synchronization operations when
 fetching items locally.
-
-Unfortunately, the use of fixed size arrays\footnote{One may use
-  cyclic array indexing but this does not help in preventing
-  overflows.} introduces an inefficient memory-size/robustness
-tradeoff: for $n$ processes and total allocated memory size $m$, one
-can tolerate at most $\frac{m}{n}$ items in a deque. Moreover, if
-overflow does occur, there is no simple way to malloc additional
-memory and continue. This has, for example, forced parallel garbage
-collectors using work-stealing to implement an application-specific
-blocking overflow management mechanism [5, 10]. In multiprogrammed
-systems, the main target of ABP work-stealing \cite{Arora2001}, even
-inefficient over-allocation based on an application's maximal
-execution-DAG depth \cite{Arora2001, Blumofe1999} may not always
-work. If a small subset of non-preempted processes end up queuing most
-of the work items, since the ABP algorithm sometimes starts putting
-items from the middle of the array even when the deque is empty, this
-can lead to overflow.\footnote{The ABP algorithm's built-in ``reset on
-  empty'' mechanism helps in some, but not all, of these cases.}
-
-This state of affairs leaves open the question of designing a dynamic
-memory algorithm to overcome the above drawbacks, but to do so while
-maintaining the low-cost synchronization overhead of the ABP
-algorithm. This is not a straightforward task, since the the
-array-based ABP algorithm is unique: it is possibly the only
-real-world algorithm that allows one to transition in a lock-free
-manner from the common case of using loads and stores to using a
-costly CAS only when a potential conflict requires processes to
-synchronize. This transition rests on the ability to detect these
-boundary synchronization cases based on the relative gap among array
-indexes. There is no straightforward way of translating this
-algorithmic trick to the pointer-based world of dynamic data
-structures.
 
 \subsection{A Java fork/join framework \cite{Lea2000}}
 

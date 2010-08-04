@@ -30,7 +30,7 @@ implementation of intervals however uses mutual exclusion when trying
 to steal.
 
 Our hypothesis was that we could improve the performance of the
-intervals scheduler with non-blocking deques. Thus, as a separate
+intervals scheduler with non-blocking queues. Thus, as a separate
 effort, we designed and explored alternative non-blocking queue
 implementations.
 
@@ -43,7 +43,7 @@ The goal of this part of the thesis was to find queue implementations
 such that they improve the performance of the intervals scheduler.
 
 None of the approaches that were developed as part of this research
-yielded a deque that was improving work-stealing performance on the
+yielded a queue that was improving work-stealing performance on the
 machines we had to test them with (see appendix
 \ref{sec:experimental-setup-marvin} and
 \ref{sec:experimental-setup-mafushi}).
@@ -51,7 +51,7 @@ machines we had to test them with (see appendix
 \todo{List chapters and give a short description, mention
   \cite{Saha2007}}
 
-This part of the thesis describes the developed deques and encountered
+This part of the thesis describes the developed queues and encountered
 problems in order to preserve this research for future reference.
 
 % Chapter two introduces the different terms involved when talking about
