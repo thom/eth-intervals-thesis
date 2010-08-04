@@ -7,15 +7,22 @@
 
 \todo[inline]{Finish chapter ``Implementation''}
 
+\begin{itemize}
+\item Describe locality-aware thread pool
+\item Locality-aware intervals benchmarks
+\end{itemize}
+
+\section{References}
+
 The affinity of the workers is set such that they execute on different
 cores. While this eliminates interference between the worker threads,
 they will nevertheless share their assigned core with other processes
 in the system, subject to standard Linux scheduling policy.
 
-\minisec{Intel threading building blocks: outfitting C++ for
+\subsection{Intel threading building blocks: outfitting C++ for
   multi-core processor parallelism \cite{Reinders2007}}
 
-\minisec{Caches}
+\subsubsection{Caches}
 
 The speed of processors has grown to be much faster than main
 memory. Making all of memory nearly as fast as a processor would
@@ -65,7 +72,7 @@ application to use a single set of data in focused chunks of
 time. This happens most naturally if you use data decomposition,
 especially at the higher levels in a program.
 
-\minisec{Costs of Time Slicing}
+\subsubsection{Costs of Time Slicing}
 
 Time slicing enables there to be more logical threads than physical
 threads. Each logical thread is serviced for a time slice—a short
@@ -112,7 +119,6 @@ lock either busy-wait pointlessly or lose the rest of their time
 slice. The effect is called convoying because the threads end up
 ``bumper to bumper'' waiting for the preempted thread in front to resume
 driving.
-
 
 
 %%% Local Variables: 
