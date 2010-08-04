@@ -1,5 +1,3 @@
-import java.util.concurrent.atomic.AtomicReference;
-
 public abstract class Interval extends WorkItem {		
 	/**
 	 * State used to indicate whether interval has been 
@@ -45,4 +43,6 @@ public abstract class Interval extends WorkItem {
 	final void exec() {
 		// Implementation not shown...
 	}
+
+	// ...
 }
