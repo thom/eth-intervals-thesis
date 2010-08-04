@@ -34,7 +34,7 @@ Department of Computer Science\\
 \documentclass[
   pagesize=auto,          % write pagesize to DVI or PDF
   paper=a4,               % use ISO A4
-  BCOR12mm,               % binding correction
+  BCOR10mm,               % binding correction
   twoside,                % two sided (duplex)
 %  halfparskip,
   chapterprefix,
@@ -120,9 +120,7 @@ Department of Computer Science\\
   escapechar=\%,
   showstringspaces=false,
   fontadjust=true,
-  basicstyle=\fontsize{10}{11}\selectfont\ttfamily,
-%  basicstyle=\ttfamily\small,
-  keywordstyle=\color{blue}\bfseries,
+  basicstyle=\fontsize{11}{12}\selectfont\ttfamily,
   captionpos=b,
   breaklines=true,
 %  breakautoindent=true,
@@ -134,10 +132,18 @@ Department of Computer Science\\
   escapeinside={//*}{\^^M},
 }
 
+\lstdefinestyle{Listing}{
+  style=Default,
+  basicstyle=\fontsize{9}{10}\selectfont\ttfamily,
+  keywordstyle=\color{blue}\bfseries,
+}
+
 \lstdefinestyle{Numbers}{
   style=Default,
+  basicstyle=\fontsize{9}{10}\selectfont\ttfamily,
+  keywordstyle=\color{blue}\bfseries,
   numbers=left,
-  numberstyle=\tiny,
+  numberstyle=\fontsize{5}{6}\selectfont\ttfamily,
 }
 
 \lstdefinestyle{NumbersC}{
@@ -147,13 +153,15 @@ Department of Computer Science\\
 
 \lstdefinestyle{Skip}{
   style=Default,
+  basicstyle=\fontsize{9}{10}\selectfont\ttfamily,
+  keywordstyle=\color{blue}\bfseries,
   aboveskip=3ex,
 }
 
 \lstdefinestyle{SkipNumbers}{
   style=Skip,
   numbers=left,
-  numberstyle=\tiny, 
+  numberstyle=\fontsize{5}{6}\selectfont\ttfamily,
 }
 
 \lstdefinestyle{SkipNumbersC}{
@@ -163,6 +171,8 @@ Department of Computer Science\\
 
 \lstdefinestyle{Float}{
   style=Default,
+  basicstyle=\fontsize{9}{10}\selectfont\ttfamily,
+  keywordstyle=\color{blue}\bfseries,
   float=!htb,
 }
 

@@ -1294,7 +1294,7 @@ operation to try to switch from Init to Running. If the atomic
 operation succeeds, the associated action is executed and the state is
 set to Done afterwards:
 
-\begin{lstlisting}
+\begin{lstlisting}[style=Listing]
   void Task.Run(){
     if(CompareAndSwap(ref state, Init, Running)){
       Execute(); // execute the associated action
