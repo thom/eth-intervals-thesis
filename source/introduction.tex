@@ -195,11 +195,11 @@ Newly constructed intervals become eligible for execution once the
 \ref{lst:interval-graph-schedule} in Listing
 \ref{lst:interval-graph}. This gives the user the opportunity to
 construct any required dependencies or perform other
-initialization. For example, adding the edge \lstinline|a
-$\rightarrow$ b| on Line \ref{lst:interval-graph-add-hb} would be
-unsafe if \lstinline|b| could begin immediately, as it would be
-possible that \lstinline|b.start| had already occurred before the call
-to \lstinline|addHb()| could add the new dependency.
+initialization. For example, adding the edge
+\lstinline|a $\rightarrow$ b| on Line \ref{lst:interval-graph-add-hb}
+would be unsafe if \lstinline|b| could begin immediately, as it would
+be possible that \lstinline|b.start| had already occurred before the
+call to \lstinline|addHb()| could add the new dependency.
 
 Explicit calls to \lstinline|schedule()| are unusual, however. This is
 because the runtime automatically invokes \lstinline|schedule()| when

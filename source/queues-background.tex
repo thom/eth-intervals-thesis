@@ -45,8 +45,8 @@ interface:
     ../listings/queues-background/WorkStealingQueue.java
 }
 
-Note that the \lstinline!put! and \lstinline!take! methods are invoked
-only by the queue's owner.
+Note that the \lstinline!put()! and \lstinline!take()! methods are
+invoked only by the queue's owner.
 
 
 \section{Current Queue Implementation}
@@ -75,10 +75,10 @@ owner. \lstinline!thief! represents the head for the thief and is also
 the lock object used when a thief tries to steal a work item.
 
 Listing \ref{lst:work-stealing-lazy-deque-put} defines the
-\lstinline!put! method which puts \lstinline!workItem! onto the bottom
-of the deque. The method automatically expands the array containing
-the work items if it is full and fixes the indices in case they are
-about to roll over (Lines
+\lstinline!put()! method which puts \lstinline!workItem! onto the
+bottom of the deque. The method automatically expands the array
+containing the work items if it is full and fixes the indices in case
+they are about to roll over (Lines
 \ref{lst:work-stealing-lazy-deque-put-expand-1} --
 \ref{lst:work-stealing-lazy-deque-put-expand-2}).
 
@@ -88,7 +88,18 @@ about to roll over (Lines
     ../listings/queues-background/WorkStealingLazyDeque-put.java
 }
 
-Listing \ref{lst:work-stealing-lazy-deque-take}
+Method \lstinline!take()! is defined in Listing
+\ref{lst:work-stealing-lazy-deque-take}. \lstinline!take()! returns
+either \lstinline!null! or a work item that should be executed.
+
+At the core of the ABP algorithm is an efficient scheme for stealing
+an item in a non-blocking manner from an array-based deque, minimizing
+the need for costly Compare-and-Swap (CAS)\footnote{The CAS (location,
+  old-value, new-value) operation atomically reads a value from
+  location, and writes new-value in location if and only if the value
+  read is old-value. The operation returns a boolean indicating
+  whether it succeeded in updating the location.} synchronization
+operations when fetching items locally.
 
 \lstinputlisting[style=FloatNumbers,
   caption={Lazy deque: \lstinline!take()! method}, 
@@ -125,15 +136,6 @@ Listing \ref{lst:work-stealing-lazy-deque-expand}
   label=lst:work-stealing-lazy-deque-expand]{
     ../listings/queues-background/WorkStealingLazyDeque-expand.java
 }
-
-At the core of the ABP algorithm is an efficient scheme for stealing
-an item in a non-blocking manner from an array-based deque, minimizing
-the need for costly Compare-and-Swap (CAS)\footnote{The CAS (location,
-  old-value, new-value) operation atomically reads a value from
-  location, and writes new-value in location if and only if the value
-  read is old-value. The operation returns a boolean indicating
-  whether it succeeded in updating the location.} synchronization
-operations when fetching items locally.
 
 \subsection{A Java fork/join framework \cite{Lea2000}}
 

@@ -1,11 +1,7 @@
-// Only owner can take. Returns either null or a WorkItem 
-// that should be executed.
 public WorkItem take() {
-	// Empty
-	if (ownerHead == ownerTail)
+	if (ownerHead == ownerTail) // Deque is empty
 		return null;
 
-	// Pop the last work item from the deque.
 	final int lastTail = ownerTail - 1;
 	final int lastIndex = lastTail % workItems.length;
 
