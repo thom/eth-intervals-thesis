@@ -8,11 +8,10 @@
 \section{Work-Stealing Queues}
 \label{sec:queues-background-work-stealing-queues}
 
-A work-stealing scheduler employs a fixed number of threads called
-workers. Each worker has a local queue to maintain its own pool of
-ready tasks from which it obtains work. When a worker finds that its
-pool is empty, it becomes a thief and steals a task from the pool of a
-victim worker chosen at random.
+In a work-stealing scheduler each worker has a local queue to maintain
+its own pool of ready tasks from which it obtains work. When a worker
+finds that its pool is empty, it becomes a thief and steals a task
+from the pool of a victim worker chosen at random.
 
 Depending on the desired extraction strategy we can implement the
 work-stealing queues differently. Most work-stealing schedulers use
@@ -20,10 +19,11 @@ work-stealing deques \cite{Arora2001, Acar2002, Blumofe1995,
   Frigo1998, Danaher2005} but there are also implementations for LIFO
 or FIFO extraction \cite{Michael2009}.
 
-A work-stealing deque is like a deque \cite{Knuth1997} except that
-only the deque's owner thread puts and takes local work to and from
-the deque's bottom end. To minimize synchronization overhead for the
-deque's owner, elements are stolen from the top end of the deque.
+A work-stealing deque is like a traditional deque \cite{Knuth1997}
+except that only the deque's owner thread puts and takes local work to
+and from the deque's bottom end. Elements are stolen from the top end
+of the deque. This minimizes synchronization overhead for the deque's
+owner.
 
 All work-stealing queues provide the following three methods in their
 interface:
@@ -35,8 +35,8 @@ interface:
   the queue is not empty, otherwise returns \lstinline!null!.
 \item \lstinline!WorkItem steal()!: If the queue is empty, returns
   \lstinline!null!. Otherwise, returns the element successfully stolen
-  from the queue, or returns \lstinline!null! if this worker loses a
-  race with another worker to steal or take a work item.
+  from the queue, or \lstinline!null! if this worker loses a race with
+  another worker to steal or take a work item.
 \end{itemize}
 
 \lstinputlisting[style=Float,
@@ -55,8 +55,8 @@ invoked only by the queue's owner.
 The queue currently used by the intervals scheduler is the lazy
 work-stealing deque. It is called ``lazy'' because the owner of the
 deque only lazily updates the location of the deque's head. This means
-it only updates the head when it tries to take something and finds it
-is gone.
+it only updates the head when its owner tries to take a work item and
+finds it was stolen by a competing thief.
 
 The members of the lazy deque are defined as:
 

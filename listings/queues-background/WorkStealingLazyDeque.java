@@ -1,5 +1,4 @@
-public class WorkStealingLazyDeque 
-		implements WorkStealingQueue {
+public class WorkStealingLazyDeque implements WorkStealingQueue {
 	static class ThiefData {
 		int head = 0;
 	}
