@@ -19,15 +19,15 @@ pool is empty, it becomes a thief and steals an interval from the pool
 of a victim worker chosen at random.
 
 To enable efficient and scalable execution, management of the work
-queues must be made as fast as possible. In the
-non-blocking\footnote{Non-blocking -- in contrast to wait-free
-  \cite{Herlihy1991} -- means that it is possible for a worker to
-  starve while trying to steal from other workers. Live-locks cannot
-  occur as if one worker starves, then others must be making
-  progress.} work-stealing algorithm, the deques are implemented with
+queues must be made as fast as possible. In the non-blocking
+work-stealing algorithm,\footnote{Non-blocking -- in contrast to
+  wait-free \cite{Herlihy1991} -- means that it is possible for a
+  worker to starve while trying to steal from other
+  workers. Live-locks cannot occur as if one worker starves, then
+  others must be making progress.} the deques are implemented with
 non-blocking synchronization \cite{Arora2001}. That is, instead of
 using mutual exclusion, it uses powerful atomic synchronization
-primitives such as compare-and-swap \cite{Moir1997}. The current deque
+primitives such as Compare-and-Swap \cite{Moir1997}. The current deque
 implementation of intervals however uses mutual exclusion when trying
 to steal.
 
@@ -39,38 +39,20 @@ implementations.
 \section{Overview}
 \label{sec:queues-intro-overview}
 
-\todo{Rewrite ``Overview''}
-
-The goal of this part of the thesis was to find queue implementations
-such that they improve the performance of the intervals scheduler.
-
-None of the approaches that were developed as part of this research
-yielded a queue that was improving work-stealing performance on the
-machines we had to test them with (see Appendix
+Chapter \ref{chap:queues-background} summarizes the properties of
+work-stealing queues and introduces ``lazy deque'', the queue
+currently used by the intervals scheduler. Chapter
+\ref{chap:queues-implementation} describes the investigated queue
+implementations. None of the approaches that were developed as part of
+this research yielded a queue that was improving work-stealing
+performance on the machines we had to test them with (see Appendix
 \ref{sec:experimental-setup-marvin} and
-\ref{sec:experimental-setup-mafushi}).
+\ref{sec:experimental-setup-mafushi}). Possible reasons for this are
+given in the evaluation in Chapter
+\ref{chap:queues-evaluation}. Chapter\ref{chap:queues-conclusions}
+concludes and summarizes the encountered problems in order to preserve
+this research for future reference.
 
-\todo{List chapters and give a short description, mention
-  \cite{Saha2007}}
-
-This part of the thesis describes the developed queues and encountered
-problems in order to preserve this research for future reference.
-
-% Chapter two introduces the different terms involved when talking about
-% virtual machines and different techniques to build them. It also
-% summarizes some important hardware aspects. Chapter three analyzes
-% other implementations of virtual machines done previously. It
-% categorizes them and relates them to the techniques introduced in
-% chapter two. Chapter four offers some background on Barrelfish,
-% especially those parts which are important to understand the
-% interfaces used within VMkit. In chapter five the global approach and
-% the design is shown. It describes how the virtual machine is laid out
-% and what the properties with respect to the background on virtual
-% machines are. Chapter six describes the implementation of the whole
-% system within Barrelfish. An evaluation of the implementation is
-% presented in chapter seven and the work concludes in chapter eight
-% where the implementation is rated according to the evaluation and the
-% aim.
 
 %%% Local Variables: 
 %%% mode: latex
