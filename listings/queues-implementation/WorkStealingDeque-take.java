@@ -11,8 +11,8 @@ public WorkItem take() {
 		return null;
 	}
 
-	WorkItem workItem = currentWorkItems[bottom % 
-		currentWorkItems.length];
+	WorkItem workItem = 
+		currentWorkItems[bottom % currentWorkItems.length];
 
 	if (size > 0)
 		return workItem;

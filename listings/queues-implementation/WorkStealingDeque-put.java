@@ -4,11 +4,9 @@ public void put(WorkItem workItem) {
 	WorkItem[] currentWorkItems = workItems;
 	int size = oldBottom - oldTop;
 	if (size >= currentWorkItems.length - 1) {
-		currentWorkItems = 
-			expand(currentWorkItems, oldBottom, oldTop);
+		currentWorkItems = expand(currentWorkItems, oldBottom, oldTop);
 		workItems = currentWorkItems;
 	}
-	currentWorkItems[oldBottom % currentWorkItems.length] = 
-		workItem;
+	currentWorkItems[oldBottom % currentWorkItems.length] = workItem;
 	bottom = oldBottom + 1;
 }

@@ -12,8 +12,7 @@ public WorkItem steal(Worker thiefWorker) {
 		if (size <= 0)
 			return null; // empty
 			
-		workItem = currentWorkItems[oldTop % 
-			currentWorkItems.length];
+		workItem = currentWorkItems[oldTop % currentWorkItems.length];
 			
 		 // fetch and increment
 		if (top.compareAndSet(oldTop, oldTop + 1))

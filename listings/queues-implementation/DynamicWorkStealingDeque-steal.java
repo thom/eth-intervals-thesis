@@ -47,8 +47,8 @@ public WorkItem steal() {
 		Index newTop = new Index(newTopNode, newTopIndex);
 
 		// Try to update top using CAS
-		if (top.compareAndSet(currentTop, newTop, 
-			currentTopTag, newTopTag))
+		if (top.compareAndSet(currentTop, newTop, currentTopTag, 
+				newTopTag))
 			break;
 	}
 

@@ -1,15 +1,15 @@
 public abstract class Interval extends WorkItem {		
 	/**
-	 * State used to indicate whether interval has been 
-	 * initialized, is running or is done already.
+	 * State used to indicate whether interval has been initialized, 
+	 * is running or is done already.
 	 */
 	enum RunningState {
 		INIT, RUNNING, DONE
 	}
 
 	/**
-	 * Indicates whether interval has been initialized, 
-	 * is running or is done already.
+	 * Indicates whether interval has been initialized, is running or 
+	 * is done already.
 	 */
 	private final AtomicReference<RunningState> runningState;
 
@@ -23,8 +23,8 @@ public abstract class Interval extends WorkItem {
 	protected abstract void run();
 	
 	/**
-	 * The "main" method for this interval: invoked when we 
-	 * are scheduled. Simply invokes "exec()".
+	 * The "main" method for this interval: invoked when we are 
+	 * scheduled. Simply invokes "exec()".
 	 */
 	@Override
 	void exec(Worker worker) {
@@ -36,9 +36,9 @@ public abstract class Interval extends WorkItem {
 	}
 	
 	/**
-	 * Executes the interval's task and - once it is finished 
-	 * - signals the end of the interval that it can occur 
-	 * (assuming all of its other dependencies are satisfied).
+	 * Executes the interval's task and - once it is finished - 
+	 * signals the end of the interval that it can occur (assuming 
+	 * all of its other dependencies are satisfied).
 	 */
 	final void exec() {
 		// Implementation not shown...

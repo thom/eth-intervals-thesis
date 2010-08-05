@@ -17,8 +17,7 @@ public WorkItem take() {
 		return null;
 
 	// Read data to be taken
-	WorkItem workItem = 
-		newBottomNode.workItems[newBottomIndex];
+	WorkItem workItem = newBottomNode.workItems[newBottomIndex];
 
 	// Update bottom
 	bottom.node = newBottomNode;
@@ -39,20 +38,18 @@ public WorkItem take() {
 		bottom.index = oldBottomIndex;
 		return null;
 	}
-	// Case 2: When taking the last entry in the deque (i.e. 
-	// deque is empty after the update of bottom)
+	// Case 2: When taking the last entry in the deque (i.e. deque is 
+	// empty after the update of bottom)
 	else if ((newBottomNode == currentTopNode)
 			&& (newBottomIndex == currentTopIndex)) {
-		// Try to update top's tag so no concurrent steal 
-		// operation will also take the same entry
-		Index newTop = new Index(currentTopNode, 
-			currentTopIndex);
-		if (top.compareAndSet(currentTop, newTop, 
-				currentTopTag, currentTopTag + 1)) {
+		// Try to update top's tag so no concurrent steal operation will also take the same entry
+		Index newTop = new Index(currentTopNode, currentTopIndex);
+		if (top.compareAndSet(currentTop, newTop, currentTopTag, 
+				currentTopTag + 1)) {
 			return workItem;
 		}
-		// If CAS failed (i.e. a concurrent steal operation 
-		// already took the last entry)
+		// If CAS failed (i.e. a concurrent steal operation already took 
+		// the last entry)
 		else {
 			// Return bottom to its old position
 			bottom.node = oldBottomNode;
@@ -60,8 +57,8 @@ public WorkItem take() {
 			return null;
 		}
 	}
-	// Case 3: Regular case (i.e. there was at least one 
-	// entry in the deque after bottom's update)
+	// Case 3: Regular case (i.e. there was at least one entry in the 
+	// deque after bottom's update)
 	else {
 		return workItem;
 	}
