@@ -20,6 +20,7 @@ single shared work deque and use it in a LIFO (stack) manner.
 \todo[inline]{Mention the experiment with a single shared work queue}
 
 \section{References}
+
 \subsection{Limits of work-stealing scheduling \cite{Vrba2009}}
 
 The original work-stealing algorithm uses non-blocking algorithms to
@@ -191,6 +192,107 @@ synchronized programs, because they cannot occur.
 \item Non-blocking steal-half work queues \cite{Hendler2002}
 \item Let benchmarks run on more than 8 cores
 \end{itemize}
+
+\subsection{Dynamic circular work-stealing deque \cite{Chase2005}}
+
+\subsubsection{Shrinking After Growth}
+
+One disadvantage of the algorithm as presented is that it does not
+shrink the array as the deque retreats from its maximum. That means
+that the memory used by the deque is a constant factor times its
+maximum size, which might result in a big waste of memory.
+
+Shrinking the array is no harder than growing the array; it only
+requires that the algorithm check against a minimum use fraction of
+the current array when performing a \lstinline!take!
+operation.\footnote{With the current implementation, this fraction
+  must be strictly less than $\frac{1}{2}$, to guarantee that the
+  deque elements could fit into the smaller array while leaving one
+  array cell unused.} The code for the \lstinline!take!
+operation with the possible shrinking operation appears in Figures 5
+and 6. As illustrated by the code, Line 31 was modified to call the
+\lstinline!perhapsShrink! method just before returning the popped
+value. The \lstinline!perhapsShrink! method shrinks the array if the
+number of elements in the deque is less than some fraction
+$\frac{1}{K}$ of the array size, where $K \ge 3$. We omit the code for
+the \lstinline!CircularArray!'s shrink method since it is almost
+identical to the code of this class's \lstinline!grow! method.
+Finally, note that the \lstinline!perhapsShrink! method is independent
+of the \lstinline!take! operation, and therefore can be invoked
+by the deque's owner on other occasions (for example after a
+\lstinline!put! operation).
+
+\minisec{Shrinking without copying}
+
+The simplest way to shrink back to a smaller array is similar to the
+way we grow it: Allocate a new smaller array, and copy the data from
+the big array to the smaller one. We can save the allocation time,
+however, if whenever we extend an array, we retain a reference from
+the bigger array to the smaller one. If each array has a reference to
+the smaller array from which it was extended, then the garbage
+collector cannot deallocate all the arrays that precede the current
+active one, and the algorithm can reuse these arrays when shrinking.
+
+Keeping the references to the smaller arrays not only saves the
+allocation time, it can also save some of the copying work: when the
+algorithm shrinks back from the big array to its previous smaller
+array, only the elements that were modified while the bigger array was
+active need to be copied (because the smaller array was not
+deallocated and therefore was not modified while the bigger array was
+active). This can be accomplished by maintaining a low-water-mark with
+each array: an integer that indicates the lowest value of
+\lstinline!bottom! in which an element was stored while the array was
+active. When a deque shrinks its array, only the elements stored in
+indexes greater than or equal to the low water mark of the bigger
+array are copied. Also, the smaller array's low water mark is updated
+to the minimum of the larger and smaller array's low water mark
+values.
+
+Note that the space overhead for referencing all the smaller arrays
+when growing is relatively low: if we double the array size every time
+we grow the array, the total overhead is less than the size of the
+current array.
+
+\minisec{Combining multiple shrinks}
+
+Sometimes it is useful to combine multiple shrink operations, that is
+to shrink back not to the previous smaller array, but to one (or more)
+preceding it. For example, suppose that we had 5 growing operations:
+$a_1 \rightarrow a_2 \rightarrow a_3 \rightarrow a_4 \rightarrow a_5$
+(here $a_i$ represents an array, and $a_{i+1}$ is a bigger array than
+$a_i$), and that on the next \lstinline!take! operation we find
+out that almost all the deque elements were stolen, and that the
+number of elements left is less than some fraction of the size of
+$a_1$. In such a case it makes more sense to shrink from $a_5$
+directly to $a_1$, without going through all the intermediate
+arrays. Extra caution should be taken, however, when choosing which
+entries to copy using the low water mark: when copying from $a_5$ to
+$a_1$ , the low water mark is the minimum of the low water marks of
+$a_5$ and all the intermediate arrays (that is $a_4$, $a_3$ and
+$a_2$).
+
+\subsubsection{Working With a Shared Pool of Buffers}
+
+The deque algorithm presented depends upon a garbage collector to
+reclaim the unused buffers. For work-stealing algorithms, where each
+process has its own deque and the maximum amount of memory needed by
+all deques together can usually be bounded, it is often more suitable
+to use the shared pool model.
+
+With the shared pool model, the extra available buffers for all the
+deques are kept in a shared pool. Whenever the deque's owner needs a
+bigger array, it allocates one (of the appropriate size) from the
+pool, and whenever it shrinks to a smaller array and does not need the
+bigger array anymore, it can return it to the pool. There are two main
+advantages for the shared pool model: First, it is much less expensive
+to reclaim and allocate buffers from the shared pool than to allocate
+them from the heap and use the garbage collec- tor for
+reclamation. Second, as described in this section, by assuming that
+the reclaimed buffers are not returned to a global use by the
+operating system, the deque's owner can reclaim a buffer while there
+may be still some thieves refer- encing it (something that the garage
+collector will not do), which leads to a better use of the allocated
+space.
 
 
 %%% Local Variables: 

@@ -18,7 +18,7 @@ public WorkItem take() {
 		return workItem;
 
 	// fetch and increment
-	if (!top.compareAndSet(oldTop, oldTop + 1))
+	if (!top.compareAndSet(oldTop, oldTop + 1)) //*\label{lst:work-stealing-deque-take-cas}
 		workItem = null; // queue is empty
 
 	bottom = oldTop + 1;

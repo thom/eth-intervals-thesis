@@ -53,10 +53,11 @@ invoked only by the queue's owner.
 \label{sec:queues-background-current-implementation}
 
 The queue currently used by the intervals scheduler is the lazy
-work-stealing deque. It is called ``lazy'' because the owner of the
-deque only lazily updates the location of the deque's head. This means
-it only updates the head when its owner tries to take a work item and
-finds it was stolen by a competing thief.
+work-stealing deque. This deque is unbounded and uses a cyclic array
+to store its work items. It is called ``lazy'' because the owner of
+the deque only lazily updates the location of the deque's head. This
+means it only updates the head when its owner tries to take a work
+item and finds it was stolen by a competing thief.
 
 The members of the lazy deque are defined as:
 

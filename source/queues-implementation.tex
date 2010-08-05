@@ -8,14 +8,125 @@
 \section{Work-Stealing Deque}
 \label{sec:queues-implementation-ws-deque}
 
-\todo[inline]{Finish section ``Work-Stealing Deque''}
+The \emph{Work-Stealing Deque} is an unbounded double-ended queue that
+dynamically resizes itself as needed.
 
-\begin{itemize}
-\item Dynamic circular work-stealing deque \cite{Chase2005}
-\item Nonblocking Cyclic Extendable Deque for the ABP work stealing
-  algorithm \cite{Lev2005}
-\item The art of multiprocessor programming \cite{Herlihy2008}
-\end{itemize}
+We implement the \lstinline!WorkStealingDeque! in a cyclic array, with
+\lstinline!top! and \lstinline!bottom! fields as indices. When using
+\lstinline!top! and \lstinline!bottom! to access array elements, we
+have to use them modulo the array's capacity as the array is
+cyclic. If \lstinline!bottom! is less than or equal to
+\lstinline!top!, the \lstinline!WorkStealingDeque! is empty. Using a
+cyclic array eliminates the need to reset \lstinline!bottom! and
+\lstinline!top! to \lstinline!0!. Moreover, it permits \lstinline!top!
+to be incremented but never decremented, eliminating the need for
+\lstinline!top! to be an \lstinline!AtomicStampedReference!. In the
+\lstinline!WorkStealingDeque! algorithm, if \lstinline!put()!
+discovers that the current circular array is full, it can resize
+(enlarge) it, copying the tasks into a bigger array, and pushing the
+new task into the new (larger) array. Because the array is indexed
+modulo its capacity, there is no need to update the \lstinline!top! or
+\lstinline!bottom! fields when moving the elements into a bigger array
+(although the actual array indices where the elements are stored might
+change).
+
+The \lstinline!WorkStealingDeque! class has three fields:
+\lstinline!workItems!, \lstinline!bottom!, and \lstinline!top!:
+
+\lstinputlisting[style=Numbers,
+  caption={Work-stealing deque}, 
+  label=lst:work-stealing-deque]{
+    ../listings/queues-implementation/WorkStealingDeque.java
+}
+
+As the \lstinline!take()! (Listing \ref{lst:work-stealing-deque-take})
+and \lstinline!steal()!  methods (Listing
+\ref{lst:work-stealing-deque-steal}) use modular arithmetic to compute
+indexes, the \lstinline!top! index never needs to be decremented. As
+noted, there is no need for a timestamp to prevent ABA problems. Both
+methods, when competing for the last task, steal it by incrementing
+\lstinline!top!. To reset the \lstinline!WorkStealingDeque! to empty,
+simply increment the \lstinline!bottom! field to equal
+\lstinline!top!. In the code, \lstinline!take()!, immediately after
+the \lstinline!compareAndSet()! in Line
+\ref{lst:work-stealing-deque-take-cas}, sets \lstinline!bottom! to
+equal \lstinline!top + 1! whether or not the
+\lstinline!compareAndSet()! succeeds, because, even if it failed, a
+concurrent thief must have stolen the last task. Storing
+\lstinline!top + 1! into \lstinline!bottom! makes \lstinline!top! and
+\lstinline!bottom! equal, resetting the \lstinline!WorkStealingDeque!
+object to an empty state.
+
+\lstinputlisting[style=Numbers,
+  caption={Work-stealing deque: Take}, 
+  label=lst:work-stealing-deque-take]{
+    ../listings/queues-implementation/WorkStealingDeque-take.java
+}
+
+\lstinputlisting[style=Numbers,
+  caption={Work-stealing deque: Steal}, 
+  label=lst:work-stealing-deque-steal]{
+    ../listings/queues-implementation/WorkStealingDeque-steal.java
+}
+
+The isEmpty() method (Fig. 16.14) first reads \lstinline!top!, then
+\lstinline!bottom!, checking whether \lstinline!bottom! is less than
+or equal to \lstinline!top! (Line 4). The order is important because
+\lstinline!top! never decreases, and so if a thread reads
+\lstinline!bottom! after \lstinline!top! and sees it is no greater,
+the queue is indeed empty because a concurrent modification of
+\lstinline!top! could only have increased the \lstinline!top!
+value. The same principle applies in the \lstinline!steal()! method
+call. An example execution is provided in Fig. 16.16.
+
+The \lstinline!CircularTaskArray()! class is depicted in
+Fig. 16.13. It provides \lstinline!get()! and put() methods that add
+and remove tasks, and a \lstinline!resize()! method that allocates a
+new circular array and copies the old array's contents into the new
+array. The use of modular arithmetic ensures that even though the
+array has changed size and the tasks may have shifted positions,
+thieves can still use the \lstinline!top! field to find the next task
+to steal.
+
+The \lstinline!put()! method (Fig. 16.14) is almost the same as that
+of the BoundedDEQueue. One difference is that the method must enlarge
+the circular array if the current push is about to cause it to exceed
+its capacity. Another is that \lstinline!steal()! does not need to
+manipulate a timestamp. The ability to resize carries a price: every
+call must read \lstinline!top! (Line 21) to determine if a resize is
+necessary, possibly causing more cache misses because \lstinline!top!
+is modified by all processes. We can reduce this overhead by having
+threads save a local value of \lstinline!top! and using it to compute
+the size of the \lstinline!UnboundedDEQueue!  object. A thread reads
+the \lstinline!top!field only when this bound is exceeded, indicating
+that a \lstinline!resize()! may be necessary.  Even though the local
+copy may become outdated because of changes to the shared
+\lstinline!top!, \lstinline!top! is never decremented, so the real
+size of the \lstinline!UnboundedDEQueue! object can only be smaller
+than the one calculated using the local variable.
+
+\lstinputlisting[style=Numbers,
+  caption={Work-stealing deque: Put}, 
+  label=lst:work-stealing-deque-put]{
+    ../listings/queues-implementation/WorkStealingDeque-put.java
+}
+
+\lstinputlisting[style=Numbers,
+  caption={Work-stealing deque: Expand}, 
+  label=lst:work-stealing-deque-expand]{
+    ../listings/queues-implementation/WorkStealingDeque-expand.java
+}
+
+In summary, we have seen two ways to design a nonblocking linearizable
+\lstinline!DEQueue! class. We can get away with using only loads and
+stores in the most common manipulations of the DEQueue, but at the
+price of having more complex algorithms. Such algorithms are
+justifiable for an application such as an executer pool whose
+performance may be critical to a concurrent multithreaded system.
+
+
+Its design is based on the \emph{Dynamic Circular Work-Stealing Deque}
+\cite{Chase2005, Lev2005}.
 
 \subsection{Dynamic circular work-stealing deque \cite{Chase2005}}
 
@@ -38,7 +149,7 @@ The deque is implemented using a cyclic array, together with two
 indexes: \lstinline!top! and \lstinline!bottom!, indicating the two
 ends of the deque. Specifically, the \lstinline!bottom! index
 indicates the next available slot in the array where the next new
-element is pushed, and is incremented on every \lstinline!pushBottom!
+element is pushed, and is incremented on every \lstinline!put!
 operation. The \lstinline!top! index indicates the topmost element in
 the deque (if there is any), and is incremented on every
 \lstinline!steal! operation. If \lstinline!bottom! is less than or
@@ -46,12 +157,12 @@ equal to \lstinline!top!, the deque is empty.
 
 Since the algorithm uses a cyclic array it makes more efficient use of
 the array, and does not need the reset-on-empty heuristic used in the
-original ABP algorithm. If a \lstinline!pushBottom! operation
-discovers that the current circular array is full, it enlarges it by
-copying the deque's elements into a bigger array, and pushes the new
-element into the new enlarged array. The deque elements stored in the
-circular array are indexed modulo its size, and therefore when moving
-the elements into a bigger array, there is no need to update
+original ABP algorithm. If a \lstinline!put! operation discovers that
+the current circular array is full, it enlarges it by copying the
+deque's elements into a bigger array, and pushes the new element into
+the new enlarged array. The deque elements stored in the circular
+array are indexed modulo its size, and therefore when moving the
+elements into a bigger array, there is no need to update
 \lstinline!top! or \lstinline!bottom! although the actual array
 indexes where the elements are stored might change. Since the only
 operation that modifies \lstinline!top! is \lstinline!steal!,
@@ -63,13 +174,13 @@ field as in all previous work-stealing algorithms.\footnote{We assume
 
 \minisec{The deque operations}
 
-The pseudocode for the \lstinline!pushBottom!, \lstinline!steal! and
-\lstinline!popBottom! operations appears in Figures 1, 2 and 3
-respectively. The \lstinline!steal! and \lstinline!popBottom! methods
-are similar to their counterparts in the original ABP algorithm. The
-main difference is that the new algorithm does not have a tag field in
-the \lstinline!top! variable -- instead, it maintains the property
-that \lstinline!top! is never decremented. The deque object also has a
+The pseudocode for the \lstinline!put!, \lstinline!steal! and
+\lstinline!take! operations appears in Figures 1, 2 and 3
+respectively. The \lstinline!steal! and \lstinline!take! methods are
+similar to their counterparts in the original ABP algorithm. The main
+difference is that the new algorithm does not have a tag field in the
+\lstinline!top! variable -- instead, it maintains the property that
+\lstinline!top! is never decremented. The deque object also has a
 private \lstinline!casTop! method (depicted in Figure 1), which
 receives two values for \lstinline!top!, old and new, and atomically
 modifies \lstinline!top! to the new value if and only if it has the
@@ -77,35 +188,33 @@ old value. In practice this method is implemented using the
 Compare-And-Swap (CAS) instruction, which is widely available on
 current machines.
 
-The \lstinline!pushBottom! operation: As in the original algorithm,
-the \lstinline!pushBottom! operation inserts the pushed entry to the
-deque simply by writing it in the location specified by
-\lstinline!bottom!, and then incrementing \lstinline!bottom! by 1. In
-our algorithm, however, the \lstinline!pushBottom! operation is also
-responsible for enlarging the array if an element is pushed into an
-already-full array. Whether the array is enlarged or not, the abstract
-\lstinline!pushBottom! operation takes place when \lstinline!bottom!
-is updated at Line 9.
+The \lstinline!put! operation: As in the original algorithm, the
+\lstinline!put! operation inserts the pushed entry to the deque simply
+by writing it in the location specified by \lstinline!bottom!, and
+then incrementing \lstinline!bottom! by 1. In our algorithm, however,
+the \lstinline!put! operation is also responsible for enlarging the
+array if an element is pushed into an already-full array. Whether the
+array is enlarged or not, the abstract \lstinline!put! operation takes
+place when \lstinline!bottom!  is updated at Line 9.
 
 To check whether the current array is full, the operation subtracts
 the value of \lstinline!top! from \lstinline!bottom! (which gives the
 number of elements that were in the deque when \lstinline!top! was
 read), and compares it to the size of the array. For memory
-reclamation reasons described in Section 4.1, the
-\lstinline!pushBottom! operation always leaves one array cell unused.
-If necessary, the \lstinline!pushBottom! operation uses the
-\lstinline!grow! method (of the \lstinline!CircularArray! class) to
-enlarge the current array.
+reclamation reasons described in Section 4.1, the \lstinline!put!
+operation always leaves one array cell unused.  If necessary, the
+\lstinline!put! operation uses the \lstinline!grow! method (of the
+\lstinline!CircularArray! class) to enlarge the current array.
 
 The growable circular array: The simplest implementation of a growable
 circular array is a power-of-two-sized array that grows by doubling
 its size. When the array is full, a new doubled size array is
 allocated, and the elements are copied from the old array to the new
-one. The pseudocode for the \lstinline!CircularArray! class appears in Figure
-4. Note that since the elements are indexed modulo the array size, the
-actual array indexes where the elements are stored might change when
-copying from one array to another, but the value of \lstinline!top!
-and \lstinline!bottom! remains the same.
+one. The pseudocode for the \lstinline!CircularArray! class appears in
+Figure 4. Note that since the elements are indexed modulo the array
+size, the actual array indexes where the elements are stored might
+change when copying from one array to another, but the value of
+\lstinline!top!  and \lstinline!bottom! remains the same.
 
 The \lstinline!steal! operation: As in the original algorithm, the
 \lstinline!steal! method begins by reading \lstinline!top! and
@@ -119,8 +228,7 @@ returns the Abort value; otherwise it returns the element read right
 before the successful CAS operation. Since the algorithm uses a cyclic
 array, it is important to read the element from the array before we do
 the CAS, because after the CAS completes, this location may be
-refilled with a new value by a concurrent \lstinline!pushBottom!
-operation.
+refilled with a new value by a concurrent \lstinline!put!  operation.
 
 A successful CAS is the point at which the abstract \lstinline!steal!
 operation takes place. Note that because \lstinline!top! is read
@@ -129,20 +237,20 @@ represent a consistent view of the memory. Specifically, it implies
 that \lstinline!bottom! and \lstinline!top! indeed had their observed
 values when \lstinline!bottom! was read at Line 12. A subtle case may
 arise, however, if the deque is emptied by a concurrent
-\lstinline!popBottom! operation after \lstinline!bottom! is read, but
+\lstinline!take! operation after \lstinline!bottom! is read, but
 before the CAS is executed. For that reason, as we describe later, any
-\lstinline!popBottom! operation that empties the deque tries to modify
+\lstinline!take! operation that empties the deque tries to modify
 \lstinline!top! (using a CAS operation), to guarantee that no
 concurrent \lstinline!steal! operation will also returns the deque's
 last entry.
 
-The \lstinline!popBottom! operation: As in the original algorithm, the
+The \lstinline!take! operation: As in the original algorithm, the
 owner can pop inexpensively (without using a CAS operation) provided
 that doing so does not cause the deque to become empty. If the deque
 was already empty, then it simply resets it to a canonical empty state
-(\lstinline!bottom == top!) and returns the Empty value
-(Lines 26-28). If the deque becomes empty, then the owner must perform
-a CAS on \lstinline!top! to see if it won or lost any race (with a
+(\lstinline!bottom == top!) and returns the Empty value (Lines
+26-28). If the deque becomes empty, then the owner must perform a CAS
+on \lstinline!top! to see if it won or lost any race (with a
 concurrent \lstinline!steal! operation) to pop the last item. Unlike
 the original ABP algorithm, the new algorithm performs the CAS on the
 value of the \lstinline!top! index and not on a tag value (note that
@@ -153,14 +261,14 @@ fails, then some concurrent \lstinline!steal! operation updated
 \lstinline!top! to that value). Therefore the deque is empty, and the
 operation completes by storing $t + 1$ in \lstinline!bottom! (by that,
 resetting the deque to a canonical empty state). In any case that the
-\lstinline!popBottom! operation does not return the empty value, the
-abstract \lstinline!popBottom! operation takes place when
+\lstinline!take! operation does not return the empty value, the
+abstract \lstinline!take! operation takes place when
 \lstinline!bottom! is updated at Line 23.
 
-\minisec{Avoid \lstinline!top! accesses in \lstinline!pushBottom!}
+\minisec{Avoid \lstinline!top! accesses in \lstinline!put!}
 
 Unlike the original ABP algorithm, the new algorithm requires reading
-\lstinline!top! on every execution of the \lstinline!pushBottom!
+\lstinline!top! on every execution of the \lstinline!put!
 operation. This may result in more data-cache misses compared to the
 original algorithm (recall that unlike \lstinline!bottom!,
 \lstinline!top! is modified by all processes).
@@ -176,405 +284,6 @@ compute the size of the deque (instead of the real value of
 real size of the deque can only be smaller than the one calculated
 using this local variable.
 
-\subsubsection{Shrinking After Growth}
-
-One disadvantage of the algorithm as presented is that it does not
-shrink the array as the deque retreats from its maximum. That means
-that the memory used by the deque is a constant factor times its
-maximum size, which might result in a big waste of memory.
-
-Shrinking the array is no harder than growing the array; it only
-requires that the algorithm check against a minimum use fraction of
-the current array when performing a \lstinline!popBottom!
-operation.\footnote{With the current implementation, this fraction
-  must be strictly less than $\frac{1}{2}$, to guarantee that the
-  deque elements could fit into the smaller array while leaving one
-  array cell unused.} The code for the \lstinline!popBottom!
-operation with the possible shrinking operation appears in Figures 5
-and 6. As illustrated by the code, Line 31 was modified to call the
-\lstinline!perhapsShrink! method just before returning the popped
-value. The \lstinline!perhapsShrink! method shrinks the array if the
-number of elements in the deque is less than some fraction
-$\frac{1}{K}$ of the array size, where $K \ge 3$. We omit the code for
-the \lstinline!CircularArray!'s shrink method since it is almost
-identical to the code of this class's \lstinline!grow! method.
-Finally, note that the \lstinline!perhapsShrink! method is independent
-of the \lstinline!popBottom! operation, and therefore can be invoked
-by the deque's owner on other occasions (for example after a
-\lstinline!pushBottom! operation).
-
-\minisec{Shrinking without copying}
-
-The simplest way to shrink back to a smaller array is similar to the
-way we grow it: Allocate a new smaller array, and copy the data from
-the big array to the smaller one. We can save the allocation time,
-however, if whenever we extend an array, we retain a reference from
-the bigger array to the smaller one. If each array has a reference to
-the smaller array from which it was extended, then the garbage
-collector cannot deallocate all the arrays that precede the current
-active one, and the algorithm can reuse these arrays when shrinking.
-
-Keeping the references to the smaller arrays not only saves the
-allocation time, it can also save some of the copying work: when the
-algorithm shrinks back from the big array to its previous smaller
-array, only the elements that were modified while the bigger array was
-active need to be copied (because the smaller array was not
-deallocated and therefore was not modified while the bigger array was
-active). This can be accomplished by maintaining a low-water-mark with
-each array: an integer that indicates the lowest value of
-\lstinline!bottom! in which an element was stored while the array was
-active. When a deque shrinks its array, only the elements stored in
-indexes greater than or equal to the low water mark of the bigger
-array are copied. Also, the smaller array's low water mark is updated
-to the minimum of the larger and smaller array's low water mark
-values.
-
-Note that the space overhead for referencing all the smaller arrays
-when growing is relatively low: if we double the array size every time
-we grow the array, the total overhead is less than the size of the
-current array.
-
-\minisec{Combining multiple shrinks}
-
-Sometimes it is useful to combine multiple shrink operations, that is
-to shrink back not to the previous smaller array, but to one (or more)
-preceding it. For example, suppose that we had 5 growing operations:
-$a_1 \rightarrow a_2 \rightarrow a_3 \rightarrow a_4 \rightarrow a_5$
-(here $a_i$ represents an array, and $a_{i+1}$ is a bigger array than
-$a_i$), and that on the next \lstinline!popBottom! operation we find
-out that almost all the deque elements were stolen, and that the
-number of elements left is less than some fraction of the size of
-$a_1$. In such a case it makes more sense to shrink from $a_5$
-directly to $a_1$, without going through all the intermediate
-arrays. Extra caution should be taken, however, when choosing which
-entries to copy using the low water mark: when copying from $a_5$ to
-$a_1$ , the low water mark is the minimum of the low water marks of
-$a_5$ and all the intermediate arrays (that is $a_4$, $a_3$ and
-$a_2$).
-
-\subsubsection{Working With a Shared Pool of Buffers}
-
-The deque algorithm presented depends upon a garbage collector to
-reclaim the unused buffers. For work-stealing algorithms, where each
-process has its own deque and the maximum amount of memory needed by
-all deques together can usually be bounded, it is often more suitable
-to use the shared pool model.
-
-With the shared pool model, the extra available buffers for all the
-deques are kept in a shared pool. Whenever the deque's owner needs a
-bigger array, it allocates one (of the appropriate size) from the
-pool, and whenever it shrinks to a smaller array and does not need the
-bigger array anymore, it can return it to the pool. There are two main
-advantages for the shared pool model: First, it is much less expensive
-to reclaim and allocate buffers from the shared pool than to allocate
-them from the heap and use the garbage collector for
-reclamation. Second, as described in this section, by assuming that
-the reclaimed buffers are not returned to a global use by the
-operating system, the deque's owner can reclaim a buffer while there
-may be still some thieves referencing it (something that the garage
-collector will not do), which leads to a better use of the allocated
-space.
-
-\minisec{Allocating and reclaiming buffers}
-
-Whenever the deque's owner needs a new array it allocates the array's
-buffer from the shared pool. Reclaiming buffers is trickier: Consider
-the case in which a \lstinline!steal! operation executes Line 13, and
-then a concurrent \lstinline!popBottom! operation shrinks the array
-and returns the bigger array's buffer to the shared pool. When the
-\lstinline!steal! operation resumes and executes Line 16, it reads and
-returns an element from the old bigger array which was already
-reclaimed, and therefore may be used by another deque. This scenario,
-of course, could not be allowed. Therefore, to return an array's
-buffer to the shared pool when shrinking back to a smaller
-one,\footnote{We assume that we do not reclaim the buffers of the
-  smaller arrays when growing to bigger ones (for a faster shrink
-  operation as described in Section 3.1). It is straightforward,
-  however, to use the same solution for reclaiming buffers also when
-  growing.} the deque's owner must have some guarantee that any
-thieves concurrently referencing that array will be forced to abort
-and will not return data read from it after it was reclaimed.
-
-One way to do it is by self-stealing: the deque's owner steals an item
-from its own deque and returns that item instead of an item popped
-from the \lstinline!bottom! of the deque. This solution, however, is
-problematic because it breaks the LIFO behavior that is normally
-expected for the deque's owner.
-
-Instead, we can use the property that the algorithm references the
-array modulo its size, and increment \lstinline!top! and
-\lstinline!bottom! in a way that aborts concurrent \lstinline!steal!
-operations, but does not change the content of the deque. For a given
-array size $N$, $x$ and $x + N$ both address the same element in the
-array. Therefore, incrementing \lstinline!top! and \lstinline!bottom!
-by the size of the new array when an array is shrunk or grown
-preserves the deque's content, but aborts any concurrent thefts. In
-Section 4.4 we show that modifying \lstinline!top! and
-\lstinline!bottom! as described still allows us to assume that they
-will not overflow.
-
-The modified \lstinline!perhapsShrink! and \lstinline!steal! methods
-appear in Figures 7 and 8. The new \lstinline!perhapsShrink! method
-contains the \lstinline!bottom! and \lstinline!top! modifications
-(Lines 39.2-39.6), right after making the new array active (Line
-39.1), and before returning the old array's buffer to the shared pool
-(Line 39.7). The order in which \lstinline!bottom! and \lstinline!top!
-are modified is important, because while the deque's owner is
-between these modifications, thieves must not spuriously return a
-value from an empty deque or report empty when elements are actually
-in the deque. Because the new \lstinline!perhapsShrink! method
-modifies \lstinline!bottom! before \lstinline!top!, a new empty deque
-scenario is added, which is when the difference between
-\lstinline!bottom! and \lstinline!top! is exactly the current array
-size. Because the \lstinline!pushBottom! method never fills the array
-to its maximum capacity, this difference uniquely identifies the new
-empty scenario, and can be detected by the \lstinline!steal! method.
-
-The CAS operation at Line 39.5. tries modifying \lstinline!top!. If it
-fails, then there must have been a concurrent \lstinline!steal!
-operation that modified \lstinline!top! after it was read by
-\lstinline!perhapsShrink! at Line 39.4, at which point the smaller
-array is already active. This implies that any subsequent CAS by
-another concurrent \lstinline!steal! operation that read an element
-from the old array will fail. Therefore if the CAS at Line 39.5 fails,
-the \lstinline!perhapsShrink! method simply returns \lstinline!bottom!
-to its original value (Line 39.6), and reclaims the old array buffer.
-
-The \lstinline!steal! method is modified in two places: An additional
-read of the active array is added (Line 11.1), and the emptiness check
-is extended (Lines 15.1-15.4). The emptiness check must be extended
-because the \lstinline!steal! operation may read \lstinline!bottom!
-and \lstinline!top! values that correspond to a deque in the
-``intermediate state'' between the \lstinline!bottom! and
-\lstinline!top! updates of a shrink operation. These values may
-indicate an empty deque although the difference between them is
-positive. Therefore, instead of only checking whether the difference
-between \lstinline!bottom! and \lstinline!top! is non-positive, the
-modified \lstinline!steal! method also checks whether this difference
-modulo the array size is 0 (Line 15.1), for the array reference read
-at Line 13.
-
-If the test at Line 15.1 succeeds, and the values read for
-\lstinline!top!, \lstinline!bottom!, and \lstinline!activeArray! at
-Lines 11,12 and 13, correspond to some state of the memory, then this
-state indicates an empty deque. To check whether these values indeed
-correspond to an actual state of the memory, we use the additional
-\lstinline!activeArray! reference read at Line 11.1. It can be shown
-that if the values of both \lstinline!top! and \lstinline!activeArray!
-were not modified from before reading \lstinline!bottom! at Line 12
-until right after reading \lstinline!activeArray! at Line 13, then the
-values read correspond to the memory state during the read of
-\lstinline!bottom! at Line 12. Therefore, if the test at Line 15.2
-succeeds, the method returns Empty;\footnote{In the correctness proof
-  we show that we do not need to worry about the ABA problem on the
-  \lstinline!activeArray! value.} otherwise, some concurrent operation
-successfully popped an element from the deque,\footnote{Assuming the
-  \lstinline!perhapsShrink! method is called only for a successful
-  \lstinline!popBottom! operation.} and the method returns Abort.
-
-Note that the deque's reference to the array is the first to be
-updated by the \lstinline!perhapsShrink! method (Line 39.1), but the
-last to be read by the \lstinline!steal! operation (Line 13), thereby
-guaranteeing that if the \lstinline!steal! operation sees an
-intermediate state, it sees the new (smaller) array. In the full
-version of the paper, we prove that the shared pool version of the
-algorithm implements a linearizable ABP-style deque that cannot
-overflow. Here we only informally show that using the above
-\lstinline!perhapsShrink! and \lstinline!steal! methods, prevents a
-\lstinline!steal! operation from returning an entry read from an array
-after it was returned to the shared pool.
-
-\begin{definition}
-  Array States:
-  \begin{itemize}
-  \item A live array is an array whose buffer does not reside in the
-    shared pool.
-  \item The active array of a deque is the array referenced by the
-    \lstinline!activeArray! data member of the deque object.
-  \end{itemize}
-\end{definition}
-
-\begin{lemma}
-  The \lstinline!steal! method never returns an entry that was read
-  from an array which is not live.
-\end{lemma}
-
-\begin{proof}
-  The only statement that returns buffers to the shared pool is Line
-  39.7 in the \lstinline!perhapsShrink! method, which is executed only
-  by the deque's owner. Also, the deque's owner is the only process
-  that may activate or deactivate an array (that is, replace the
-  active array of the deque). Since the \lstinline!perhapsShrink!
-  method set the new smaller array to be the active array before
-  executing Line 39.7, then an active array is never deallocated.
-
-  The \lstinline!steal! operation returns an entry only if the CAS
-  statement at Line 17 successfully writes the t + 1 value to
-  \lstinline!top!, in which case it returns the entry read at Line
-  16. The \lstinline!steal! operation reads the deque's active array
-  at Line 13, and therefore the array is live at that point. Thus, if
-  the \lstinline!steal! operation reads an entry from a non-live
-  array, it must be the case that a concurrent
-  \lstinline!perhapsShrink! operation:
-
-  \begin{enumerate}
-  \item Executes Line 39.7 before the \lstinline!steal! operation
-    executes Line 16, and
-  \item Executes Line 39.1 after the \lstinline!steal! operation
-    executed Line 13.
-  \end{enumerate}
-
-  This implies that Line 39.5 is executed after the \lstinline!steal!
-  operation reads \lstinline!top! at Line 11, but before it executes
-  Line 17. If the CAS at Line 39.5 succeeds, then the CAS at Line 17
-  fails. Otherwise, there must have been a concurrent
-  \lstinline!steal! operation that modified \lstinline!top! after the
-  \lstinline!perhapsShrink! executed Line 39.4, which also guarantees
-  that the CAS at Line 17 fails. We can conclude then that if a
-  \lstinline!steal! operation read an entry from a non-live array,
-  then the CAS operation at Line 17 fails, which implies that the
-  entry is not returned by that operation.
-\end{proof}
-
-\minisec{Lock freedom}
-
-The algorithm we presented is clearly wait-free: the only loop in the
-algorithm is the one that copies the data from one array to another,
-and it is guaranteed to be finite (linear in the length of the array
-from which we copy).
-
-A more interesting property, which we formally prove in the full
-version of the paper, is that even if the \lstinline!steal! operation
-retries every time it returns Abort, the algorithm is
-lock-free. Informally, this is correct because a \lstinline!steal!
-operation only returns Abort when either \lstinline!top! is modified
-by a concurrent pop operation (either a \lstinline!popBottom! or a
-\lstinline!steal! operation), or that \lstinline!top! or
-\lstinline!activeArray! are modified by a \lstinline!perhapsShrink!
-operation. Note that neither a pop nor a \lstinline!perhapsShrink!
-operation can cause more than 2 \lstinline!steal! operations by the
-same process to return Abort. Therefore, if a \lstinline!steal!
-operation by a process returns Abort infinitely often, then there must
-be other concurrent operations that complete successfully.
-
-\minisec{Deallocating memory from the shared pool}
-
-In case the shared pool runs out of buffers, it is possible to
-allocate more memory to it. Freeing memory from the shared pool is a
-more sensitive issue, especially in a strongly typed language, because
-reuse of the freed buffers can cause differently-typed data to be
-stored into these buffers. This may cause what is locally an actual
-typing error (between lines 16 and 19), because there might be some
-thieves that still reference the array that was stored in this buffer
-(even in non-strongly typed languages, releasing memory to the
-operating system and then referencing it may cause a runtime
-error). Therefore in order to safely free an array's buffer from the
-shared pool, we must first ensure that no thief is referencing that
-array. This is done automatically by a garbage collector, if one
-exists. Otherwise, other mechanisms should be used, like the Pass the
-Buck algorithm by Herlihy, Luchangco and Moir [7]. It is important to
-note, however, that freeing memory from the shared pool is a rare
-operation (usually it is not needed at all), and therefore even using
-a relatively expansive algorithm (like a garbage collector) should not
-significantly hurt the performance of the algorithm.
-
-\minisec{Analysis}
-
-Shrinking in the shared pool model consumes deque indices more rapidly
-than the earlier form of the algorithm, because every time the array
-is shrunk, \lstinline!top! and \lstinline!bottom! are incremented by
-the size of the smaller array. However, because of the policy of
-shrinking only at a particular utilization, the consumption of indices
-is still linear in the number of operations. Indices are consumed
-fastest when the deque oscillates between containing $\frac{N}{2}$ and
-$\frac{N}{K}$ elements, where N is the capacity of the larger of two
-arrays and $\frac{1}{K}$ is the utilization fraction under which we
-shrink the array. Each time the deque grows to $\frac{N}{2}$ elements,
-it expands out of the small array; each time it reduces to
-$\frac{N}{K}$ elements, it shrinks, and the \lstinline!top! and
-\lstinline!bottom! indices are bumped forward by $\frac{N}{2}$. The
-number of operations in a grow-shrink cycle is $2N \times (\frac{1}{2}
-- \frac{1}{K})$. Growth of \lstinline!top! is maximized if the
-operations that remove the elements from the deque are steals. The
-growth in one worst-case grow-shrink cycle is \lstinline!top! is $N
-\times (\frac{1}{2} - \frac{1}{K}) + \frac{N}{2}$. Dividing,
-cancelling, and simplifying produces a worst-case growth of $(K -
-1)/(K - 2)$ indices per operation, which is small given that $K \ge
-3$.
-
-If $K$ is $3$, then the amortized index consumption of each operation
-is no larger than $2$. A 64-bit index will not overflow until at least
-263 operations are performed. If operations occur at a rate of 232 per
-second, this provides at least 231 seconds of run-time. One year is
-roughly equal to 225 seconds, so a 64 bit index permits at least 64
-years of continuous operation without overflow.
-
-Because the active array in the deque is at least $\frac{1}{K}$
-filled, and because the total size of the smaller blocks is at most
-the size of the active array, the storage overhead of this algorithm
-is at most $2K$ times the current deque size.\footnote{This upper
-  bound assumes that the \lstinline!perhapsShrink! method is called by
-  the deque's owner often enough to shrink the deque's array when
-  necessary.}
-
-\subsubsection{Performance}
-
-We evaluated the performance of the new dynamic circular work-stealing
-algorithm in comparison to the original fixed-array ABP work-stealing
-algorithm. We implemented both algorithms in C++, and used a simple
-shared pool algorithm that allocates and frees a buffer with a single
-CAS instruction.
-
-The benchmark we ran simulates load balancing of a general computation
-by building the DAG corresponding to the computation
-\cite{Blumofe1999}, as follows: Initially a single deque contains a
-single node representing the first work item of the
-computation. Processes pop nodes from their own deques, and
-\lstinline!steal! nodes from other deques if their own deque is
-empty. Each time a process pops a node from a deque, it generates up
-to B child nodes, and pushes them into its deque (B represents the
-maximum branch of the DAG, and it is a configurable parameter). The
-number of child nodes generated for a node is randomly chosen with
-probability that is inversely proportional to the depth of that node
-in the DAG. The expected number of child nodes for a node of depth $d$
-in a DAG of maximum depth $D$ is: $B \cdot \left(1 - \frac{d}{D}
-\right)$. To get the most accurate measure of the performance
-difference between the two algorithms, we did not perform any work on
-a node other than pushing its child nodes to the process's deque.
-
-We ran the benchmark on a 16 node Sun Enterprise 6500, an SMP machine
-formed from 8 boards of two 400MHz UltraSparc processors, connected by
-a crossbar UPA switch, and running a SolarisTM 9 operating system. We
-chose the maximum branch of the DAG to be 13, and the maximum depth to
-be 10. We used 72-element arrays for the original ABP deques, and our
-algorithm allocated the deques with an initial size of 64-elements,
-plus a few 128-element arrays in the shared pool.
-
-Figure 9 presents the throughput of both algorithms, running
-stand-alone, as a function of the number of processes. As can be
-seen, both algorithms scale well, and the performance difference is
-relatively small. Recall that our benchmark does not perform any real
-computation -- it only measures the load-balancing algorithm
-overhead. In real applications the time spent on the load-balancing
-algorithm Next we ran our benchmark in a multiprogrammed fashion by
-running multiple instances of it in parallel, where each instance is
-running with 16 processes (as the number of processors on the
-machine). Figure 10 presents the throughput of an instance as a
-function the multiprogramming level. As can be seen, there is no
-significant difference in the performance of the two algorithms.
-
-To compare the stability of the two algorithms, we measured how many
-of our 64-element arrays overflowed and needed a 128-element array
-from the shared pool, and noticed that at most one 128-element array
-is ever needed. On the other hand, the 72-element array allocated for
-each of the deques in the original ABP algorithm was not always
-sufficient, and in some cases the algorithm failed to complete due to
-an overflow of an array. These failures became more frequent as the
-level of multiprogramming increased. Therefore, for the same amount of
-array space (notice that $16 \cdot 72 = 128 + (16 \cdot 64)$), we get
-more robustness with our new algorithm than with the original ABP
-algorithm, without a noticeable cost in performance.
-
 \subsubsection{Summary}
 
 We present the first ABP-style circular work stealing deque that
@@ -586,126 +295,14 @@ ABP-work stealing such as the locality-guided work-stealing of Acar,
 Blelloch and Blumofe \cite{Acar2002} or the steal-half algorithm of
 Hendler and Shavit \cite{Hendler2002}.
 
-\subsection{The art of multiprocessor programming \cite{Herlihy2008}}
+\todo[inline]{Finish section ``Work-Stealing Deque''}
 
-A limitation of the \lstinline!BoundedDEQueue! class is that the queue
-has a fixed size. For some applications, it may be difficult to
-predict this size, especially if some threads create significantly
-more tasks than others. Assigning each thread its own
-\lstinline!BoundedDEQueue! of maximal capacity wastes space.
-
-To address these limitations, we now consider an unbounded
-double-ended queue \lstinline!UnboundedDEQueue! class that dynamically
-resizes itself as needed.
-
-We implement the \lstinline!UnboundedDEQueue! in a cyclic array, with
-\lstinline!top! and \lstinline!bottom! fields as in the
-\lstinline!BoundedDEQueue! (except indexed modulo the array's
-capacity). As before, if \lstinline!bottom! is less than or equal to
-\lstinline!top!, the \lstinline!UnboundedDEQueue! is empty. Using a
-cyclic array eliminates the need to reset \lstinline!bottom! and
-\lstinline!top! to \lstinline!0!. Moreover, it permits \lstinline!top!
-to be incremented but never decremented, eliminating the need for
-\lstinline!top! to be an \lstinline!AtomicStampedReference!. Moreover,
-in the \lstinline!UnboundedDEQueue! algorithm, if
-\lstinline!pushBottom()! discovers that the current circular array is
-full, it can resize (enlarge) it, copying the tasks into a bigger
-array, and pushing the new task into the new (larger) array. Because
-the array is indexed modulo its capacity, there is no need to update
-the \lstinline!top! or \lstinline!bottom! fields when moving the
-elements into a bigger array (although the actual array indexes where
-the elements are stored might change).
-
-The \lstinline!CircularTaskArray()! class is depicted in
-Fig. 16.13. It provides \lstinline!get()! and put() methods that add
-and remove tasks, and a \lstinline!resize()! method that allocates a
-new circular array and copies the old array's contents into the new
-array. The use of modular arithmetic ensures that even though the
-array has changed size and the tasks may have shifted positions,
-thieves can still use the \lstinline!top! field to find the next task
-to steal.
-
-The \lstinline!UnboundedDEQueue! class has three fields: tasks,
-\lstinline!bottom!, and \lstinline!top! (Fig. 16.14, Lines 3 -- 5). The
-\lstinline!popBottom()! (Fig. 16.14) and \lstinline!popTop()! methods
-(Fig. 16.15) are almost the same as those of the BoundedDEQueue, with
-one key difference: the use of modular arithmetic to compute indexes
-means the \lstinline!top! index need never be decremented. As noted,
-there is no need for a timestamp to prevent ABA problems. Both
-methods, when competing for the last task, steal it by incrementing
-\lstinline!top!. To reset the \lstinline!UnboundedDEQueue! to empty,
-simply increment the \lstinline!bottom! field to equal
-\lstinline!top!. In the code, \lstinline!popBottom()!, immediately
-after the compareAndSet() in Line 27, sets \lstinline!bottom! to equal
-\lstinline!top+1! whether or not the compareAndSet() succeeds,
-because, even if it failed, a concurrent thief must have stolen the
-last task. Storing \lstinline!top+1! into \lstinline!bottom! makes
-\lstinline!top! and \lstinline!bottom! equal, resetting the
-\lstinline!UnboundedDEQueue! object to an empty state.
-
-The isEmpty() method (Fig. 16.14) first reads \lstinline!top!, then
-\lstinline!bottom!, checking whether \lstinline!bottom! is less than
-or equal to \lstinline!top! (Line 4). The order is important because
-\lstinline!top! never decreases, and so if a thread reads
-\lstinline!bottom! after \lstinline!top! and sees it is no greater,
-the queue is indeed empty because a concurrent modification of
-\lstinline!top! could only have increased the \lstinline!top!
-value. The same principle applies in the \lstinline!popTop()! method
-call. An example execution is provided in Fig. 16.16.
-
-The \lstinline!pushBottom()! method (Fig. 16.14) is almost the same as
-that of the BoundedDEQueue. One difference is that the method must
-enlarge the circular array if the current push is about to cause it to
-exceed its capacity. Another is that \lstinline!popTop()! does not
-need to manipulate a timestamp. The ability to resize carries a price:
-every call must read \lstinline!top! (Line 21) to determine if a
-resize is necessary, possibly causing more cache misses because
-\lstinline!top! is modified by all processes. We can reduce this
-overhead by having threads save a local value of \lstinline!top! and
-using it to compute the size of the \lstinline!UnboundedDEQueue!
-object. A thread reads the \lstinline!top!field only when this bound
-is exceeded, indicating that a \lstinline!resize()! may be necessary.
-Even though the local copy may become outdated because of changes to
-the shared \lstinline!top!, \lstinline!top! is never decremented, so
-the real size of the \lstinline!UnboundedDEQueue! object can only be
-smaller than the one calculated using the local variable.
-
-In summary, we have seen two ways to design a nonblocking linearizable
-\lstinline!DEQueue! class. We can get away with using only loads and
-stores in the most common manipulations of the DEQueue, but at the
-price of having more complex algorithms. Such algorithms are
-justifiable for an application such as an executer pool whose
-performance may be critical to a concurrent multithreaded system.
-
-\lstinputlisting[style=Numbers,
-  caption={Work-stealing deque}, 
-  label=lst:work-stealing-deque]{
-    ../listings/queues-implementation/WorkStealingDeque.java
-}
-
-\lstinputlisting[style=Numbers,
-  caption={Work-stealing deque: Put}, 
-  label=lst:work-stealing-deque-put]{
-    ../listings/queues-implementation/WorkStealingDeque-put.java
-}
-
-\lstinputlisting[style=Numbers,
-  caption={Work-stealing deque: Take}, 
-  label=lst:work-stealing-deque-take]{
-    ../listings/queues-implementation/WorkStealingDeque-take.java
-}
-
-\lstinputlisting[style=Numbers,
-  caption={Work-stealing deque: Steal}, 
-  label=lst:work-stealing-deque-steal]{
-    ../listings/queues-implementation/WorkStealingDeque-steal.java
-}
-
-\lstinputlisting[style=Numbers,
-  caption={Work-stealing deque: Expand}, 
-  label=lst:work-stealing-deque-expand]{
-    ../listings/queues-implementation/WorkStealingDeque-expand.java
-}
+\begin{itemize}
+\item Dynamic circular work-stealing deque \cite{Chase2005}
+\item Nonblocking Cyclic Extendable Deque for the ABP work stealing
+  algorithm \cite{Lev2005}
+\item The art of multiprocessor programming \cite{Herlihy2008}
+\end{itemize}
 
 
 \section{Dynamic Work-Stealing Deque}

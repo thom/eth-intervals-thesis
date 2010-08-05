@@ -14,6 +14,66 @@
 \item $\le 8$ cores
 \end{itemize}
 
+
+\subsection{Dynamic circular work-stealing deque \cite{Chase2005}}
+
+We evaluated the performance of the new dynamic circular work-stealing
+algorithm in comparison to the original fixed-array ABP work-stealing
+algorithm. We implemented both algorithms in C++, and used a simple
+shared pool algorithm that allocates and frees a buffer with a single
+CAS instruction.
+
+The benchmark we ran simulates load balancing of a general computation
+by building the DAG corresponding to the computation
+\cite{Blumofe1999}, as follows: Initially a single deque contains a
+single node representing the first work item of the
+computation. Processes pop nodes from their own deques, and
+\lstinline!steal! nodes from other deques if their own deque is
+empty. Each time a process pops a node from a deque, it generates up
+to B child nodes, and pushes them into its deque (B represents the
+maximum branch of the DAG, and it is a configurable parameter). The
+number of child nodes generated for a node is randomly chosen with
+probability that is inversely proportional to the depth of that node
+in the DAG. The expected number of child nodes for a node of depth $d$
+in a DAG of maximum depth $D$ is: $B \cdot \left(1 - \frac{d}{D}
+\right)$. To get the most accurate measure of the performance
+difference between the two algorithms, we did not perform any work on
+a node other than pushing its child nodes to the process's deque.
+
+We ran the benchmark on a 16 node Sun Enterprise 6500, an SMP machine
+formed from 8 boards of two 400MHz UltraSparc processors, connected by
+a crossbar UPA switch, and running a SolarisTM 9 operating system. We
+chose the maximum branch of the DAG to be 13, and the maximum depth to
+be 10. We used 72-element arrays for the original ABP deques, and our
+algorithm allocated the deques with an initial size of 64-elements,
+plus a few 128-element arrays in the shared pool.
+
+Figure 9 presents the throughput of both algorithms, running
+stand-alone, as a function of the number of processes. As can be
+seen, both algorithms scale well, and the performance difference is
+relatively small. Recall that our benchmark does not perform any real
+computation -- it only measures the load-balancing algorithm
+overhead. In real applications the time spent on the load-balancing
+algorithm Next we ran our benchmark in a multiprogrammed fashion by
+running multiple instances of it in parallel, where each instance is
+running with 16 processes (as the number of processors on the
+machine). Figure 10 presents the throughput of an instance as a
+function the multiprogramming level. As can be seen, there is no
+significant difference in the performance of the two algorithms.
+
+To compare the stability of the two algorithms, we measured how many
+of our 64-element arrays overflowed and needed a 128-element array
+from the shared pool, and noticed that at most one 128-element array
+is ever needed. On the other hand, the 72-element array allocated for
+each of the deques in the original ABP algorithm was not always
+sufficient, and in some cases the algorithm failed to complete due to
+an overflow of an array. These failures became more frequent as the
+level of multiprogramming increased. Therefore, for the same amount of
+array space (notice that $16 \cdot 72 = 128 + (16 \cdot 64)$), we get
+more robustness with our new algorithm than with the original ABP
+algorithm, without a noticeable cost in performance.
+
+
 %%% Local Variables: 
 %%% mode: latex
 %%% TeX-master: "thesis"
