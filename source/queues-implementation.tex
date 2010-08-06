@@ -9,23 +9,36 @@
 \label{sec:queues-implementation-ws-deque}
 
 The \emph{Work-Stealing Deque} is an unbounded double-ended queue that
-dynamically resizes itself as needed.Its design is based on the
+dynamically resizes itself as needed. Its design is based on the
 \emph{Dynamic Circular Work-Stealing Deque} \cite{Chase2005, Lev2005}.
 
-As with the lazy deque, the only restriction on the deque size is due
-to integer overflow.\footnote{A 64-bit integer is large enough to
-  accommodate 64 years of puts, takes, and steals executing at a rate
-  of 4 billion operations per second, so it appears that this will not
-  be a problem in practice.}
-
-We implement the \lstinline!WorkStealingDeque! in a cyclic array, with
-\lstinline!top! and \lstinline!bottom! fields as indices. When using
-\lstinline!top! and \lstinline!bottom! to access array elements, we
-have to use them modulo the array's capacity as the array is
+We implemented the \lstinline!WorkStealingDeque! in a cyclic array,
+with \lstinline!top! and \lstinline!bottom! fields as indices. When
+using \lstinline!top! and \lstinline!bottom! to access array elements,
+we have to use them modulo the array's capacity as the array is
 cyclic. If \lstinline!bottom! is less than or equal to
 \lstinline!top!, the \lstinline!WorkStealingDeque! is empty. Using a
 cyclic array eliminates the need to reset \lstinline!bottom! and
-\lstinline!top! to \lstinline!0!. 
+\lstinline!top! to \lstinline!0!.
+
+The deque is implemented using a cyclic array, together with two
+indexes: \lstinline!top! and \lstinline!bottom!, indicating the two
+ends of the deque. Specifically, the \lstinline!bottom! index
+indicates the next available slot in the array where the next new
+element is pushed, and is incremented on every \lstinline!put()!
+operation. The \lstinline!top! index indicates the topmost element in
+the deque (if there is any), and is incremented on every
+\lstinline!steal()! operation. Since the only operation that modifies
+\lstinline!top! is \lstinline!steal()!, \lstinline!top! is never
+decremented, and there is no need for a tag field as in all previous
+work-stealing algorithms. If \lstinline!bottom! is less than or equal
+to \lstinline!top!, the deque is empty.
+
+\lstinline!steal()! does not need to manipulate a timestamp.
+
+The growable circular array: The simplest implementation of a growable
+circular array is a power-of-two-sized array that grows by doubling
+its size.
 
 The \lstinline!WorkStealingDeque! class has three fields:
 \lstinline!workItems!, \lstinline!bottom!, and \lstinline!top!:
@@ -44,46 +57,21 @@ Moreover, it permits \lstinline!top!  to be incremented but never
 decremented, eliminating the need for \lstinline!top! to be an
 \lstinline!AtomicStampedReference!.
 
-\subsubsection{Circular Array}
-
-The deque is implemented using a cyclic array, together with two
-indexes: \lstinline!top! and \lstinline!bottom!, indicating the two
-ends of the deque. Specifically, the \lstinline!bottom! index
-indicates the next available slot in the array where the next new
-element is pushed, and is incremented on every \lstinline!put!
-operation. The \lstinline!top! index indicates the topmost element in
-the deque (if there is any), and is incremented on every
-\lstinline!steal! operation. Since the only operation that modifies
-\lstinline!top! is \lstinline!steal!, \lstinline!top! is never
-decremented, and there is no need for a tag field as in all previous
-work-stealing algorithms.\footnote{We assume that \lstinline!top!
-  never overflows. As explained in the previous section, with a 64-bit
-  integer implementation this is a very reasonable assumption.} If
-\lstinline!bottom! is less than or equal to \lstinline!top!, the deque
-is empty.
-
-\lstinline!steal()! does not need to manipulate a timestamp.
-
-The growable circular array: The simplest implementation of a growable
-circular array is a power-of-two-sized array that grows by doubling
-its size.
-
-\subsubsection{Methods}
-
-The code for the \lstinline!put!, \lstinline!steal! and
-\lstinline!take! operations appears in Listings
+The code for the \lstinline!put()!, \lstinline!steal()! and
+\lstinline!take()! operations appears in Listings
 \ref{lst:work-stealing-deque-put}, \ref{lst:work-stealing-deque-take}
 and \ref{lst:work-stealing-deque-steal} respectively. The algorithm
 does not have a tag field in the \lstinline!top! variable -- instead,
 it maintains the property that \lstinline!top! is never decremented.
 
-The \lstinline!put! operation inserts the pushed entry to the deque
+The \lstinline!put()! operation inserts the pushed entry to the deque
 simply by writing it in the location specified by \lstinline!bottom!,
-and then incrementing \lstinline!bottom! by 1. The \lstinline!put!
+and then incrementing \lstinline!bottom! by 1. The \lstinline!put()!
 operation is also responsible for enlarging the array if an element is
 pushed into an already-full array. Whether the array is enlarged or
-not, the \lstinline!put! operation takes place when \lstinline!bottom!
-is updated at Line \ref{lst:work-stealing-deque-put-update-bottom}.
+not, the \lstinline!put()! operation takes place when
+\lstinline!bottom!  is updated at Line
+\ref{lst:work-stealing-deque-put-update-bottom}.
 
 The \lstinline!put()! method must enlarge the circular array if the
 current push is about to cause it to exceed its capacity.
@@ -92,11 +80,11 @@ To check whether the current array is full, the operation subtracts
 the value of \lstinline!top! from \lstinline!bottom! (which gives the
 number of elements that were in the deque when \lstinline!top! was
 read), and compares it to the size of the array. If necessary, the
-\lstinline!put! operation uses the \lstinline!expand()! method to
+\lstinline!put()! operation uses the \lstinline!expand()! method to
 enlarge the current array.
 
 \lstinputlisting[style=Numbers,
-  caption={Work-stealing deque: Put}, 
+  caption={Work-stealing deque: \lstinline!put()! method}, 
   label=lst:work-stealing-deque-put]{
     ../listings/queues-implementation/WorkStealingDeque-put.java
 }
@@ -112,8 +100,8 @@ change).
 
 Since the algorithm uses a cyclic array it makes more efficient use of
 the array, and does not need the reset-on-empty heuristic used in the
-original ABP algorithm. If a \lstinline!put! operation discovers that
-the current circular array is full, it enlarges it by copying the
+original ABP algorithm. If a \lstinline!put()! operation discovers
+that the current circular array is full, it enlarges it by copying the
 deque's elements into a bigger array, and pushes the new element into
 the new enlarged array. The deque elements stored in the circular
 array are indexed modulo its size, and therefore when moving the
@@ -121,69 +109,65 @@ elements into a bigger array, there is no need to update
 \lstinline!top! or \lstinline!bottom! although the actual array
 indexes where the elements are stored might change.
 
-The \lstinline!CircularTaskArray()! class is depicted in
-Fig. 16.13. It provides \lstinline!get()! and put() methods that add
-and remove tasks, and a \lstinline!resize()! method that allocates a
-new circular array and copies the old array's contents into the new
-array. The use of modular arithmetic ensures that even though the
-array has changed size and the tasks may have shifted positions,
-thieves can still use the \lstinline!top! field to find the next task
-to steal.
+The \lstinline!resize()! method allocates a new circular array and
+copies the old array's contents into the new array. The use of modular
+arithmetic ensures that even though the array has changed size and the
+tasks may have shifted positions, thieves can still use the
+\lstinline!top! field to find the next task to steal.
 
 When the array is full, a new doubled size array is allocated, and the
-elements are copied from the old array to the new one. The pseudocode
-for the \lstinline!CircularArray! class appears in Figure 4. Note that
-since the elements are indexed modulo the array size, the actual array
+elements are copied from the old array to the new one. Note that since
+the elements are indexed modulo the array size, the actual array
 indexes where the elements are stored might change when copying from
 one array to another, but the value of \lstinline!top!  and
 \lstinline!bottom! remains the same.
 
 \lstinputlisting[style=Numbers,
-  caption={Work-stealing deque: Expand}, 
+  caption={Work-stealing deque: \lstinline!expand()! method}, 
   label=lst:work-stealing-deque-expand]{
     ../listings/queues-implementation/WorkStealingDeque-expand.java
 }
 
-The owner can \lstinline!take! inexpensively (without using a CAS
-operation) provided that doing so does not cause the deque to become
-empty. If the deque was already empty, then it simply resets it to a
-canonical empty state (\lstinline!bottom == top!) and returns
-\lstinline!null! (Lines \ref{lst:work-stealing-deque-take-empty-1} --
+The owner can take inexpensively (without using a CAS operation)
+provided that doing so does not cause the deque to become empty. If
+the deque was already empty, then it simply resets it to a canonical
+empty state (\lstinline!bottom == top!) and returns \lstinline!null!
+(Lines \ref{lst:work-stealing-deque-take-empty-1} --
 \ref{lst:work-stealing-deque-take-empty-2}). If the deque becomes
 empty, then the owner must perform a CAS on \lstinline!top! to see if
-it won or lost any race with a concurrent \lstinline!steal!  operation
-to take the last item. The algorithm performs the CAS on the value of
-the \lstinline!top! index and not on a tag value (note that
+it won or lost any race with a concurrent \lstinline!steal()!
+operation to take the last item. The algorithm performs the CAS on the
+value of the \lstinline!top! index and not on a tag value (note that
 incrementing \lstinline!top!  when the deque is empty leaves the deque
 in an empty state). Right after the CAS operation, whether it succeeds
 or not, the value of \lstinline!top! is \lstinline!t + 1! (note that
-if the CAS fails, then some concurrent \lstinline!steal!  operation
+if the CAS fails, then some concurrent \lstinline!steal()!  operation
 updated \lstinline!top! to that value). Therefore the deque is empty,
 and the operation completes by storing \lstinline!t + 1! in
 \lstinline!bottom!  (by that, resetting the deque to a canonical empty
-state). In any case that the \lstinline!take!  operation does not
-return the empty value, the \lstinline!take! operation takes place
+state). In any case that the \lstinline!take()!  operation does not
+return the empty value, the \lstinline!take()! operation takes place
 when \lstinline!bottom! is updated at Line
 \ref{lst:work-stealing-deque-take-update}.
 
 \lstinputlisting[style=Numbers,
-  caption={Work-stealing deque: Take}, 
+  caption={Work-stealing deque: \lstinline!take()! method},
   label=lst:work-stealing-deque-take]{
     ../listings/queues-implementation/WorkStealingDeque-take.java
 }
 
-The \lstinline!steal! method begins by reading \lstinline!top! and
+The \lstinline!steal()! method begins by reading \lstinline!top! and
 \lstinline!bottom!, and checking whether the deque is empty by
 comparing these values. If the deque is not empty, it reads the
 element stored in the \lstinline!top! position of the cyclic array,
 and tries to increment \lstinline!top! using a CAS operation. If the
-CAS fails, it implies that a concurrent \lstinline!steal! operation
+CAS fails, it implies that a concurrent \lstinline!steal()! operation
 successfully removed an element from the deque, so the operation tries
 to steal again; otherwise it returns the element read right before the
 successful CAS operation. Since the algorithm uses a cyclic array, it
 is important to read the element from the array before we do the CAS,
 because after the CAS completes, this location may be refilled with a
-new value by a concurrent \lstinline!put!  operation.
+new value by a concurrent \lstinline!put()!  operation.
 
 The \lstinline!steal()! method first reads \lstinline!top!, then
 \lstinline!bottom!, checking whether \lstinline!bottom! is less than
@@ -193,22 +177,23 @@ or equal to \lstinline!top!. The order is important because
 the queue is indeed empty because a concurrent modification of
 \lstinline!top! could only have increased the \lstinline!top! value.
 
-A successful CAS is the point at which the \lstinline!steal!
+A successful CAS is the point at which the \lstinline!steal()!
 operation takes place. Note that because \lstinline!top! is read
 before \lstinline!bottom!, it is guaranteed that the values read
 represent a consistent view of the memory. Specifically, it implies
 that \lstinline!bottom! and \lstinline!top! indeed had their observed
 values when \lstinline!bottom! was read at Line
 \ref{lst:work-stealing-deque-steal-bottom}. A subtle case may arise,
-however, if the deque is emptied by a concurrent \lstinline!take!
+however, if the deque is emptied by a concurrent \lstinline!take()!
 operation after \lstinline!bottom! is read, but before the CAS is
-executed. For that reason, as we describe later, any \lstinline!take!
-operation that empties the deque tries to modify \lstinline!top!
-(using a CAS operation), to guarantee that no concurrent
-\lstinline!steal! operation will also returns the deque's last entry.
+executed. For that reason, as we describe later, any
+\lstinline!take()!  operation that empties the deque tries to modify
+\lstinline!top!  (using a CAS operation), to guarantee that no
+concurrent \lstinline!steal()! operation will also returns the deque's
+last entry.
 
 \lstinputlisting[style=Numbers,
-  caption={Work-stealing deque: Steal}, 
+  caption={Work-stealing deque: \lstinline!steal()! method}, 
   label=lst:work-stealing-deque-steal]{
     ../listings/queues-implementation/WorkStealingDeque-steal.java
 }
@@ -230,40 +215,6 @@ concurrent thief must have stolen the last task. Storing
 \lstinline!top + 1! into \lstinline!bottom! makes \lstinline!top! and
 \lstinline!bottom! equal, resetting the \lstinline!WorkStealingDeque!
 object to an empty state.
-
-\minisec{Avoid \lstinline!top! accesses in \lstinline!put!}
-
-Unlike the original ABP algorithm, the new algorithm requires reading
-\lstinline!top! on every execution of the \lstinline!put!
-operation. This may result in more data-cache misses compared to the
-original algorithm (recall that unlike \lstinline!bottom!,
-\lstinline!top! is modified by all processes).
-
-The frequency of accesses to the \lstinline!top! variable can be
-significantly reduced, by keeping a local upper bound on the size of
-the deque, and only read \lstinline!top! when the upper bound
-indicates that an array expansion may be necessary. Such a local upper
-bound can be easily achieved by saving the last value of
-\lstinline!top! read in a local variable, and using this variable to
-compute the size of the deque (instead of the real value of
-\lstinline!top!). Because \lstinline!top! is never decremented, the
-real size of the deque can only be smaller than the one calculated
-using this local variable.
-
-\minisec{Herlihy}
-
-The ability to resize carries a price: every call must read
-\lstinline!top! (Line 21) to determine if a resize is necessary,
-possibly causing more cache misses because \lstinline!top!  is
-modified by all processes. We can reduce this overhead by having
-threads save a local value of \lstinline!top!  and using it to compute
-the size of the \lstinline!UnboundedDEQueue!  object. A thread reads
-the \lstinline!top!field only when this bound is exceeded, indicating
-that a \lstinline!resize()! may be necessary.  Even though the local
-copy may become outdated because of changes to the shared
-\lstinline!top!, \lstinline!top! is never decremented, so the real
-size of the \lstinline!UnboundedDEQueue! object can only be smaller
-than the one calculated using the local variable.
 
 \todo[inline]{Finish section ``Work-Stealing Deque''}
 
@@ -371,8 +322,8 @@ to another worker in its group when that worker can be unblocked
 (because the task on which it was waiting has completed for example).
 
 Each worker group keeps tasks in its own doubled-ended queue. The task
-queue provides the operations \lstinline!Push!, \lstinline!Pop! and
-\lstinline!Take!. When a task is created, the running worker thread
+queue provides the operations \lstinline!Push()!, \lstinline!Pop()! and
+\lstinline!Take()!. When a task is created, the running worker thread
 pushes the task onto the local queue of its group. If it finishes its
 current task, it will try to pop a task from the group queue and
 continue with that. This way, a task is always pushed and popped
@@ -382,7 +333,7 @@ are no more tasks in its queue (and none of the other workers in its
 group can be unblocked), it becomes a thief : it chooses another task
 queue of another worker group at random and tries to steal a task or
 replicable task from the (non-local) end of the task queue using
-\lstinline!Take!. For many parallel conquer-and-divide algorithms,
+\lstinline!Take()!. For many parallel conquer-and-divide algorithms,
 this ensures that the largest tasks are stolen first. For loops,
 which are typically implemented via replicable tasks, it means that
 tasks are only replicated on demand, i.e. when another thread starts
@@ -398,12 +349,12 @@ to ensure that each pushed task is only popped or taken once such that
 each task is only executed once. To achieve atomic take and pop
 operations, most implementations, like \cite{Arora2001}, rely on the
 THE protocol \cite{Dijkstra1965}, which allow the common
-\lstinline!Push! and \lstinline!Pop! operations to be implemented
+\lstinline!Push()! and \lstinline!Pop()! operations to be implemented
 without using expensive atomic compare-and-swap
 operations. Unfortunately, this only works on machines with a
 sequentially consistent memory model, and in practice there are just
 few architectures that support this. On the x86 for example, one needs
-to insert a memory barrier in \lstinline!Pop! operation which is
+to insert a memory barrier in \lstinline!Pop()! operation which is
 almost as expensive as taking a lock in the first place.
 
 Moreover, there is an even bigger disadvantage to queues based on the
@@ -411,7 +362,7 @@ THE protocol which is more subtle. As shown in Section 4.1, whenever
 f2.Value is called where the future f2 has not yet started, we should
 execute it directly on the calling thread. But if we use the THE
 protocol, there is no mechanism to get f2 exclusively: we can only
-\lstinline!Pop! it from our queue if it happens to be the last task
+\lstinline!Pop()! it from our queue if it happens to be the last task
 that was pushed, otherwise one cannot determine whether f2 is on the
 local queue, or resides in a queue of another worker group. Without
 gaining exclusive access in some other way, we cannot execute the task
@@ -441,7 +392,7 @@ Effectively, this ensures that each task is only executed once, or
 stated differently: running a task is an idempotent
 operation. Unfortunately, if we would use task queues based on the THE
 protocol we now use two mechanisms for mutual exclusion, and execute
-both a memory barrier instruction on a \lstinline!Pop! operation, and
+both a memory barrier instruction on a \lstinline!Pop()! operation, and
 an interlocked instruction when calling Run. Since these are expensive
 instructions that require synchronization among the processors, we
 would like to avoid these. As shown in the previous paragraphs, the
@@ -457,20 +408,20 @@ they already implement their own mutual exclusion.
 \subsubsection{Duplicating Queues}
 
 A duplicating queue is a double-ended queue that potentially returns a
-pushed element more than once. In particular, the \lstinline!Push! and
-\lstinline!Pop! operations behave like normal, but the
-\lstinline!Take! operation is allowed to either take an element (and
+pushed element more than once. In particular, the \lstinline!Push()! and
+\lstinline!Pop()! operations behave like normal, but the
+\lstinline!Take()! operation is allowed to either take an element (and
 remove it from the queue), or to just duplicate an element in the
 queue. While this nondeterminism might be dangerous for many clients,
 it is fine for our usage of the duplicating queue: the Task's Run
 method is idempotent and ReplicableTask's expect to be executed in
 parallel. Other properties of a duplicating queues are as usual: a
 duplicating queue never loses an element, and returns all pushed
-elements after a finite number of \lstinline!Pop! (and
-\lstinline!Take!) operations.
+elements after a finite number of \lstinline!Pop()! (and
+\lstinline!Take()!) operations.
 
 By allowing duplication we can avoid an expensive memory barrier
-instruction in the \lstinline!Pop! operation on the x86
+instruction in the \lstinline!Pop()! operation on the x86
 architecture. More generally, our duplicating queue is designed
 specifically to be correct on architectures satisfying the Total Store
 Order (TSO) memory model (Sindhu et al. 1991) or stronger model. To
@@ -628,9 +579,9 @@ in this scheme, only the owner thread can add tasks to its set, but
 all threads (including the owner) can take items from the owner's set.
 
 This working set of items (called a work stealing queue from now on)
-supports three main operations: \lstinline!put! and \lstinline!take!
+supports three main operations: \lstinline!put()! and \lstinline!take()!
 which are used only by the queue's owner to insert and extract tasks,
-and \lstinline!steal! which is used by other threads to steal work.
+and \lstinline!steal()! which is used by other threads to steal work.
 Current algorithms for work stealing queues comply with the following
 semantics: each inserted task is eventually extracted -- by the owner
 thread or other threads -- exactly once. However, these semantics are
@@ -661,7 +612,7 @@ operation. For example, the algorithms must guarantee that no tasks
 are lost and all extracted tasks contain valid and consistent
 information while at the same time avoiding the use of expensive
 synchronization instructions in the owner's operations:
-\lstinline!put! and \lstinline!take!.
+\lstinline!put()! and \lstinline!take()!.
 
 On mainstream processors, existing algorithms for conventional work
 stealing queues require store-load memory ordering fence instructions
@@ -766,9 +717,9 @@ adhering to the strong semantics. In a paper by Frigo
 et. al. \cite{Frigo1998}, the authors present the THE work stealing
 algorithm implemented in the Cilk language runtime
 \cite{Blumofe1995}. That algorithm is based on Dijkstra's mutual
-exclusion protocol and uses locks in the \lstinline!steal!  operation
+exclusion protocol and uses locks in the \lstinline!steal()!  operation
 and in the corner case when the queue is empty it uses locks in
-\lstinline!take!. Another algorithm presented by Arora
+\lstinline!take()!. Another algorithm presented by Arora
 et. al. \cite{Arora2001} presents a non-blocking double-ended work
 queue but in the worst-case requires unbounded memory even if the
 number of waiting tasks at any one time is bounded. The Chase-Lev
@@ -777,7 +728,7 @@ the performance of the Arora et. al. algorithm.
 
 The correctness of all of these algorithms depends on enforcing the
 order of a write before a read in the critical path of the owner's
-\lstinline!take! operation. For example, in the Chase-Lev algorithm
+\lstinline!take()! operation. For example, in the Chase-Lev algorithm
 \cite{Chase2005} (Figure 3), the write in line 23 must be ordered
 before the read in line 24; in the Cilk THE algorithm \cite{Frigo1998}
 (Figure 4), the write in line 5 must be ordered before the read in
@@ -794,7 +745,7 @@ work stealing. The main motivation behind these algorithms is to
 exploit the relaxed semantics to deliver better performance. In
 particular, the relaxed semantics enable us to build algorithms which
 speed up the common path consisting of the owner's operations:
-\lstinline!put! and \lstinline!take!. We present three algorithms,
+\lstinline!put()! and \lstinline!take()!. We present three algorithms,
 each with a different choice for how the items are extracted. In all
 of our algorithms, the owner inserts new tasks at the tail of the
 queue. In the first algorithm (idempotent LIFO) tasks are always
@@ -807,13 +758,13 @@ they were inserted.
 
 The key challenge we faced in designing our algorithms is how to avoid
 the need for special atomic instructions (i.e. CAS or LL/SC) and
-store-load ordering in our \lstinline!put! and \lstinline!take!
+store-load ordering in our \lstinline!put()! and \lstinline!take()!
 operations while guaranteeing the following:
 
 \begin{itemize}
 \item No lost tasks: That is, each inserted tasks will eventually be
   extracted (one or more times).
-\item No garbage task information: That is, \lstinline!steal!
+\item No garbage task information: That is, \lstinline!steal()!
   operations always return valid task information (i.e., that is safe
   to execute). The task information, which may span multiple words and
   hence may be read and written non-atomically, must be complete and
@@ -822,33 +773,33 @@ operations while guaranteeing the following:
 \end{itemize}
 
 \textbf{Ordering Requirements:} In all three of our algorithms, the
-\lstinline!take! operation does not require any special ordering among
+\lstinline!take()! operation does not require any special ordering among
 memory accesses beyond what is implied by data dependence. This is in
 contrast to existing work stealing algorithms \cite{Arora2001,
   Chase2005, Frigo1998, Hendler2006, Hendler2002}, which all require a
-store-load fence in the critical path of the \lstinline!take!
+store-load fence in the critical path of the \lstinline!take()!
 operation. Store-load ordering requires a fence instruction on all
 mainstream architectures (e.g., \lstinline!sync! on PowerPC and
 \lstinline!mfence! or \lstinline!lock! prefix instructions on Intel
 X86). The avoidance of these fence instructions in the common case is
 crucial to improving performance.
 
-In the \lstinline!put! operation of each of the three new algorithms,
+In the \lstinline!put()! operation of each of the three new algorithms,
 the writing of the task information into the queue structure must be
 completed before updating the tail index, in order to guarantee that
-interference with concurrent \lstinline!steal! operations does not
+interference with concurrent \lstinline!steal()! operations does not
 lead to lost items (and hence a violation of the correctness
-criteria), or the extraction by a \lstinline!steal! operation of
+criteria), or the extraction by a \lstinline!steal()! operation of
 invalid task information that may lead to unpredictable errors or
 failures. On architectures such as Intel X86 and Sun Sparc (with total
 store order), no special fence instructions are needed. On PowerPC, a
 light-weight fence instruction (lwsync) is needed. Existing work
 stealing algorithms \cite{Arora2001, Chase2005, Frigo1998,
   Hendler2006, Hendler2002} require the same store-store ordering in
-their \lstinline!put! operations for the same reasons why it is needed
+their \lstinline!put()! operations for the same reasons why it is needed
 in ours. Hence, this is not a new overhead added in our algorithms.
 
-Ordering requirements for the \lstinline!steal! operations are
+Ordering requirements for the \lstinline!steal()! operations are
 indicated in each of the algorithm listings in Figures 1, 2, and 3.
 
 \textbf{ABA Problem and Prevention:} The ABA problem is common in
@@ -872,7 +823,7 @@ scenario mentioned above. The packing of a tag with index variables in
 one atomic word limits the size of the index.
 
 Two of the algorithms (idempotent LIFO and idempotent double-ended)
-need to guard against the ABA problem in the \lstinline!steal!
+need to guard against the ABA problem in the \lstinline!steal()!
 operation as discussed below in more detail.
 
 Our algorithms are presented using CAS and ABA prevention
@@ -882,7 +833,7 @@ mechanism but can use any ABA prevention mechanism. For example, the
 PowerPC architectures supports the LL/SC instructions, which are
 inherently immune to the ABA problem. In such a case, there is no need
 for the tag, because we can replace the read and the CAS of the index
-variable in the \lstinline!steal! operations by LL and SC,
+variable in the \lstinline!steal()! operations by LL and SC,
 respectively. In the absence of hardware support for LL/SC, software
 mechanisms can be used to simulate them without using tags packed with
 values \cite{Moir1997}.
@@ -894,7 +845,7 @@ automatic garbage collection, where old arrays are freed
 automatically. Without garbage collection, buffer pools as described
 by Chase and Lev \cite{Chase2005} can be used. The old array can be
 remembered in the \lstinline!expand()! operation and then freed to the
-buffer pools right after the end of the \lstinline!put! operation. As
+buffer pools right after the end of the \lstinline!put()! operation. As
 for the actual tasks, they are not dynamic objects. They are written
 and read directly to and from elements of the task array.
 
@@ -907,9 +858,9 @@ queue, the size of the queue, and an ABA-prevention tag. The task
 array is encapsulated in a structure that contains both the array and
 its size.
 
-\textbf{\lstinline!Put!:} The owner starts the \lstinline!put!
+\textbf{\lstinline!Put()!:} The owner starts the \lstinline!put()!
 operation by reading the anchor variable in line 1. In line 2, the
-owner checks if there is enough space to \lstinline!put! the new task
+owner checks if there is enough space to \lstinline!put()! the new task
 by checking if the size subfield is less than the size of the tasks
 array. If not, it expands the array and restarts. Otherwise, it
 proceeds to line 3 and writes the task information into the task array
@@ -920,10 +871,10 @@ be atomic.
 Finally, in line 4, the owner writes to the anchor variable the three
 packed values as read in line 1 with the size and tag subfields each
 incremented by one, indicating the addition of a task and to prevent
-the ABA problem in concurrent \lstinline!steal! operations as
+the ABA problem in concurrent \lstinline!steal()! operations as
 discussed below.
 
-\textbf{\lstinline!Take!:} The owner starts the \lstinline!take!
+\textbf{\lstinline!Take()!:} The owner starts the \lstinline!take()!
 operation by reading the anchor variable in line 1, then checking in
 line 2 if the queue is empty (i.e., if s = 0). If so, the operation
 returns an indicator of an empty queue. Otherwise, it proceeds to
@@ -934,7 +885,7 @@ In line 4, the owner writes to the anchor variable the three packed
 subfield values read in line 1 with the size subfield decremented by
 one to indicate the extraction of a task.
 
-\textbf{\lstinline!Steal!:} A thread starts the \lstinline!steal!
+\textbf{\lstinline!Steal()!:} A thread starts the \lstinline!steal()!
 operation by reading the anchor variable in line 1. In line 2, the
 thread checks if the queue is empty (i.e., if s = 0). If so, the
 operation returns an indicator of an empty queue. Otherwise, it
@@ -973,7 +924,7 @@ algorithms that exploit the relaxed semantics to deliver lower
 overheads than existing algorithms that support the conventional work
 stealing semantics. Our algorithms do not require the use of special
 atomic instructions or costly store-load fence instructions in the
-common case, that is, the owner \lstinline!put! and \lstinline!take!
+common case, that is, the owner \lstinline!put()! and \lstinline!take()!
 operations on the work stealing structure. The benefits are
 demonstrated by our experimental evaluation in comparison to existing
 state-of-the-art work stealing algorithms using graph applications and
@@ -991,31 +942,31 @@ common.
 
 \lstinputlisting[style=Numbers,
   caption={Duplicating work-stealing deque}, 
-  label=lst:work-stealing-deque]{
+  label=lst:duplicating-work-stealing-deque]{
     ../listings/queues-implementation/DuplicatingWorkStealingDeque.java
 }
 
 \lstinputlisting[style=Numbers,
-  caption={Duplicating work-stealing deque: Put}, 
-  label=lst:work-stealing-deque-put]{
+  caption={Duplicating work-stealing deque: \lstinline!put()! method}, 
+  label=lst:duplicating-work-stealing-deque-put]{
     ../listings/queues-implementation/DuplicatingWorkStealingDeque-put.java
 }
 
 \lstinputlisting[style=Numbers,
-  caption={Duplicating work-stealing deque: Take}, 
-  label=lst:work-stealing-deque-take]{
+  caption={Duplicating work-stealing deque: \lstinline!take()! method},
+  label=lst:duplicating-work-stealing-deque-take]{
     ../listings/queues-implementation/DuplicatingWorkStealingDeque-take.java
 }
 
 \lstinputlisting[style=Numbers,
-  caption={Duplicating work-stealing deque: Steal}, 
-  label=lst:work-stealing-deque-steal]{
+  caption={Duplicating work-stealing deque: \lstinline!steal()! method},
+  label=lst:duplicating-work-stealing-deque-steal]{
     ../listings/queues-implementation/DuplicatingWorkStealingDeque-steal.java
 }
 
 \lstinputlisting[style=Numbers,
-  caption={Duplicating work-stealing deque: Expand}, 
-  label=lst:work-stealing-deque-expand]{
+  caption={Duplicating work-stealing deque: \lstinline!expand()! method}, 
+  label=lst:duplicating-work-stealing-deque-expand]{
     ../listings/queues-implementation/DuplicatingWorkStealingDeque-expand.java
 }
 
@@ -1026,25 +977,25 @@ common.
 }
 
 \lstinputlisting[style=Numbers,
-  caption={Idempotent work-stealing deque: Put}, 
+  caption={Idempotent work-stealing deque: \lstinline!put()! method},
   label=lst:idempotent-work-stealing-deque-put]{
     ../listings/queues-implementation/IdempotentWorkStealingDeque-put.java
 }
 
 \lstinputlisting[style=Numbers,
-  caption={Idempotent work-stealing deque: Take}, 
+  caption={Idempotent work-stealing deque: \lstinline!take()! method},
   label=lst:idempotent-work-stealing-deque-take]{
     ../listings/queues-implementation/IdempotentWorkStealingDeque-take.java
 }
 
 \lstinputlisting[style=Numbers,
-  caption={Idempotent work-stealing deque: Steal}, 
+  caption={Idempotent work-stealing deque: \lstinline!steal()! method},
   label=lst:idempotent-work-stealing-deque-steal]{
     ../listings/queues-implementation/IdempotentWorkStealingDeque-steal.java
 }
 
 \lstinputlisting[style=Numbers,
-  caption={Idempotent work-stealing deque: Expand}, 
+  caption={Idempotent work-stealing deque: \lstinline!expand()! method},
   label=lst:idempotent-work-stealing-deque-expand]{
     ../listings/queues-implementation/IdempotentWorkStealingDeque-expand.java
 }
@@ -1462,25 +1413,25 @@ Hendler and Shavit \cite{Hendler2002}.
 }
 
 \lstinputlisting[style=Numbers,
-  caption={Dynamic work-stealing deque: Put}, 
+  caption={Dynamic work-stealing deque: \lstinline!put()! method},
   label=lst:dynamic-work-stealing-deque-put]{
     ../listings/queues-implementation/DynamicWorkStealingDeque-put.java
 }
 
 \lstinputlisting[style=Numbers,
-  caption={Dynamic work-stealing deque: Take}, 
+  caption={Dynamic work-stealing deque: \lstinline!take()! method},
   label=lst:dynamic-work-stealing-deque-take]{
     ../listings/queues-implementation/DynamicWorkStealingDeque-take.java
 }
 
 \lstinputlisting[style=Numbers,
-  caption={Dynamic work-stealing deque: Steal}, 
+  caption={Dynamic work-stealing deque: \lstinline!steal()! method},
   label=lst:dynamic-work-stealing-deque-steal]{
     ../listings/queues-implementation/DynamicWorkStealingDeque-steal.java
 }
 
 \lstinputlisting[style=Numbers,
-  caption={Dynamic work-stealing deque: Is empty?}, 
+  caption={Dynamic work-stealing deque: \lstinline!isEmpty()! method},
   label=lst:dynamic-work-stealing-deque-isempty]{
     ../listings/queues-implementation/DynamicWorkStealingDeque-isempty.java
 }

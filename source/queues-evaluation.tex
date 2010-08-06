@@ -15,6 +15,7 @@
 \end{itemize}
 
 \section{References}
+
 \subsection{Dynamic circular work-stealing deque \cite{Chase2005}}
 
 We evaluated the performance of the new dynamic circular work-stealing
@@ -72,6 +73,40 @@ level of multiprogramming increased. Therefore, for the same amount of
 array space (notice that $16 \cdot 72 = 128 + (16 \cdot 64)$), we get
 more robustness with our new algorithm than with the original ABP
 algorithm, without a noticeable cost in performance.
+
+\subsection{Avoid \lstinline!top! accesses in \lstinline!put()!}
+
+Unlike the original ABP algorithm, the new algorithm requires reading
+\lstinline!top! on every execution of the \lstinline!put()!
+operation. This may result in more data-cache misses compared to the
+original algorithm (recall that unlike \lstinline!bottom!,
+\lstinline!top! is modified by all processes).
+
+The frequency of accesses to the \lstinline!top! variable can be
+significantly reduced, by keeping a local upper bound on the size of
+the deque, and only read \lstinline!top! when the upper bound
+indicates that an array expansion may be necessary. Such a local upper
+bound can be easily achieved by saving the last value of
+\lstinline!top! read in a local variable, and using this variable to
+compute the size of the deque (instead of the real value of
+\lstinline!top!). Because \lstinline!top! is never decremented, the
+real size of the deque can only be smaller than the one calculated
+using this local variable.
+
+\minisec{Herlihy}
+
+The ability to resize carries a price: every call must read
+\lstinline!top! (Line 21) to determine if a resize is necessary,
+possibly causing more cache misses because \lstinline!top!  is
+modified by all processes. We can reduce this overhead by having
+threads save a local value of \lstinline!top!  and using it to compute
+the size of the \lstinline!UnboundedDEQueue!  object. A thread reads
+the \lstinline!top!field only when this bound is exceeded, indicating
+that a \lstinline!resize()! may be necessary.  Even though the local
+copy may become outdated because of changes to the shared
+\lstinline!top!, \lstinline!top! is never decremented, so the real
+size of the \lstinline!UnboundedDEQueue! object can only be smaller
+than the one calculated using the local variable.
 
 
 %%% Local Variables: 
