@@ -12,34 +12,6 @@ The \emph{Work-Stealing Deque} is an unbounded double-ended queue that
 dynamically resizes itself as needed. Its design is based on the
 \emph{Dynamic Circular Work-Stealing Deque} \cite{Chase2005, Lev2005}.
 
-We implemented the \lstinline!WorkStealingDeque! in a cyclic array,
-with \lstinline!top! and \lstinline!bottom! fields as indices. When
-using \lstinline!top! and \lstinline!bottom! to access array elements,
-we have to use them modulo the array's capacity as the array is
-cyclic. If \lstinline!bottom! is less than or equal to
-\lstinline!top!, the \lstinline!WorkStealingDeque! is empty. Using a
-cyclic array eliminates the need to reset \lstinline!bottom! and
-\lstinline!top! to \lstinline!0!.
-
-The deque is implemented using a cyclic array, together with two
-indexes: \lstinline!top! and \lstinline!bottom!, indicating the two
-ends of the deque. Specifically, the \lstinline!bottom! index
-indicates the next available slot in the array where the next new
-element is pushed, and is incremented on every \lstinline!put()!
-operation. The \lstinline!top! index indicates the topmost element in
-the deque (if there is any), and is incremented on every
-\lstinline!steal()! operation. Since the only operation that modifies
-\lstinline!top! is \lstinline!steal()!, \lstinline!top! is never
-decremented, and there is no need for a tag field as in all previous
-work-stealing algorithms. If \lstinline!bottom! is less than or equal
-to \lstinline!top!, the deque is empty.
-
-\lstinline!steal()! does not need to manipulate a timestamp.
-
-The growable circular array: The simplest implementation of a growable
-circular array is a power-of-two-sized array that grows by doubling
-its size.
-
 The \lstinline!WorkStealingDeque! class has three fields:
 \lstinline!workItems!, \lstinline!bottom!, and \lstinline!top!:
 
@@ -49,39 +21,21 @@ The \lstinline!WorkStealingDeque! class has three fields:
     ../listings/queues-implementation/WorkStealingDeque.java
 }
 
-Unlike all previous algorithms, the \lstinline!top! and
-\lstinline!bottom! fields are used merely to indicate the two ends of
-the deque -- no tag field is required to eliminate the ABA problem.
+The array \lstinline!workItems! is used in a cyclic way with
+\lstinline!top! and \lstinline!bottom! indicating the two ends of the
+deque. If \lstinline!bottom! is less than or equal to \lstinline!top!,
+the deque is empty.
 
-Moreover, it permits \lstinline!top!  to be incremented but never
-decremented, eliminating the need for \lstinline!top! to be an
-\lstinline!AtomicStampedReference!.
-
-The code for the \lstinline!put()!, \lstinline!steal()! and
-\lstinline!take()! operations appears in Listings
-\ref{lst:work-stealing-deque-put}, \ref{lst:work-stealing-deque-take}
-and \ref{lst:work-stealing-deque-steal} respectively. The algorithm
-does not have a tag field in the \lstinline!top! variable -- instead,
-it maintains the property that \lstinline!top! is never decremented.
-
-The \lstinline!put()! operation inserts the pushed entry to the deque
-simply by writing it in the location specified by \lstinline!bottom!,
-and then incrementing \lstinline!bottom! by 1. The \lstinline!put()!
-operation is also responsible for enlarging the array if an element is
-pushed into an already-full array. Whether the array is enlarged or
-not, the \lstinline!put()! operation takes place when
-\lstinline!bottom!  is updated at Line
-\ref{lst:work-stealing-deque-put-update-bottom}.
-
-The \lstinline!put()! method must enlarge the circular array if the
-current push is about to cause it to exceed its capacity.
-
-To check whether the current array is full, the operation subtracts
-the value of \lstinline!top! from \lstinline!bottom! (which gives the
-number of elements that were in the deque when \lstinline!top! was
-read), and compares it to the size of the array. If necessary, the
-\lstinline!put()! operation uses the \lstinline!expand()! method to
-enlarge the current array.
+The \lstinline!put()! method \ref{lst:work-stealing-deque-put} first
+checks whether the current circular array is full (Line
+\ref{lst:work-stealing-deque-put-size}). If it is full, we call
+\lstinline!expand()! (Line \ref{lst:work-stealing-deque-put-expand},
+see Listing \ref{lst:work-stealing-deque-expand}) to enlarge it by
+copying the deque's elements into a bigger array. In any case the
+deque has enough space now and we can put the new work item in the
+location specified by \lstinline!bottom!, and then increment
+\lstinline!bottom! by 1 (Line
+\ref{lst:work-stealing-deque-put-update-bottom}).
 
 \lstinputlisting[style=Numbers,
   caption={Work-stealing deque: \lstinline!put()! method}, 
@@ -89,44 +43,25 @@ enlarge the current array.
     ../listings/queues-implementation/WorkStealingDeque-put.java
 }
 
-In the \lstinline!WorkStealingDeque! algorithm, if \lstinline!put()!
-discovers that the current circular array is full, it can resize
-(enlarge) it, copying the tasks into a bigger array, and pushing the
-new task into the new (larger) array. Because the array is indexed
-modulo its capacity, there is no need to update the \lstinline!top! or
-\lstinline!bottom! fields when moving the elements into a bigger array
-(although the actual array indices where the elements are stored might
-change).
-
-Since the algorithm uses a cyclic array it makes more efficient use of
-the array, and does not need the reset-on-empty heuristic used in the
-original ABP algorithm. If a \lstinline!put()! operation discovers
-that the current circular array is full, it enlarges it by copying the
-deque's elements into a bigger array, and pushes the new element into
-the new enlarged array. The deque elements stored in the circular
-array are indexed modulo its size, and therefore when moving the
-elements into a bigger array, there is no need to update
-\lstinline!top! or \lstinline!bottom! although the actual array
-indexes where the elements are stored might change.
-
-The \lstinline!resize()! method allocates a new circular array and
-copies the old array's contents into the new array. The use of modular
+Listing \ref{lst:work-stealing-deque-expand} shows the
+\lstinline!expand()! method. It allocates a new doubled size array and
+copies the old array's elements into the new array. The use of modular
 arithmetic ensures that even though the array has changed size and the
-tasks may have shifted positions, thieves can still use the
-\lstinline!top! field to find the next task to steal.
+work items may have shifted positions, there is no need to update the
+\lstinline!top! or \lstinline!bottom! fields.
 
-When the array is full, a new doubled size array is allocated, and the
-elements are copied from the old array to the new one. Note that since
-the elements are indexed modulo the array size, the actual array
-indexes where the elements are stored might change when copying from
-one array to another, but the value of \lstinline!top!  and
-\lstinline!bottom! remains the same.
+% Because the array is indexed modulo its capacity, there is no need
+% to update the \lstinline!top! or \lstinline!bottom! fields when
+% moving the elements into a bigger array -- although the actual array
+% indices where the elements are stored might change.
 
 \lstinputlisting[style=Numbers,
   caption={Work-stealing deque: \lstinline!expand()! method}, 
   label=lst:work-stealing-deque-expand]{
     ../listings/queues-implementation/WorkStealingDeque-expand.java
 }
+
+Listing \ref{lst:work-stealing-deque-take}
 
 The owner can take inexpensively (without using a CAS operation)
 provided that doing so does not cause the deque to become empty. If
@@ -136,25 +71,24 @@ empty state (\lstinline!bottom == top!) and returns \lstinline!null!
 \ref{lst:work-stealing-deque-take-empty-2}). If the deque becomes
 empty, then the owner must perform a CAS on \lstinline!top! to see if
 it won or lost any race with a concurrent \lstinline!steal()!
-operation to take the last item. The algorithm performs the CAS on the
-value of the \lstinline!top! index and not on a tag value (note that
-incrementing \lstinline!top!  when the deque is empty leaves the deque
-in an empty state). Right after the CAS operation, whether it succeeds
-or not, the value of \lstinline!top! is \lstinline!t + 1! (note that
-if the CAS fails, then some concurrent \lstinline!steal()!  operation
-updated \lstinline!top! to that value). Therefore the deque is empty,
-and the operation completes by storing \lstinline!t + 1! in
-\lstinline!bottom!  (by that, resetting the deque to a canonical empty
-state). In any case that the \lstinline!take()!  operation does not
-return the empty value, the \lstinline!take()! operation takes place
-when \lstinline!bottom! is updated at Line
-\ref{lst:work-stealing-deque-take-update}.
+operation to take the last item. Right after the CAS operation,
+whether it succeeds or not, the value of \lstinline!top! is
+\lstinline!t + 1! (note that if the CAS fails, then some concurrent
+\lstinline!steal()!  operation updated \lstinline!top! to that
+value). Therefore the deque is empty, and the operation completes by
+storing \lstinline!t + 1! in \lstinline!bottom!  (by that, resetting
+the deque to a canonical empty state). In any case that the
+\lstinline!take()!  operation does not return the empty value, the
+\lstinline!take()! operation takes place when \lstinline!bottom! is
+updated at Line \ref{lst:work-stealing-deque-take-update}.
 
 \lstinputlisting[style=Numbers,
   caption={Work-stealing deque: \lstinline!take()! method},
   label=lst:work-stealing-deque-take]{
     ../listings/queues-implementation/WorkStealingDeque-take.java
 }
+
+Listing \ref{lst:work-stealing-deque-steal}
 
 The \lstinline!steal()! method begins by reading \lstinline!top! and
 \lstinline!bottom!, and checking whether the deque is empty by
@@ -192,6 +126,14 @@ executed. For that reason, as we describe later, any
 concurrent \lstinline!steal()! operation will also returns the deque's
 last entry.
 
+Since the only operation that modifies \lstinline!top! is
+\lstinline!steal()!, \lstinline!top! is never decremented, and there
+is no need for a tag field to eliminate the ABA problem.
+
+The algorithm does not have a tag field in the \lstinline!top!
+variable -- instead, it maintains the property that \lstinline!top! is
+never decremented.
+
 \lstinputlisting[style=Numbers,
   caption={Work-stealing deque: \lstinline!steal()! method}, 
   label=lst:work-stealing-deque-steal]{
@@ -201,7 +143,7 @@ last entry.
 As the \lstinline!take()! (Listing \ref{lst:work-stealing-deque-take})
 and \lstinline!steal()!  methods (Listing
 \ref{lst:work-stealing-deque-steal}) use modular arithmetic to compute
-indexes, the \lstinline!top! index never needs to be decremented. As
+indices, the \lstinline!top! index never needs to be decremented. As
 noted, there is no need for a timestamp to prevent ABA problems. Both
 methods, when competing for the last task, steal it by incrementing
 \lstinline!top!. To reset the \lstinline!WorkStealingDeque! to empty,
@@ -216,14 +158,12 @@ concurrent thief must have stolen the last task. Storing
 \lstinline!bottom! equal, resetting the \lstinline!WorkStealingDeque!
 object to an empty state.
 
-\todo[inline]{Finish section ``Work-Stealing Deque''}
-
-\begin{itemize}
-\item Dynamic circular work-stealing deque \cite{Chase2005}
-\item Nonblocking Cyclic Extendable Deque for the ABP work stealing
-  algorithm \cite{Lev2005}
-\item The art of multiprocessor programming \cite{Herlihy2008}
-\end{itemize}
+Specifically, the \lstinline!bottom! index indicates the next
+available slot in the array where the next new element is pushed, and
+is incremented on every \lstinline!put()!  operation. The
+\lstinline!top! index indicates the topmost element in the deque (if
+there is any), and is incremented on every \lstinline!steal()!
+operation.
 
 \newpage
 \todo{Remove newpage!!!}
@@ -1001,7 +941,7 @@ This paper presents the first dynamic memory work-stealing
 algorithm. It is based on a novel way of building non-blocking
 dynamic-sized work stealing deques by detecting synchronization
 conflicts based on ``pointer-crossing'' rather than ``gaps between
-indexes'' as in the original ABP algorithm. As we show, the new
+indices'' as in the original ABP algorithm. As we show, the new
 algorithm dramatically increases robustness and memory efficiency,
 while causing applications no observable performance penalty. We
 therefore believe it can replace array-based ABP work stealing deques,
@@ -1100,7 +1040,7 @@ manner from the common case of using loads and stores to using a
 costly CAS only when a potential conflict requires processes to
 synchronize. This transition rests on the ability to detect these
 boundary synchronization cases based on the relative gap among array
-indexes. There is no straightforward way of translating this
+indices. There is no straightforward way of translating this
 algorithmic trick to the pointer-based world of dynamic data
 structures.
 
@@ -1136,7 +1076,7 @@ The potential conflict that requires CAS-based synchronization occurs
 when a pop by a local process and a pop by a thief might both be
 trying to remove the same item from the deque. The original ABP
 algorithm detects this scenario by examining the gap between the
-\lstinline!Top! and \lstinline!Bottom! array indexes, and uses a CAS
+\lstinline!Top! and \lstinline!Bottom! array indices, and uses a CAS
 operation only when they are ``too close''. Moreover, in the original
 algorithm, the empty deque scenario is checked simply by checking
 whether \lstinline!Bottom $\le$ Top!.
