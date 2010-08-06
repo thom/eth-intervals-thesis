@@ -8,5 +8,5 @@ public void put(WorkItem workItem) {
 		workItems = currentWorkItems;
 	}
 	currentWorkItems[oldBottom % currentWorkItems.length] = workItem;
-	bottom = oldBottom + 1;
+	bottom = oldBottom + 1; //*\label{lst:work-stealing-deque-put-update-bottom}
 }

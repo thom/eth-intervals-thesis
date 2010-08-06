@@ -5,7 +5,7 @@ public WorkItem steal(Worker thiefWorker) {
 	while (true) {
 		// important that top read before bottom
 		oldTop = top.get();
-		oldBottom = bottom;
+		oldBottom = bottom; //*\label{lst:work-stealing-deque-steal-bottom}
 		WorkItem[] currentWorkItems = workItems;
 		int size = oldBottom - oldTop;
 			

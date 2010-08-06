@@ -6,9 +6,9 @@ public WorkItem take() {
 	int oldTop = top.get();
 	int size = oldBottom - oldTop;
 
-	if (size < 0) {
+	if (size < 0) { //*\label{lst:work-stealing-deque-take-empty-1}
 		bottom = oldTop;
-		return null;
+		return null; //*\label{lst:work-stealing-deque-take-empty-2}
 	}
 
 	WorkItem workItem = 
@@ -21,6 +21,6 @@ public WorkItem take() {
 	if (!top.compareAndSet(oldTop, oldTop + 1)) //*\label{lst:work-stealing-deque-take-cas}
 		workItem = null; // queue is empty
 
-	bottom = oldTop + 1;
+	bottom = oldTop + 1; //*\label{lst:work-stealing-deque-take-update}
 	return workItem;
 }
