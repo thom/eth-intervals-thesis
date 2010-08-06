@@ -941,36 +941,6 @@ common.
 }
 
 \lstinputlisting[style=Numbers,
-  caption={Duplicating work-stealing deque}, 
-  label=lst:duplicating-work-stealing-deque]{
-    ../listings/queues-implementation/DuplicatingWorkStealingDeque.java
-}
-
-\lstinputlisting[style=Numbers,
-  caption={Duplicating work-stealing deque: \lstinline!put()! method}, 
-  label=lst:duplicating-work-stealing-deque-put]{
-    ../listings/queues-implementation/DuplicatingWorkStealingDeque-put.java
-}
-
-\lstinputlisting[style=Numbers,
-  caption={Duplicating work-stealing deque: \lstinline!take()! method},
-  label=lst:duplicating-work-stealing-deque-take]{
-    ../listings/queues-implementation/DuplicatingWorkStealingDeque-take.java
-}
-
-\lstinputlisting[style=Numbers,
-  caption={Duplicating work-stealing deque: \lstinline!steal()! method},
-  label=lst:duplicating-work-stealing-deque-steal]{
-    ../listings/queues-implementation/DuplicatingWorkStealingDeque-steal.java
-}
-
-\lstinputlisting[style=Numbers,
-  caption={Duplicating work-stealing deque: \lstinline!expand()! method}, 
-  label=lst:duplicating-work-stealing-deque-expand]{
-    ../listings/queues-implementation/DuplicatingWorkStealingDeque-expand.java
-}
-
-\lstinputlisting[style=Numbers,
   caption={Idempotent work-stealing deque}, 
   label=lst:idempotent-work-stealing-deque]{
     ../listings/queues-implementation/IdempotentWorkStealingDeque.java
@@ -1000,20 +970,22 @@ common.
     ../listings/queues-implementation/IdempotentWorkStealingDeque-expand.java
 }
 
+\section{Alternative Implementations}
+\label{sec:queues-alternative-implementations}
 
-\section{Dynamic Work-Stealing Deque}
-\label{sec:queues-implementation-dynamic-ws-deque}
+\todo[inline]{Finish section ``Alternative Implementations''}
 
-\todo[inline]{Finish section ``Dynamic Work-Stealing Deque''}
+\subsection{Dynamic Work-Stealing Deque}
 
 \begin{itemize}
 \item A dynamic-sized nonblocking work stealing deque
   \cite{Hendler2006}
 \item A dynamic-sized nonblocking work stealing deque
   \cite{Hendler2006a}
+\item Dynamic circular work-stealing deque \cite{Chase2005}
 \end{itemize}
 
-\subsection{Dynamic circular work-stealing deque \cite{Chase2005}}
+\subsubsection{Dynamic circular work-stealing deque \cite{Chase2005}}
 
 The list-based work-stealing deque algorithm presented by Hendler, Lev
 and Shavit \cite{Hendler2006, Hendler2006a} uses a list of small
@@ -1022,7 +994,7 @@ complicated, does not use cyclic arrays (and therefore wastes some
 memory), and introduces a trade-off between its time and space
 complexity due to the extra work required for the list's maintenance.
 
-\subsection{A dynamic-sized nonblocking work stealing deque
+\subsubsection{A dynamic-sized nonblocking work stealing deque
   \cite{Hendler2006, Hendler2006a}}
 
 This paper presents the first dynamic memory work-stealing
@@ -1435,6 +1407,307 @@ Hendler and Shavit \cite{Hendler2002}.
   label=lst:dynamic-work-stealing-deque-isempty]{
     ../listings/queues-implementation/DynamicWorkStealingDeque-isempty.java
 }
+
+\subsection{Duplicating Work-Stealing Queue}
+
+Duplicating queues as an alternative to idempotent queues.
+
+\begin{itemize}
+\item The design of a task parallel library \cite{Leijen2009}
+\item Checkfence: checking consistency of concurrent data types on
+  relaxed memory models \cite{Burckhardt2007}
+\item Checkfence: checking consistency of concurrent data types on
+  relaxed memory models \cite{Burckhardt2007a}
+\end{itemize}
+
+\subsubsection{The design of a task parallel library \cite{Leijen2009}}
+
+Under the hood, tasks and replicable tasks are assigned by the runtime
+to special worker threads. TPL uses standard work-stealing for this
+work distribution \cite{Frigo1998} where tasks are held in a thread
+local task queue. When the task queue of a thread becomes empty, the
+thread will try to steal tasks from the task queue of another
+thread. The performance of work stealing algorithms is in a large part
+determined by the efficiency of their task queue implementations.
+
+We provide a novel implementation of these task queues, called
+duplicating queues. A surprising feature of the duplicating queue is
+that it behaves in a sequentially inconsistent way on weak memory
+models. However, the nondeterminism of the queue is carefully captured
+in a benign way by sometimes duplicating elements in the queue (but
+never losing or inventing elements, and still ensuring that tasks are
+only executed once). Of course, exploiting weak memory models is
+playing with fire. That's why we verified the correctness of the
+duplicating queue formally using the Checkfence tool
+\cite{Burckhardt2007, Burckhardt2007a}.
+
+A duplicating queue is a novel data structure for implementing
+non-blocking task queues that can work efficiently on architectures
+with weak memory models. These queues are sequentially inconsistent
+but capture the resulting non-determinism in a benign way by sometimes
+duplicating elements.
+
+\subsubsection{Work Distribution}
+
+As we have seen TPL is convenient to use, but it can only be
+successful if besides elegance, it is also performant. In this section
+we focus on important high-level design decisions and focus later on
+how these decisions inform the design of the work stealing
+implementation.
+
+\minisec{Design for efficiency}
+
+The most important contributor for efficiency is the decision to give
+no concurrency guarantees. Parallel tasks are only potentially run in
+parallel. The library specifies that a task is executed between its
+creation and the first call to Wait. This means that we can give a
+valid implementation that is fully sequential. Indeed, there is a
+special debug mode where all tasks are executed sequentially when Wait
+is called (and will therefore never have race
+conditions). Effectively, there are no fairness guarantees for
+parallel tasks. In contrast with OS threads, parallel tasks are only
+good for finite CPU-bound tasks, but not for asynchronous programming.
+
+\minisec{Work stealing}
+
+The TPL runtime reuses the ideas of the well known work stealing
+techniques as implemented for example in CILK \cite{Frigo1998,
+  Danaher2005} and the Java fork-join framework \cite{Lea2000,
+  Lea2000a, Lea2004, Lea2006}. We shortly discuss its principles and
+focus on why our implementation differs.
+
+The runtime system uses one worker group per processor. Each group
+contains one or more worker threads where only one of them is running
+and where all others are blocked. Whenever this running worker thread
+becomes blocked too (due to the previous case 2 for example) an extra
+running worker thread is added to that group such that the processor
+is always busy. A worker thread can also be retired and give control
+to another worker in its group when that worker can be unblocked
+(because the task on which it was waiting has completed for example).
+
+Each worker group keeps tasks in its own doubled-ended queue. The task
+queue provides the operations \lstinline!Push()!, \lstinline!Pop()! and
+\lstinline!Take()!. When a task is created, the running worker thread
+pushes the task onto the local queue of its group. If it finishes its
+current task, it will try to pop a task from the group queue and
+continue with that. This way, a task is always pushed and popped
+locally, which benefits both the data locality of the task and reduces
+the amount of synchronization needed. If a worker thread finds there
+are no more tasks in its queue (and none of the other workers in its
+group can be unblocked), it becomes a thief : it chooses another task
+queue of another worker group at random and tries to steal a task or
+replicable task from the (non-local) end of the task queue using
+\lstinline!Take()!. For many parallel conquer-and-divide algorithms,
+this ensures that the largest tasks are stolen first. For loops,
+which are typically implemented via replicable tasks, it means that
+tasks are only replicated on demand, i.e. when another thread starts
+idling. Unfortunately, at this point we have to do more
+synchronization for our queues, since we have multiple parties that
+can try to steal at the same time from the same queue, and we can have
+interaction between the worker thread associated with that queue and
+the stealing thread.
+
+The performance of work stealing is largely dependent on the
+performance of its task queue implementation. In particular, we need
+to ensure that each pushed task is only popped or taken once such that
+each task is only executed once. To achieve atomic take and pop
+operations, most implementations, like \cite{Arora2001}, rely on the
+THE protocol \cite{Dijkstra1965}, which allow the common
+\lstinline!Push()! and \lstinline!Pop()! operations to be implemented
+without using expensive atomic compare-and-swap
+operations. Unfortunately, this only works on machines with a
+sequentially consistent memory model, and in practice there are just
+few architectures that support this. On the x86 for example, one needs
+to insert a memory barrier in \lstinline!Pop()! operation which is
+almost as expensive as taking a lock in the first place.
+
+Moreover, there is an even bigger disadvantage to queues based on the
+THE protocol which is more subtle. As shown in Section 4.1, whenever
+f2.Value is called where the future f2 has not yet started, we should
+execute it directly on the calling thread. But if we use the THE
+protocol, there is no mechanism to get f2 exclusively: we can only
+\lstinline!Pop()! it from our queue if it happens to be the last task
+that was pushed, otherwise one cannot determine whether f2 is on the
+local queue, or resides in a queue of another worker group. Without
+gaining exclusive access in some other way, we cannot execute the task
+directly or otherwise we may execute a task more than once since it
+can concurrently be taken by another worker, or popped if it resided
+on a non-local task queue.
+
+Since this is exactly the common case that we need to optimize, we
+opted for another approach where each task uses internally an atomic
+compare-and-swap operation to ensure that it only executes once. We
+assign to each task an associated state, Init, Running, and Done. The
+internal Run method on a task performs an atomic compare-and-swap
+operation to try to switch from Init to Running. If the atomic
+operation succeeds, the associated action is executed and the state is
+set to Done afterwards:
+
+\begin{lstlisting}[style=Listing]
+  void Task.Run(){
+    if(CompareAndSwap(ref state, Init, Running)){
+      Execute(); // execute the associated action
+      state = Done;
+    }
+  }
+\end{lstlisting}
+
+Effectively, this ensures that each task is only executed once, or
+stated differently: running a task is an idempotent
+operation. Unfortunately, if we would use task queues based on the THE
+protocol we now use two mechanisms for mutual exclusion, and execute
+both a memory barrier instruction on a \lstinline!Pop()! operation, and
+an interlocked instruction when calling Run. Since these are expensive
+instructions that require synchronization among the processors, we
+would like to avoid these. As shown in the previous paragraphs, the
+interlocked instruction in the Run method is essential and since we
+now ensure exclusivity on the task level, it is possible to use a
+weaker data structure for the task queues. In particular, this leads
+to the development of the duplicating queue.
+
+Note that only tasks need this additional check; for replicating tasks
+there is no need to do the atomic compare-and-swap operation since
+they already implement their own mutual exclusion.
+
+\subsubsection{Duplicating Queues}
+
+A duplicating queue is a double-ended queue that potentially returns a
+pushed element more than once. In particular, the \lstinline!Push()! and
+\lstinline!Pop()! operations behave like normal, but the
+\lstinline!Take()! operation is allowed to either take an element (and
+remove it from the queue), or to just duplicate an element in the
+queue. While this nondeterminism might be dangerous for many clients,
+it is fine for our usage of the duplicating queue: the Task's Run
+method is idempotent and ReplicableTask's expect to be executed in
+parallel. Other properties of a duplicating queues are as usual: a
+duplicating queue never loses an element, and returns all pushed
+elements after a finite number of \lstinline!Pop()! (and
+\lstinline!Take()!) operations.
+
+By allowing duplication we can avoid an expensive memory barrier
+instruction in the \lstinline!Pop()! operation on the x86
+architecture. More generally, our duplicating queue is designed
+specifically to be correct on architectures satisfying the Total Store
+Order (TSO) memory model (Sindhu et al. 1991) or stronger model. To
+our knowledge, this is one of the first data structures that takes
+specific advantage of weaker memory models to avoid memory
+barriers. An interesting aspect is that the non-determinism that is
+introduced by the weaker memory model is captured in a benign way
+where the number of duplicated elements is non-deterministically
+determined.
+
+\subsubsection{Performance}
+
+Measuring the performance of the duplicating queue in isolation is not
+very useful. The reason is that the main performance benefit does not
+come from the duplicating queue, but from being able to guarantee
+mutual exclusivity in the tasks themselves, such that a task can be
+executed directly when Wait is called and the task has not started
+yet. Since the task queues no longer need to guarantee mutual
+exclusivity, the duplicating queue is mostly an optimization to avoid
+using too many expensive interlocked instructions.
+
+Therefore, it is better to measure the benefit of being able to
+directly execute a task for which Wait is called (and which has not
+started yet). We created two versions of the library: one based on a
+duplicating queue with direct execution of tasks, and a traditional
+implementation based on the standard THE protocol. The standard
+fibonacci benchmark represents one of the worst-case examples since
+most waits are for tasks that were just pushed on the stack (and
+reside on the top of the stack). We ran this benchmark on a 4
+processor machine which used 196418 tasks ($\approx$ 500.000 tasks per
+second). The implementation based on the duplicating queue was 1.4
+times faster when using all processors. Here are some statistics,
+where DUP refers to the duplicating queue implementation, and THE to
+the implementation based on the THE protocol.
+
+As we can see, the performance of THE mostly suffered because there
+were many more switches between threads, and many more thread
+migrations. This happened precisely when Wait was called for a task
+that had not yet started. Since one cannot reliably determine whether
+this task was on the local queue, a fresh worker thread was needed to
+execute the task resulting in a thread switch. Of course, this
+automatically also lead to more migration of threads where ready
+worker threads were stolen by another worker group. Interestingly,
+the number of task steals are about the same as this is mostly
+determined by the particular algorithm and sizes of the tasks.
+
+Of course, for most fork-join parallelism (including the fibonacci
+benchmark), the task to be waited upon is often right on the top of
+the local task queue. When Wait is called on a task that has not
+started yet, we can optimize for this case in the THE implementation
+by simply popping the top of the stack if that happens to be our task
+and execute it directly. When applying this simple optimization, both
+implementations perform very similar for this benchmark. Of course,
+the DUP implementation outperforms again when the parallelism is less
+structured using futures for example, and in general at any time when
+Wait is called on a task that is not on the top of the stack.
+
+\subsubsection{Related Work}
+
+There is a wealth of research into parallel scheduling algorithms,
+data structures, and language designs, and we necessarily restrict
+this section to work that is directly relevant to work stealing and
+embedded library designs.
+
+The idea of duplicating queues has recently been described as
+``idempotent'' queues \cite{Michael2009}. We were not aware of this
+work at the time of writing this paper and arrived at our results
+independently (doing our first implementation in January 2008). Their
+general motivation and the semantics of the idempotent queue seem
+largely identical, but the implementation is quite different. Their
+elegant implementation packs fields together in a memory word and
+relies strictly on atomic compare-and-swap and memory ordering
+instructions. In contrast, our implementation uses a simple lock on
+all but the critical paths which can simplify many implementation
+aspects and also removes a level of indirection on the critical path.
+
+\subsubsection{Conclusions}
+
+We described the lessons learned in the design of a library for
+parallel programming. TPL is an example of the possibilities of an
+embedded domain specific language that relies heavily on parametric
+polymorphism and first-class anonymous functions, and we hope to apply
+this to other domains as well.
+
+To the best of our knowledge, the duplicating queue is one of the
+first data structures that explicitly takes the properties of weak
+memory models into account, and it is surprising we can capture the
+resulting non-determinism in a benign way without for example losing
+or inventing elements. It would be interesting to see if we can adapt
+the structure such that it can be applied for other parallel
+algorithms too.
+
+\lstinputlisting[style=Numbers,
+  caption={Duplicating work-stealing deque}, 
+  label=lst:duplicating-work-stealing-deque]{
+    ../listings/queues-implementation/DuplicatingWorkStealingDeque.java
+}
+
+\lstinputlisting[style=Numbers,
+  caption={Duplicating work-stealing deque: \lstinline!put()! method}, 
+  label=lst:duplicating-work-stealing-deque-put]{
+    ../listings/queues-implementation/DuplicatingWorkStealingDeque-put.java
+}
+
+\lstinputlisting[style=Numbers,
+  caption={Duplicating work-stealing deque: \lstinline!take()! method},
+  label=lst:duplicating-work-stealing-deque-take]{
+    ../listings/queues-implementation/DuplicatingWorkStealingDeque-take.java
+}
+
+\lstinputlisting[style=Numbers,
+  caption={Duplicating work-stealing deque: \lstinline!steal()! method},
+  label=lst:duplicating-work-stealing-deque-steal]{
+    ../listings/queues-implementation/DuplicatingWorkStealingDeque-steal.java
+}
+
+\lstinputlisting[style=Numbers,
+  caption={Duplicating work-stealing deque: \lstinline!expand()! method}, 
+  label=lst:duplicating-work-stealing-deque-expand]{
+    ../listings/queues-implementation/DuplicatingWorkStealingDeque-expand.java
+}
+
 
 \section{ABA Problem}
 
