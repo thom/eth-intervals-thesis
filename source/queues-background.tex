@@ -91,12 +91,11 @@ array containing the work items is full (Line
 \ref{lst:work-stealing-lazy-deque-take}. It takes an object from the
 bottom of the deque if the deque is not empty, otherwise it returns
 \lstinline!null!. On Line \ref{lst:work-stealing-lazy-deque-take-cas}
-we use
-Compare-and-Set\footnote{\verb!compareAndSet(int i, E expect, E update)!
+we use Compare-and-Set\footnote{Also known as Compare-and-Swap
+  \cite{IBM1974}. \verb!compareAndSet(int i, E expect, E update)!
   atomically sets the element at position \verb!i! to the given object
   \verb!update! if the current value equals \verb!expect!. The method
-  returns \verb!true! if successful. When \verb!false! is returned,
-  then the actual value was not equal to the expected value.} to check
+  returns \verb!true! if successful and \verb!false! else.} to check
 if another worker stole the item we wanted to take. If the item is
 gone, we know that all previous items must have been stolen too and we
 can update our notion of the head of the deque (Line

@@ -5,6 +5,16 @@
 \chapter{Investigated Queues}
 \label{chap:queues-implementation}
 
+% We present three algorithms, each with a different choice for how the
+% items are extracted. In all of our algorithms, the owner inserts new
+% tasks at the tail of the queue. In the first algorithm (idempotent
+% LIFO) tasks are always extracted from the tail, while in the second
+% algorithm (idempotent FIFO) tasks are always extracted from the
+% head. In the third algorithm (idempotent double-ended), the owner
+% extracts from the tail while thieves extract from the head of the
+% queue. We use the term queue loosely to mean a structure with items
+% stored in the order in which they were inserted.
+
 \section{Work-Stealing Deque}
 \label{sec:queues-implementation-ws-deque}
 
@@ -12,7 +22,7 @@ The \emph{Work-Stealing Deque} is an unbounded double-ended queue that
 dynamically resizes itself as needed. Its design is based on the
 \emph{Dynamic Circular Work-Stealing Deque} \cite{Chase2005, Lev2005}.
 
-The \lstinline!WorkStealingDeque! class has three fields:
+The \lstinline!WorkStealingDeque! class has three fields,
 \lstinline!workItems!, \lstinline!bottom!, and \lstinline!top!:
 
 \lstinputlisting[style=Numbers,
@@ -23,18 +33,18 @@ The \lstinline!WorkStealingDeque! class has three fields:
 
 The array \lstinline!workItems! is used in a cyclic way with
 \lstinline!top! and \lstinline!bottom! indicating the two ends of the
-deque. If \lstinline!bottom! is less than or equal to \lstinline!top!,
-the deque is empty.
+deque. An important property of \lstinline!top! is that it is never
+decreased. If \lstinline!bottom! is less than or equal to
+\lstinline!top!, the deque is empty.
 
-The \lstinline!put()! method \ref{lst:work-stealing-deque-put} first
-checks whether the current circular array is full (Line
+The \lstinline!put()! method (Listing
+\ref{lst:work-stealing-deque-put}) first checks whether the current
+circular array is full (Line
 \ref{lst:work-stealing-deque-put-size}). If it is full, we call
-\lstinline!expand()! (Line \ref{lst:work-stealing-deque-put-expand},
-see Listing \ref{lst:work-stealing-deque-expand}) to enlarge it by
-copying the deque's elements into a bigger array. In any case the
-deque has enough space now and we can put the new work item in the
-location specified by \lstinline!bottom!, and then increment
-\lstinline!bottom! by 1 (Line
+\lstinline!expand()! (Line \ref{lst:work-stealing-deque-put-expand})
+to enlarge it by copying the deque's elements into a bigger array. Now
+we can put the new work item in the location specified by
+\lstinline!bottom!, and then increment \lstinline!bottom! by 1 (Line
 \ref{lst:work-stealing-deque-put-update-bottom}).
 
 \lstinputlisting[style=Numbers,
@@ -50,419 +60,123 @@ arithmetic ensures that even though the array has changed size and the
 work items may have shifted positions, there is no need to update the
 \lstinline!top! or \lstinline!bottom! fields.
 
-% Because the array is indexed modulo its capacity, there is no need
-% to update the \lstinline!top! or \lstinline!bottom! fields when
-% moving the elements into a bigger array -- although the actual array
-% indices where the elements are stored might change.
-
 \lstinputlisting[style=Numbers,
   caption={Work-stealing deque: \lstinline!expand()! method}, 
   label=lst:work-stealing-deque-expand]{
     ../listings/queues-implementation/WorkStealingDeque-expand.java
 }
 
-Listing \ref{lst:work-stealing-deque-take}
+In Listing \ref{lst:work-stealing-deque-take} we define the
+\lstinline!take()! method. If the deque is empty, we reset it to an
+empty state where \lstinline!bottom == top! and return
+\lstinline!null! (Lines \ref{lst:work-stealing-deque-take-empty-1} --
+\ref{lst:work-stealing-deque-take-empty-2}). If taking a work item
+does not make the deque empty, the owner can take it without using a
+Compare-and-Swap operation (Lines
+\ref{lst:work-stealing-deque-take-non-empty-1} --
+\ref{lst:work-stealing-deque-take-non-empty-2}). If the owner is
+trying to take the last work item, then it must perform a
+Compare-and-Swap on \lstinline!top! to see if it won or lost any race
+with a concurrent \lstinline!steal()! operation to take the last item
+(Line \ref{lst:work-stealing-deque-take-cas}). Regardless whether the
+Compare-and-Swap operation succeeds, the value of \lstinline!top! is
+incremented by 1 and the deque is empty: If the Compare-and-Swap in
+\lstinline!take()! fails, then some concurrent \lstinline!steal()!
+operation succeeded in stealing the last work item and incremented
+\lstinline!top!. Therefore the operation completes by storing the
+incremented top value in \lstinline!bottom! which resets the deque to
+an empty state (Line \ref{lst:work-stealing-deque-take-update}).
 
-The owner can take inexpensively (without using a CAS operation)
-provided that doing so does not cause the deque to become empty. If
-the deque was already empty, then it simply resets it to a canonical
-empty state (\lstinline!bottom == top!) and returns \lstinline!null!
-(Lines \ref{lst:work-stealing-deque-take-empty-1} --
-\ref{lst:work-stealing-deque-take-empty-2}). If the deque becomes
-empty, then the owner must perform a CAS on \lstinline!top! to see if
-it won or lost any race with a concurrent \lstinline!steal()!
-operation to take the last item. Right after the CAS operation,
-whether it succeeds or not, the value of \lstinline!top! is
-\lstinline!t + 1! (note that if the CAS fails, then some concurrent
-\lstinline!steal()!  operation updated \lstinline!top! to that
-value). Therefore the deque is empty, and the operation completes by
-storing \lstinline!t + 1! in \lstinline!bottom!  (by that, resetting
-the deque to a canonical empty state). In any case that the
-\lstinline!take()!  operation does not return the empty value, the
-\lstinline!take()! operation takes place when \lstinline!bottom! is
-updated at Line \ref{lst:work-stealing-deque-take-update}.
-
-\lstinputlisting[style=Numbers,
+\lstinputlisting[style=FloatNumbers,
   caption={Work-stealing deque: \lstinline!take()! method},
   label=lst:work-stealing-deque-take]{
     ../listings/queues-implementation/WorkStealingDeque-take.java
 }
 
-Listing \ref{lst:work-stealing-deque-steal}
-
-The \lstinline!steal()! method begins by reading \lstinline!top! and
-\lstinline!bottom!, and checking whether the deque is empty by
-comparing these values. If the deque is not empty, it reads the
-element stored in the \lstinline!top! position of the cyclic array,
-and tries to increment \lstinline!top! using a CAS operation. If the
-CAS fails, it implies that a concurrent \lstinline!steal()! operation
-successfully removed an element from the deque, so the operation tries
-to steal again; otherwise it returns the element read right before the
-successful CAS operation. Since the algorithm uses a cyclic array, it
-is important to read the element from the array before we do the CAS,
-because after the CAS completes, this location may be refilled with a
-new value by a concurrent \lstinline!put()!  operation.
-
-The \lstinline!steal()! method first reads \lstinline!top!, then
-\lstinline!bottom!, checking whether \lstinline!bottom! is less than
-or equal to \lstinline!top!. The order is important because
-\lstinline!top! never decreases, and so if a thread reads
+The \lstinline!steal()! method (Listing
+\ref{lst:work-stealing-deque-steal}) first reads \lstinline!top!, then
+\lstinline!bottom!. The order is important: If a thread reads
 \lstinline!bottom! after \lstinline!top! and sees it is no greater,
 the queue is indeed empty because a concurrent modification of
 \lstinline!top! could only have increased the \lstinline!top! value.
 
-A successful CAS is the point at which the \lstinline!steal()!
-operation takes place. Note that because \lstinline!top! is read
-before \lstinline!bottom!, it is guaranteed that the values read
-represent a consistent view of the memory. Specifically, it implies
-that \lstinline!bottom! and \lstinline!top! indeed had their observed
-values when \lstinline!bottom! was read at Line
-\ref{lst:work-stealing-deque-steal-bottom}. A subtle case may arise,
-however, if the deque is emptied by a concurrent \lstinline!take()!
-operation after \lstinline!bottom! is read, but before the CAS is
-executed. For that reason, as we describe later, any
-\lstinline!take()!  operation that empties the deque tries to modify
-\lstinline!top!  (using a CAS operation), to guarantee that no
-concurrent \lstinline!steal()! operation will also returns the deque's
-last entry.
+If the deque is empty, \lstinline!steal()! returns \lstinline!null!
+(Lines \ref{lst:work-stealing-deque-steal-empty-1} --
+\ref{lst:work-stealing-deque-steal-empty-2}). Else it reads the
+element stored in the \lstinline!top! position of the cyclic array,
+and tries to increment \lstinline!top! using a Compare-and-Swap
+operation. If the Compare-and-Swap fails, it implies that a concurrent
+\lstinline!steal()! successfully removed an element from the deque, so
+the operation tries to steal again. Otherwise it returns the element
+read right before the successful Compare-and-Swap operation.
 
-Since the only operation that modifies \lstinline!top! is
-\lstinline!steal()!, \lstinline!top! is never decremented, and there
-is no need for a tag field to eliminate the ABA problem.
+To prevent \lstinline!steal()! from returning the deque's last work
+item if it was already taken by a concurrent \lstinline!take()! after
+\lstinline!bottom! is read (Line
+\ref{lst:work-stealing-deque-steal-bottom}), but before the
+Compare-and-Swap operation is executed (Line
+\ref{lst:work-stealing-deque-steal-cas}), any \lstinline!take()! that
+empties the deque tries to modify \lstinline!top! using a
+Compare-and-Swap operation.
 
-The algorithm does not have a tag field in the \lstinline!top!
-variable -- instead, it maintains the property that \lstinline!top! is
-never decremented.
-
-\lstinputlisting[style=Numbers,
+\lstinputlisting[style=FloatNumbers,
   caption={Work-stealing deque: \lstinline!steal()! method}, 
   label=lst:work-stealing-deque-steal]{
     ../listings/queues-implementation/WorkStealingDeque-steal.java
 }
 
-As the \lstinline!take()! (Listing \ref{lst:work-stealing-deque-take})
-and \lstinline!steal()!  methods (Listing
-\ref{lst:work-stealing-deque-steal}) use modular arithmetic to compute
-indices, the \lstinline!top! index never needs to be decremented. As
-noted, there is no need for a timestamp to prevent ABA problems. Both
-methods, when competing for the last task, steal it by incrementing
-\lstinline!top!. To reset the \lstinline!WorkStealingDeque! to empty,
-simply increment the \lstinline!bottom! field to equal
-\lstinline!top!. In the code, \lstinline!take()!, immediately after
-the \lstinline!compareAndSet()! in Line
-\ref{lst:work-stealing-deque-take-cas}, sets \lstinline!bottom! to
-equal \lstinline!top + 1! whether or not the
-\lstinline!compareAndSet()! succeeds, because, even if it failed, a
-concurrent thief must have stolen the last task. Storing
-\lstinline!top + 1! into \lstinline!bottom! makes \lstinline!top! and
-\lstinline!bottom! equal, resetting the \lstinline!WorkStealingDeque!
-object to an empty state.
-
-Specifically, the \lstinline!bottom! index indicates the next
-available slot in the array where the next new element is pushed, and
-is incremented on every \lstinline!put()!  operation. The
-\lstinline!top! index indicates the topmost element in the deque (if
-there is any), and is incremented on every \lstinline!steal()!
-operation.
-
-\newpage
-\todo{Remove newpage!!!}
-
-
 \section{Idempotent Work-Stealing Deque}
 \label{sec:queues-implementation-idempotent-ws-deque}
 
-\todo[inline]{Finish section ``Idempotent Work-Stealing Deque''}
-
-\minisec{References}
-
-\begin{itemize}
-\item Idempotent work stealing \cite{Michael2009}
-\item The design of a task parallel library \cite{Leijen2009}
-\item Checkfence: checking consistency of concurrent data types on
-  relaxed memory models \cite{Burckhardt2007}
-\item Checkfence: checking consistency of concurrent data types on
-  relaxed memory models \cite{Burckhardt2007a}
-\end{itemize}
-
-\minisec{Things to mention}
-
-\begin{itemize}
-\item Idempotent FIFO queues: Idempotent queue
-\item Idempotent LIFO queues: Idempotent stack
-\item Duplicating queues as an alternative to idempotent queues
-\item State of interval task (init, running, done) could be helpful
-  when using a mailbox style implementation for locality-aware
-  scheduling \cite{Acar2002}
-\end{itemize}
+The ``Idempotent Work-Stealing Deque'' is based on ideas from
+\cite{Leijen2009} and \cite{Michael2009}. It is an unbounded
+double-ended queue that can resize itself if needed.
 
 \subsection{The design of a task parallel library \cite{Leijen2009}}
 
-Under the hood, tasks and replicable tasks are assigned by the runtime
-to special worker threads. TPL uses standard work-stealing for this
-work distribution \cite{Frigo1998} where tasks are held in a thread
-local task queue. When the task queue of a thread becomes empty, the
-thread will try to steal tasks from the task queue of another
-thread. The performance of work stealing algorithms is in a large part
-determined by the efficiency of their task queue implementations.
-
-We provide a novel implementation of these task queues, called
-duplicating queues. A surprising feature of the duplicating queue is
-that it behaves in a sequentially inconsistent way on weak memory
-models. However, the nondeterminism of the queue is carefully captured
-in a benign way by sometimes duplicating elements in the queue (but
-never losing or inventing elements, and still ensuring that tasks are
-only executed once). Of course, exploiting weak memory models is
-playing with fire. That's why we verified the correctness of the
-duplicating queue formally using the Checkfence tool
-\cite{Burckhardt2007, Burckhardt2007a}.
-
-A duplicating queue is a novel data structure for implementing
-non-blocking task queues that can work efficiently on architectures
-with weak memory models. These queues are sequentially inconsistent
-but capture the resulting non-determinism in a benign way by sometimes
-duplicating elements.
-
 \subsubsection{Work Distribution}
 
-As we have seen TPL is convenient to use, but it can only be
-successful if besides elegance, it is also performant. In this section
-we focus on important high-level design decisions and focus later on
-how these decisions inform the design of the work stealing
-implementation.
+Each interval uses internally an atomic Compare-and-Swap operation to
+ensure that it only executes once. We assign to each interval an
+associated state, \lstinline!INIT!, \lstinline!RUNNING!,
+\lstinline!DONE!. The internal \lstinline!exec()! method on a task
+performs an atomic Compare-and-Swap operation to try to switch from
+\lstinline!INIT! to \lstinline!RUNNING!. If the atomic operation
+succeeds, the associated action is executed and the state is set to
+\lstinline!DONE! afterwards:
 
-\minisec{Design for efficiency}
+\lstinputlisting[style=Numbers,
+  caption={Interval}, 
+  label=lst:interval]{
+    ../listings/queues-implementation/Interval.java
+}
 
-The most important contributor for efficiency is the decision to give
-no concurrency guarantees. Parallel tasks are only potentially run in
-parallel. The library specifies that a task is executed between its
-creation and the first call to Wait. This means that we can give a
-valid implementation that is fully sequential. Indeed, there is a
-special debug mode where all tasks are executed sequentially when Wait
-is called (and will therefore never have race
-conditions). Effectively, there are no fairness guarantees for
-parallel tasks. In contrast with OS threads, parallel tasks are only
-good for finite CPU-bound tasks, but not for asynchronous programming.
-
-\minisec{Work stealing}
-
-The TPL runtime reuses the ideas of the well known work stealing
-techniques as implemented for example in CILK \cite{Frigo1998,
-  Danaher2005} and the Java fork-join framework \cite{Lea2000,
-  Lea2000a, Lea2004, Lea2006}. We shortly discuss its principles and
-focus on why our implementation differs.
-
-The runtime system uses one worker group per processor. Each group
-contains one or more worker threads where only one of them is running
-and where all others are blocked. Whenever this running worker thread
-becomes blocked too (due to the previous case 2 for example) an extra
-running worker thread is added to that group such that the processor
-is always busy. A worker thread can also be retired and give control
-to another worker in its group when that worker can be unblocked
-(because the task on which it was waiting has completed for example).
-
-Each worker group keeps tasks in its own doubled-ended queue. The task
-queue provides the operations \lstinline!Push()!, \lstinline!Pop()! and
-\lstinline!Take()!. When a task is created, the running worker thread
-pushes the task onto the local queue of its group. If it finishes its
-current task, it will try to pop a task from the group queue and
-continue with that. This way, a task is always pushed and popped
-locally, which benefits both the data locality of the task and reduces
-the amount of synchronization needed. If a worker thread finds there
-are no more tasks in its queue (and none of the other workers in its
-group can be unblocked), it becomes a thief : it chooses another task
-queue of another worker group at random and tries to steal a task or
-replicable task from the (non-local) end of the task queue using
-\lstinline!Take()!. For many parallel conquer-and-divide algorithms,
-this ensures that the largest tasks are stolen first. For loops,
-which are typically implemented via replicable tasks, it means that
-tasks are only replicated on demand, i.e. when another thread starts
-idling. Unfortunately, at this point we have to do more
-synchronization for our queues, since we have multiple parties that
-can try to steal at the same time from the same queue, and we can have
-interaction between the worker thread associated with that queue and
-the stealing thread.
-
-The performance of work stealing is largely dependent on the
-performance of its task queue implementation. In particular, we need
-to ensure that each pushed task is only popped or taken once such that
-each task is only executed once. To achieve atomic take and pop
-operations, most implementations, like \cite{Arora2001}, rely on the
-THE protocol \cite{Dijkstra1965}, which allow the common
-\lstinline!Push()! and \lstinline!Pop()! operations to be implemented
-without using expensive atomic compare-and-swap
-operations. Unfortunately, this only works on machines with a
-sequentially consistent memory model, and in practice there are just
-few architectures that support this. On the x86 for example, one needs
-to insert a memory barrier in \lstinline!Pop()! operation which is
-almost as expensive as taking a lock in the first place.
-
-Moreover, there is an even bigger disadvantage to queues based on the
-THE protocol which is more subtle. As shown in Section 4.1, whenever
-f2.Value is called where the future f2 has not yet started, we should
-execute it directly on the calling thread. But if we use the THE
-protocol, there is no mechanism to get f2 exclusively: we can only
-\lstinline!Pop()! it from our queue if it happens to be the last task
-that was pushed, otherwise one cannot determine whether f2 is on the
-local queue, or resides in a queue of another worker group. Without
-gaining exclusive access in some other way, we cannot execute the task
-directly or otherwise we may execute a task more than once since it
-can concurrently be taken by another worker, or popped if it resided
-on a non-local task queue.
-
-Since this is exactly the common case that we need to optimize, we
-opted for another approach where each task uses internally an atomic
-compare-and-swap operation to ensure that it only executes once. We
-assign to each task an associated state, Init, Running, and Done. The
-internal Run method on a task performs an atomic compare-and-swap
-operation to try to switch from Init to Running. If the atomic
-operation succeeds, the associated action is executed and the state is
-set to Done afterwards:
-
-\begin{lstlisting}[style=Listing]
-  void Task.Run(){
-    if(CompareAndSwap(ref state, Init, Running)){
-      Execute(); // execute the associated action
-      state = Done;
-    }
-  }
-\end{lstlisting}
-
-Effectively, this ensures that each task is only executed once, or
-stated differently: running a task is an idempotent
-operation. Unfortunately, if we would use task queues based on the THE
-protocol we now use two mechanisms for mutual exclusion, and execute
-both a memory barrier instruction on a \lstinline!Pop()! operation, and
-an interlocked instruction when calling Run. Since these are expensive
-instructions that require synchronization among the processors, we
-would like to avoid these. As shown in the previous paragraphs, the
-interlocked instruction in the Run method is essential and since we
-now ensure exclusivity on the task level, it is possible to use a
-weaker data structure for the task queues. In particular, this leads
-to the development of the duplicating queue.
-
-Note that only tasks need this additional check; for replicating tasks
-there is no need to do the atomic compare-and-swap operation since
-they already implement their own mutual exclusion.
+Effectively, this ensures that each interval is only executed once, or
+stated differently: running an interval is an idempotent
+operation. Unfortunately, if we would use traditional work-stealing
+queues we now use two mechanisms for mutual exclusion, and execute
+both a memory barrier instruction on a \lstinline!take()! operation,
+and an interlocked instruction when calling \lstinline!exec()!. Since
+these are expensive instructions that require synchronization among
+the processors, we would like to avoid these. Since we now ensure
+exclusivity on the interval level, it is possible to use a weaker data
+structure for the work queues.
 
 \subsubsection{Duplicating Queues}
 
 A duplicating queue is a double-ended queue that potentially returns a
-pushed element more than once. In particular, the \lstinline!Push()! and
-\lstinline!Pop()! operations behave like normal, but the
-\lstinline!Take()! operation is allowed to either take an element (and
-remove it from the queue), or to just duplicate an element in the
+pushed element more than once. In particular, the \lstinline!put()!
+and \lstinline!take()! operations behave like normal, but the
+\lstinline!steal()! operation is allowed to either take an element
+(and remove it from the queue), or to just duplicate an element in the
 queue. While this nondeterminism might be dangerous for many clients,
-it is fine for our usage of the duplicating queue: the Task's Run
-method is idempotent and ReplicableTask's expect to be executed in
-parallel. Other properties of a duplicating queues are as usual: a
-duplicating queue never loses an element, and returns all pushed
-elements after a finite number of \lstinline!Pop()! (and
-\lstinline!Take()!) operations.
-
-By allowing duplication we can avoid an expensive memory barrier
-instruction in the \lstinline!Pop()! operation on the x86
-architecture. More generally, our duplicating queue is designed
-specifically to be correct on architectures satisfying the Total Store
-Order (TSO) memory model (Sindhu et al. 1991) or stronger model. To
-our knowledge, this is one of the first data structures that takes
-specific advantage of weaker memory models to avoid memory
-barriers. An interesting aspect is that the non-determinism that is
-introduced by the weaker memory model is captured in a benign way
-where the number of duplicated elements is non-deterministically
-determined.
-
-\subsubsection{Performance}
-
-Measuring the performance of the duplicating queue in isolation is not
-very useful. The reason is that the main performance benefit does not
-come from the duplicating queue, but from being able to guarantee
-mutual exclusivity in the tasks themselves, such that a task can be
-executed directly when Wait is called and the task has not started
-yet. Since the task queues no longer need to guarantee mutual
-exclusivity, the duplicating queue is mostly an optimization to avoid
-using too many expensive interlocked instructions.
-
-Therefore, it is better to measure the benefit of being able to
-directly execute a task for which Wait is called (and which has not
-started yet). We created two versions of the library: one based on a
-duplicating queue with direct execution of tasks, and a traditional
-implementation based on the standard THE protocol. The standard
-fibonacci benchmark represents one of the worst-case examples since
-most waits are for tasks that were just pushed on the stack (and
-reside on the top of the stack). We ran this benchmark on a 4
-processor machine which used 196418 tasks ($\approx$ 500.000 tasks per
-second). The implementation based on the duplicating queue was 1.4
-times faster when using all processors. Here are some statistics,
-where DUP refers to the duplicating queue implementation, and THE to
-the implementation based on the THE protocol.
-
-As we can see, the performance of THE mostly suffered because there
-were many more switches between threads, and many more thread
-migrations. This happened precisely when Wait was called for a task
-that had not yet started. Since one cannot reliably determine whether
-this task was on the local queue, a fresh worker thread was needed to
-execute the task resulting in a thread switch. Of course, this
-automatically also lead to more migration of threads where ready
-worker threads were stolen by another worker group. Interestingly,
-the number of task steals are about the same as this is mostly
-determined by the particular algorithm and sizes of the tasks.
-
-Of course, for most fork-join parallelism (including the fibonacci
-benchmark), the task to be waited upon is often right on the top of
-the local task queue. When Wait is called on a task that has not
-started yet, we can optimize for this case in the THE implementation
-by simply popping the top of the stack if that happens to be our task
-and execute it directly. When applying this simple optimization, both
-implementations perform very similar for this benchmark. Of course,
-the DUP implementation outperforms again when the parallelism is less
-structured using futures for example, and in general at any time when
-Wait is called on a task that is not on the top of the stack.
-
-\subsubsection{Related Work}
-
-There is a wealth of research into parallel scheduling algorithms,
-data structures, and language designs, and we necessarily restrict
-this section to work that is directly relevant to work stealing and
-embedded library designs.
-
-The idea of duplicating queues has recently been described as
-``idempotent'' queues \cite{Michael2009}. We were not aware of this
-work at the time of writing this paper and arrived at our results
-independently (doing our first implementation in January 2008). Their
-general motivation and the semantics of the idempotent queue seem
-largely identical, but the implementation is quite different. Their
-elegant implementation packs fields together in a memory word and
-relies strictly on atomic compare-and-swap and memory ordering
-instructions. In contrast, our implementation uses a simple lock on
-all but the critical paths which can simplify many implementation
-aspects and also removes a level of indirection on the critical path.
-
-\subsubsection{Conclusions}
-
-We described the lessons learned in the design of a library for
-parallel programming. TPL is an example of the possibilities of an
-embedded domain specific language that relies heavily on parametric
-polymorphism and first-class anonymous functions, and we hope to apply
-this to other domains as well.
-
-To the best of our knowledge, the duplicating queue is one of the
-first data structures that explicitly takes the properties of weak
-memory models into account, and it is surprising we can capture the
-resulting non-determinism in a benign way without for example losing
-or inventing elements. It would be interesting to see if we can adapt
-the structure such that it can be applied for other parallel
-algorithms too.
-
+it is fine for our usage of the duplicating queue: the interval's
+\lstinline!exec()! method is idempotent. Other properties of a
+duplicating queues are as usual: a duplicating queue never loses an
+element, and returns all pushed elements after a finite number of
+\lstinline!take()! and \lstinline!steal()! operations.
 
 \subsection{Idempotent work stealing \cite{Michael2009}}
-
-Load balancing is a technique which allows efficient parallelization
-of irregular workloads, and a key component of many applications and
-parallelizing runtimes. Work-stealing is a popular technique for
-implementing load balancing, where each parallel thread maintains its
-own work set of items and occasionally steals items from the sets of
-other threads.
 
 The conventional semantics of work stealing guarantee that each
 inserted task is eventually extracted exactly once. However,
@@ -475,53 +189,19 @@ semantics, because either:
 \item the application can tolerate repeated work.
 \end{enumerate}
 
-In this paper, we introduce idempotent work stealing, and present
-several new algorithms that exploit the relaxed semantics to deliver
-better performance. The semantics of the new algorithms guarantee that
-each inserted task is eventually extracted at least once -- instead of
+The relaxed semantics of idempotent work stealing guarantee that each
+inserted task is eventually extracted at least once -- instead of
 exactly once.
 
 On mainstream processors, algorithms for conventional work stealing
 require special atomic instructions or store-load memory ordering
 fence instructions in the owner's critical path operations. In
 general, these instructions are substantially slower than regular
-memory access instructions. By exploiting the relaxed semantics, our
-algorithms avoid these instructions in the owner's operations. We
-evaluated our algorithms using common graph problems and
-micro-benchmarks and compared them to well-known conventional work
-stealing algorithms, the THE Cilk and Chase-Lev algorithms. We found
-that our best algorithm (with LIFO extraction) outperforms existing
-algorithms in nearly all cases, and often by significant margins.
+memory access instructions. By exploiting the relaxed semantics, we
+can avoid these instructions in the owner's operations.
 
 \subsubsection{Introduction}
 
-Statically parallelizing applications with irregular workloads is a
-very challenging task. The key problem in trying to come up with a
-scalable static algorithmic solution is that the amount of available
-parallelism can change dramatically from one invocation of the
-algorithm to another. One answer to this challenge is the well-known
-dynamic technique of load balancing. Load balancing works by
-dynamically distributing the work to each process. It is a key
-technique used in many runtimes for parallel languages such as Cilk
-\cite{Blumofe1995, Frigo1998} and X10 \cite{Charles2005,
-  Saraswat2010}. It is also a core component of parallel garbage
-collectors \cite{Flood2001}, now a part of most modern virtual
-machines. Increased proliferation of load balancing techniques and
-their central place in most parallelizing systems dictate the need for
-high-performing load balancing algorithms.
-
-Work-stealing is a technique that implements load balancing.
-Effectively, each thread maintains its own set of tasks. The owner
-thread stores and takes items from that set. Typically, when there are
-no more tasks in the set (the owner thread has nothing more to do), to
-keep busy, the thread can steal work items from other threads. Hence,
-in this scheme, only the owner thread can add tasks to its set, but
-all threads (including the owner) can take items from the owner's set.
-
-This working set of items (called a work stealing queue from now on)
-supports three main operations: \lstinline!put()! and \lstinline!take()!
-which are used only by the queue's owner to insert and extract tasks,
-and \lstinline!steal()! which is used by other threads to steal work.
 Current algorithms for work stealing queues comply with the following
 semantics: each inserted task is eventually extracted -- by the owner
 thread or other threads -- exactly once. However, these semantics are
@@ -566,243 +246,54 @@ new algorithms are designed to optimize the owner's operations by
 avoiding the high overheads of these instruction in the owner's
 operations. That is, in our algorithms, unlike existing algorithms,
 owner operations avoid using special atomic instructions and expensive
-store-load fence instructions. We have evaluated ours and existing
-state-of-the-art algorithms with both microbenchmarks and
-representative non-trivial graph applications whose correctness
-invariants allow the usage of relaxed work stealing semantics. In
-particular, we performed experimental evaluation on several
-fundamental graph problems such as transitive closure and spanning
-tree computation for various graph types and sizes. The results
-indicate performance gains of up to 5x on microbenchmarks and up to 3x
-on graph applications. On graph applications, gains of 40\% are
-common.
+store-load fence instructions.
 
-The contributions of this paper are the following:
-\begin{itemize}
-\item Introducing the concept of idempotent work stealing, a useful
- relaxation of the conventional semantics, applicable to a wide-class
-  of applications.
-\item New high-performance work-stealing algorithms that adhere to
-  these new relaxed semantics while avoiding expensive synchronization
-  in the critical path of the owner's operations.
-\item Experimental evaluation of our new and existing state-of-the-
-  art algorithms. The results indicate that our algorithms often
-  significantly outperform existing state-of-the-art algorithms.
-\end{itemize}
+\subsubsection{Algorithm}
 
-The rest of the paper is organized as follows. In Section 2, we
-discuss related work and atomic and fence instructions. Section 3
-describes the new algorithms in detail. Section 4 presents our
-experimental performance results. We conclude the paper with Section
-5.
+The \lstinline!IdempotentWorkStealingDeque! class has an inner class,
+\lstinline!ArrayData!, and two fields, \lstinline!anchor! and
+\lstinline!workItems!:
 
-\subsubsection{Background}
+\lstinputlisting[style=Numbers,
+  caption={Idempotent work-stealing deque}, 
+  label=lst:idempotent-work-stealing-deque]{
+    ../listings/queues-implementation/IdempotentWorkStealingDeque.java
+}
 
-\minisec{Atomic and Fence Instructions}
+The array \lstinline!workItems! is used in a cyclic way with head and
+size encapsulated in an \lstinline!ArrayData! reference. The
+\lstinline!ArrayData! reference is maintained by the atomic stamped
+reference \lstinline!anchor! together with an integer stamp. Our
+algorithm needs to guard against the ABA problem in the
+\lstinline!steal()! operation and uses the stamp as an ABA-prevention
+tag.\footnote{The tag is a specific implementation choice. At the
+  abstract level, the algorithms do not require the use of the tag
+  mechanism but can use any ABA prevention mechanism, like bounded
+  tags \cite{Moir1997} or hazard pointers \cite{Michael2004}}
 
-To build efficient and correct concurrent algorithms, implementations
-often rely on the use of special atomic and memory fence instructions.
+Typically, the ABA problem occurs when a thread reads some value A
+from a shared variable, and then other threads write to the variable
+some value B, and then A again. Later, when the original thread checks
+if the variable holds the value A, e.g., using CAS, the comparison
+succeeds, while the intention of the algorithm designer is for such a
+comparison to fail in this case, and to succeed only if the variable
+has not been written after the initial read. However, the semantics of
+CAS prevent it from distinguishing the two cases. The classic solution
+for the ABA problem \cite{IBM1974} is to pack a tag with the shared
+variable and increment the tag when the associated variable is
+updated, so that other threads can detect that the variable has been
+updated. This solution assumes that the tag is large enough that it is
+unlikely to wrap around and reach the same value while a thread is
+executing the read-check scenario mentioned above. The packing of a
+tag with index variables in one atomic word limits the size of the
+index.
 
-\textbf{Atomic Instructions:} Current mainstream processor
-architectures support either Compare-and-Swap (CAS) or the pair
-Load-Linked and Store-Conditional (LL/SC).
-
-CAS was introduced on the IBM System 370 \cite{IBM1974}. It is
-supported on Intel and Sun SPARC processor architectures. In its
-simplest form, it takes three arguments: a memory location, an
-expected value, and a new value. If the memory location holds the
-expected value, the new value is written to it, atomically. A Boolean
-return value indicates whether the write occurred. If it returns true,
-it is said to succeed. Otherwise, it is said to fail.
-
-LL and SC are supported on the PowerPC architecture. LL takes one
-argument: a memory location, and returns its contents. SC takes two
-arguments: a memory location and a new value. Only if the memory
-location has not been written since the current thread last read it
-using LL, the new value is written to the memory location,
-atomically. A Boolean return value indicates whether the write
-occurred. Similar to CAS, SC is said to succeed or fail, if it returns
-true or false, respectively. For architectural reasons,
-implementations of LL/SC, do not allow the nesting or interleaving of
-LL/SC pairs, and infrequently often allow SC to fail spuriously, even
-if the target location was never written since the last LL. These
-spurious failures happen, for example, if the thread was preempted or
-a different location in the same cache line was written. For
-generality, we present the algorithms in this paper using CAS. As
-discussed in Section 3, if LL/SC is supported rather than CAS, simpler
-implementations are possible.
-
-\textbf{Fence Instructions:} Mainstream processor architectures allow
-some independent memory accesses to be executed out of program order,
-for the sake of hiding memory access latency and hence improving
-performance in the general case where reordering memory accesses has
-no effect on correctness. These architectures provide fence
-instructions that allow programmers to enforce order among memory
-accesses -- that otherwise could be reordered -- if such an ordering
-is required for correctness. This situation typically occurs in the
-implementations of concurrent algorithms.
-
-While processor architectures vary in their relaxation of memory
-access ordering, all mainstream processors require fence instructions
-for preventing loads being executed before the completion of stores to
-independent locations where the stores appear earlier in program order
-(i.e., enforce store-load ordering). For architectural and historical
-reasons, fences that enforce store-load order are typically quite
-expensive and take tens of processor cycles.
-
-\minisec{Related Work}
-
-There have been several published algorithms for work-stealing, all
-adhering to the strong semantics. In a paper by Frigo
-et. al. \cite{Frigo1998}, the authors present the THE work stealing
-algorithm implemented in the Cilk language runtime
-\cite{Blumofe1995}. That algorithm is based on Dijkstra's mutual
-exclusion protocol and uses locks in the \lstinline!steal()!  operation
-and in the corner case when the queue is empty it uses locks in
-\lstinline!take()!. Another algorithm presented by Arora
-et. al. \cite{Arora2001} presents a non-blocking double-ended work
-queue but in the worst-case requires unbounded memory even if the
-number of waiting tasks at any one time is bounded. The Chase-Lev
-algorithm \cite{Chase2005} rectifies this situation while preserving
-the performance of the Arora et. al. algorithm.
-
-The correctness of all of these algorithms depends on enforcing the
-order of a write before a read in the critical path of the owner's
-\lstinline!take()! operation. For example, in the Chase-Lev algorithm
-\cite{Chase2005} (Figure 3), the write in line 23 must be ordered
-before the read in line 24; in the Cilk THE algorithm \cite{Frigo1998}
-(Figure 4), the write in line 5 must be ordered before the read in
-line 6. Similarly, for the algorithms by Arora
-et. al. \cite{Arora2001}, Hendler and Shavit \cite{Hendler2002}, and
-Hendler et. al. \cite{Hendler2006}.
-
-\subsubsection{Algorithms}
-
-\minisec{Overview}
-
-In this section we describe in detail our algorithms for idempotent
-work stealing. The main motivation behind these algorithms is to
-exploit the relaxed semantics to deliver better performance. In
-particular, the relaxed semantics enable us to build algorithms which
-speed up the common path consisting of the owner's operations:
-\lstinline!put()! and \lstinline!take()!. We present three algorithms,
-each with a different choice for how the items are extracted. In all
-of our algorithms, the owner inserts new tasks at the tail of the
-queue. In the first algorithm (idempotent LIFO) tasks are always
-extracted from the tail, while in the second algorithm (idempotent
-FIFO) tasks are always extracted from the head. In the third algorithm
-(idempotent double-ended), the owner extracts from the tail while
-thieves extract from the head of the queue. We use the term queue
-loosely to mean a structure with items stored in the order in which
-they were inserted.
-
-The key challenge we faced in designing our algorithms is how to avoid
-the need for special atomic instructions (i.e. CAS or LL/SC) and
-store-load ordering in our \lstinline!put()! and \lstinline!take()!
-operations while guaranteeing the following:
-
-\begin{itemize}
-\item No lost tasks: That is, each inserted tasks will eventually be
-  extracted (one or more times).
-\item No garbage task information: That is, \lstinline!steal()!
-  operations always return valid task information (i.e., that is safe
-  to execute). The task information, which may span multiple words and
-  hence may be read and written non-atomically, must be complete and
-  consistent and represent an actual task that was inserted into the
-  work queue.
-\end{itemize}
-
-\textbf{Ordering Requirements:} In all three of our algorithms, the
-\lstinline!take()! operation does not require any special ordering among
-memory accesses beyond what is implied by data dependence. This is in
-contrast to existing work stealing algorithms \cite{Arora2001,
-  Chase2005, Frigo1998, Hendler2006, Hendler2002}, which all require a
-store-load fence in the critical path of the \lstinline!take()!
-operation. Store-load ordering requires a fence instruction on all
-mainstream architectures (e.g., \lstinline!sync! on PowerPC and
-\lstinline!mfence! or \lstinline!lock! prefix instructions on Intel
-X86). The avoidance of these fence instructions in the common case is
-crucial to improving performance.
-
-In the \lstinline!put()! operation of each of the three new algorithms,
-the writing of the task information into the queue structure must be
-completed before updating the tail index, in order to guarantee that
-interference with concurrent \lstinline!steal()! operations does not
-lead to lost items (and hence a violation of the correctness
-criteria), or the extraction by a \lstinline!steal()! operation of
-invalid task information that may lead to unpredictable errors or
-failures. On architectures such as Intel X86 and Sun Sparc (with total
-store order), no special fence instructions are needed. On PowerPC, a
-light-weight fence instruction (lwsync) is needed. Existing work
-stealing algorithms \cite{Arora2001, Chase2005, Frigo1998,
-  Hendler2006, Hendler2002} require the same store-store ordering in
-their \lstinline!put()! operations for the same reasons why it is needed
-in ours. Hence, this is not a new overhead added in our algorithms.
-
-Ordering requirements for the \lstinline!steal()! operations are
-indicated in each of the algorithm listings in Figures 1, 2, and 3.
-
-\textbf{ABA Problem and Prevention:} The ABA problem is common in
-non-blocking algorithms, mostly in relation to the use of CAS. It was
-first encountered in a free list implementation listed in the IBM
-System 370 documentation \cite{IBM1974}. Typically, the ABA problem
-occurs when a thread reads some value A from a shared variable, and
-then other threads write to the variable some value B, and then A
-again. Later, when the original thread checks if the variable holds
-the value A, e.g., using CAS, the comparison succeeds, while the
-intention of the algorithm designer is for such a comparison to fail
-in this case, and to succeed only if the variable has not been written
-after the initial read. However, the semantics of CAS prevent it from
-distinguishing the two cases. The classic solution for the ABA problem
-\cite{IBM1974} is to pack a tag with the shared variable and increment
-the tag when the associated variable is updated, so that other threads
-can detect that the variable has been updated. This solution assumes
-that the tag is large enough that it is unlikely to wrap around and
-reach the same value while a thread is executing the read-check
-scenario mentioned above. The packing of a tag with index variables in
-one atomic word limits the size of the index.
-
-Two of the algorithms (idempotent LIFO and idempotent double-ended)
-need to guard against the ABA problem in the \lstinline!steal()!
-operation as discussed below in more detail.
-
-Our algorithms are presented using CAS and ABA prevention
-tags. However, the tag is a specific implementation choice. At the
-abstract level, the algorithms do not require the use of the tag
-mechanism but can use any ABA prevention mechanism. For example, the
-PowerPC architectures supports the LL/SC instructions, which are
-inherently immune to the ABA problem. In such a case, there is no need
-for the tag, because we can replace the read and the CAS of the index
-variable in the \lstinline!steal()! operations by LL and SC,
-respectively. In the absence of hardware support for LL/SC, software
-mechanisms can be used to simulate them without using tags packed with
-values \cite{Moir1997}.
-
-\textbf{Expanding and shrinking:} We present in detail for each
-algorithm how to expand the queue size, where task arrays are replaced
-by new larger ones. The shown algorithm code assumes support for
-automatic garbage collection, where old arrays are freed
-automatically. Without garbage collection, buffer pools as described
-by Chase and Lev \cite{Chase2005} can be used. The old array can be
-remembered in the \lstinline!expand()! operation and then freed to the
-buffer pools right after the end of the \lstinline!put()! operation. As
-for the actual tasks, they are not dynamic objects. They are written
-and read directly to and from elements of the task array.
-
-\minisec{Algorithm with Double-Ended Extraction}
-
-In the idempotent double-ended algorithm (Figure 3), the queue is
-represented by an array of tasks, and an anchor variable that is
-packed with three subfields indicating the index of the head of the
-queue, the size of the queue, and an ABA-prevention tag. The task
-array is encapsulated in a structure that contains both the array and
-its size.
-
-\textbf{\lstinline!Put()!:} The owner starts the \lstinline!put()!
+Listing \ref{lst:idempotent-work-stealing-deque-put} shows the
+\lstinline!put()! method. The owner starts the \lstinline!put()!
 operation by reading the anchor variable in line 1. In line 2, the
-owner checks if there is enough space to \lstinline!put()! the new task
-by checking if the size subfield is less than the size of the tasks
-array. If not, it expands the array and restarts. Otherwise, it
+owner checks if there is enough space to \lstinline!put()! the new
+task by checking if the size subfield is less than the size of the
+tasks array. If not, it expands the array and restarts. Otherwise, it
 proceeds to line 3 and writes the task information into the task array
 at the tail of the queue (i.e., h+s modulo the size of the array). The
 writing of the task information which can span multiple words need not
@@ -810,30 +301,68 @@ be atomic.
 
 Finally, in line 4, the owner writes to the anchor variable the three
 packed values as read in line 1 with the size and tag subfields each
-incremented by one, indicating the addition of a task and to prevent
+incremented by 1, indicating the addition of a task and to prevent
 the ABA problem in concurrent \lstinline!steal()! operations as
 discussed below.
 
-\textbf{\lstinline!Take()!:} The owner starts the \lstinline!take()!
-operation by reading the anchor variable in line 1, then checking in
-line 2 if the queue is empty (i.e., if s = 0). If so, the operation
-returns an indicator of an empty queue. Otherwise, it proceeds to
-line 3 and reads the task information at the tail of the queue, i.e.,
-from the array element with index h+s−1 modulo the array size.
+\lstinputlisting[style=Numbers,
+  caption={Idempotent work-stealing deque: \lstinline!put()! method},
+  label=lst:idempotent-work-stealing-deque-put]{
+    ../listings/queues-implementation/IdempotentWorkStealingDeque-put.java
+}
+
+Listing \ref{lst:idempotent-work-stealing-deque-expand},
+\lstinline!expand()!: Array expansion for this algorithm is similar to
+the array expansion for the idempotent FIFO algorithm.
+
+FIFO queue: For the owner to expand a full queue, it allocates a new
+larger array (e.g., with double the current capacity) in line 2. Then,
+it copies the tasks from the current array to the newly allocated one
+in lines 3 and 4. After that, it sets the tasks pointer to the new
+array in line 5. The writes in lines 2 and 4 must be ordered before
+the write in line 5. Otherwise, a thief may read uninitialized task
+information.
+
+The write in line 5 must be ordered before the subsequent write in
+line 5 of put that updates the tail variable. Otherwise, a
+\lstinline!steal()! operation may return an old task, while the new
+task is lost without ever being executed.
+
+\lstinputlisting[style=Numbers,
+  caption={Idempotent work-stealing deque: \lstinline!expand()! method},
+  label=lst:idempotent-work-stealing-deque-expand]{
+    ../listings/queues-implementation/IdempotentWorkStealingDeque-expand.java
+}
+
+The method \lstinline!take()! is defined in Listing
+\ref{lst:idempotent-work-stealing-deque-take}. The owner starts the
+\lstinline!take()! operation by reading the anchor variable in line
+1, then checking in line 2 if the queue is empty (i.e., if s = 0). If
+so, the operation returns an indicator of an empty queue. Otherwise,
+it proceeds to line 3 and reads the task information at the tail of
+the queue, i.e., from the array element with index h+s−1 modulo the
+array size.
 
 In line 4, the owner writes to the anchor variable the three packed
 subfield values read in line 1 with the size subfield decremented by
 one to indicate the extraction of a task.
 
-\textbf{\lstinline!Steal()!:} A thread starts the \lstinline!steal()!
-operation by reading the anchor variable in line 1. In line 2, the
-thread checks if the queue is empty (i.e., if s = 0). If so, the
-operation returns an indicator of an empty queue. Otherwise, it
-proceeds to step 3 and reads a pointer to the tasks array. The read in
-line 3 must be ordered after the read in line 1. Otherwise, a thief
-may dereference a stale pointer to the tasks array after it has been
-replaced by the owner in order to expand the queue, which may lead to
-a lost task scenario.
+\lstinputlisting[style=Numbers,
+  caption={Idempotent work-stealing deque: \lstinline!take()! method},
+  label=lst:idempotent-work-stealing-deque-take]{
+    ../listings/queues-implementation/IdempotentWorkStealingDeque-take.java
+}
+
+
+A thread starts the \lstinline!steal()! operation (Listing
+\ref{lst:idempotent-work-stealing-deque-steal}) by reading the anchor
+variable in line 1. In line 2, the thread checks if the queue is empty
+(i.e., if s = 0). If so, the operation returns an indicator of an
+empty queue. Otherwise, it proceeds to step 3 and reads a pointer to
+the tasks array. The read in line 3 must be ordered after the read in
+line 1. Otherwise, a thief may dereference a stale pointer to the
+tasks array after it has been replaced by the owner in order to expand
+the queue, which may lead to a lost task scenario.
 
 In line 4, the thread reads the array element with index h. Reading
 the task information which can span multiple words need not be atomic,
@@ -850,65 +379,46 @@ successful, updates the anchor variable with the values read in line 1
 except with the head subfield incremented (modulo some size bound) to
 indicate the stealing of a task.
 
-\textbf{\lstinline!Expand!:} Array expansion for this algorithm is
-similar to the array expansion for the idempotent FIFO algorithm.
-
-\subsubsection{Conclusion}
-
-In this paper we introduced the concept of idempotent work stealing, a
-useful relaxation of the conventional work stealing semantics. The
-relaxation of the semantics, where tasks are extracted at least once
-instead of exactly once, is applicable to a wide class of irregular
-applications relying on work stealing. We presented new concurrent
-algorithms that exploit the relaxed semantics to deliver lower
-overheads than existing algorithms that support the conventional work
-stealing semantics. Our algorithms do not require the use of special
-atomic instructions or costly store-load fence instructions in the
-common case, that is, the owner \lstinline!put()! and \lstinline!take()!
-operations on the work stealing structure. The benefits are
-demonstrated by our experimental evaluation in comparison to existing
-state-of-the-art work stealing algorithms using graph applications and
-microbenchmarks. The performance gains of our algorithms are evident
-even on graphs with millions of vertices. In particular, our
-idempotent LIFO algorithm outperforms the existing algorithms in
-nearly all cases, sometimes by a factor of 3 and gains of 40\% are
-common.
-
-\lstinputlisting[style=Numbers,
-  caption={Interval}, 
-  label=lst:interval]{
-    ../listings/queues-implementation/Interval.java
-}
-
-\lstinputlisting[style=Numbers,
-  caption={Idempotent work-stealing deque}, 
-  label=lst:idempotent-work-stealing-deque]{
-    ../listings/queues-implementation/IdempotentWorkStealingDeque.java
-}
-
-\lstinputlisting[style=Numbers,
-  caption={Idempotent work-stealing deque: \lstinline!put()! method},
-  label=lst:idempotent-work-stealing-deque-put]{
-    ../listings/queues-implementation/IdempotentWorkStealingDeque-put.java
-}
-
-\lstinputlisting[style=Numbers,
-  caption={Idempotent work-stealing deque: \lstinline!take()! method},
-  label=lst:idempotent-work-stealing-deque-take]{
-    ../listings/queues-implementation/IdempotentWorkStealingDeque-take.java
-}
-
 \lstinputlisting[style=Numbers,
   caption={Idempotent work-stealing deque: \lstinline!steal()! method},
   label=lst:idempotent-work-stealing-deque-steal]{
     ../listings/queues-implementation/IdempotentWorkStealingDeque-steal.java
 }
 
-\lstinputlisting[style=Numbers,
-  caption={Idempotent work-stealing deque: \lstinline!expand()! method},
-  label=lst:idempotent-work-stealing-deque-expand]{
-    ../listings/queues-implementation/IdempotentWorkStealingDeque-expand.java
-}
+\todo[inline]{Finish section ``Idempotent Work-Stealing Deque''}
+
+\minisec{References}
+
+\begin{itemize}
+\item Idempotent work stealing \cite{Michael2009}
+\item The design of a task parallel library \cite{Leijen2009}
+\item Checkfence: checking consistency of concurrent data types on
+  relaxed memory models \cite{Burckhardt2007}
+\item Checkfence: checking consistency of concurrent data types on
+  relaxed memory models \cite{Burckhardt2007a}
+\end{itemize}
+
+\minisec{Things to mention}
+
+\begin{itemize}
+\item Idempotent FIFO queues: Idempotent queue
+\item Idempotent LIFO queues: Idempotent stack
+\item Duplicating queues as an alternative to idempotent queues
+\item State of interval task (init, running, done) could be helpful
+  when using a mailbox style implementation for locality-aware
+  scheduling \cite{Acar2002}
+\end{itemize}
+
+We present three algorithms, each with a different choice for how the
+items are extracted. In all of our algorithms, the owner inserts new
+tasks at the tail of the queue. In the first algorithm (idempotent
+LIFO) tasks are always extracted from the tail, while in the second
+algorithm (idempotent FIFO) tasks are always extracted from the
+head. In the third algorithm (idempotent double-ended), the owner
+extracts from the tail while thieves extract from the head of the
+queue. We use the term queue loosely to mean a structure with items
+stored in the order in which they were inserted.
+
 
 \section{Alternative Implementations}
 \label{sec:queues-alternative-implementations}
@@ -1360,7 +870,154 @@ Duplicating queues as an alternative to idempotent queues.
   relaxed memory models \cite{Burckhardt2007a}
 \end{itemize}
 
-\subsubsection{The design of a task parallel library \cite{Leijen2009}}
+\subsubsection{The design of a task parallel library \cite{Leijen2009} (Summarized version)}
+
+We provide a novel implementation of these task queues, called
+duplicating queues. A surprising feature of the duplicating queue is
+that it behaves in a sequentially inconsistent way on weak memory
+models. However, the nondeterminism of the queue is carefully captured
+in a benign way by sometimes duplicating elements in the queue (but
+never losing or inventing elements, and still ensuring that tasks are
+only executed once). Of course, exploiting weak memory models is
+playing with fire. That's why we verified the correctness of the
+duplicating queue formally using the Checkfence tool
+\cite{Burckhardt2007, Burckhardt2007a}.
+
+A duplicating queue is a novel data structure for implementing
+non-blocking task queues that can work efficiently on architectures
+with weak memory models. These queues are sequentially inconsistent
+but capture the resulting non-determinism in a benign way by sometimes
+duplicating elements.
+
+\subsubsection{Work Distribution}
+
+Each worker keeps tasks in its own doubled-ended queue. The task queue
+provides the operations \lstinline!put()!, \lstinline!take()! and
+\lstinline!steal()!. When a task is created, the running worker thread
+pushes the task onto the local queue of its group. If it finishes its
+current task, it will try to pop a task from the group queue and
+continue with that. This way, a task is always pushed and popped
+locally, which benefits both the data locality of the task and reduces
+the amount of synchronization needed. If a worker thread finds there
+are no more tasks in its queue (and none of the other workers in its
+group can be unblocked), it becomes a thief : it chooses another task
+queue of another worker group at random and tries to steal a task or
+replicable task from the (non-local) end of the task queue using
+\lstinline!steal()!. For many parallel conquer-and-divide algorithms,
+this ensures that the largest tasks are stolen first. For loops, which
+are typically implemented via replicable tasks, it means that tasks
+are only replicated on demand, i.e. when another thread starts
+idling. Unfortunately, at this point we have to do more
+synchronization for our queues, since we have multiple parties that
+can try to steal at the same time from the same queue, and we can have
+interaction between the worker thread associated with that queue and
+the stealing thread.
+
+The performance of work stealing is largely dependent on the
+performance of its task queue implementation. In particular, we need
+to ensure that each pushed task is only popped or taken once such that
+each task is only executed once. To achieve atomic take and pop
+operations, most implementations, like \cite{Arora2001}, rely on the
+THE protocol \cite{Dijkstra1965}, which allow the common
+\lstinline!put()! and \lstinline!take()! operations to be implemented
+without using expensive atomic compare-and-swap
+operations. Unfortunately, this only works on machines with a
+sequentially consistent memory model, and in practice there are just
+few architectures that support this. On the x86 for example, one needs
+to insert a memory barrier in \lstinline!take()! operation which is
+almost as expensive as taking a lock in the first place.
+
+Moreover, there is an even bigger disadvantage to queues based on the
+THE protocol which is more subtle. As shown in Section 4.1, whenever
+f2.Value is called where the future f2 has not yet started, we should
+execute it directly on the calling thread. But if we use the THE
+protocol, there is no mechanism to get f2 exclusively: we can only
+\lstinline!take()! it from our queue if it happens to be the last task
+that was pushed, otherwise one cannot determine whether f2 is on the
+local queue, or resides in a queue of another worker group. Without
+gaining exclusive access in some other way, we cannot execute the task
+directly or otherwise we may execute a task more than once since it
+can concurrently be taken by another worker, or popped if it resided
+on a non-local task queue.
+
+Since this is exactly the common case that we need to optimize, we
+opted for another approach where each task uses internally an atomic
+compare-and-swap operation to ensure that it only executes once. We
+assign to each task an associated state, Init, Running, and Done. The
+internal Run method on a task performs an atomic compare-and-swap
+operation to try to switch from Init to Running. If the atomic
+operation succeeds, the associated action is executed and the state is
+set to Done afterwards:
+
+\begin{lstlisting}[style=Listing]
+  void Task.Run(){
+    if(CompareAndSwap(ref state, Init, Running)){
+      Execute(); // execute the associated action
+      state = Done;
+    }
+  }
+\end{lstlisting}
+
+Effectively, this ensures that each task is only executed once, or
+stated differently: running a task is an idempotent
+operation. Unfortunately, if we would use task queues based on the THE
+protocol we now use two mechanisms for mutual exclusion, and execute
+both a memory barrier instruction on a \lstinline!take()! operation,
+and an interlocked instruction when calling Run. Since these are
+expensive instructions that require synchronization among the
+processors, we would like to avoid these. As shown in the previous
+paragraphs, the interlocked instruction in the Run method is essential
+and since we now ensure exclusivity on the task level, it is possible
+to use a weaker data structure for the task queues. In particular,
+this leads to the development of the duplicating queue.
+
+\subsubsection{Duplicating Queues}
+
+A duplicating queue is a double-ended queue that potentially returns a
+pushed element more than once. In particular, the \lstinline!put()!
+and \lstinline!take()! operations behave like normal, but the
+\lstinline!steal()! operation is allowed to either take an element
+(and remove it from the queue), or to just duplicate an element in the
+queue. While this nondeterminism might be dangerous for many clients,
+it is fine for our usage of the duplicating queue: the Task's Run
+method is idempotent and ReplicableTask's expect to be executed in
+parallel. Other properties of a duplicating queues are as usual: a
+duplicating queue never loses an element, and returns all pushed
+elements after a finite number of \lstinline!take()! (and
+\lstinline!steal()!) operations.
+
+By allowing duplication we can avoid an expensive memory barrier
+instruction in the \lstinline!take()! operation on the x86
+architecture. More generally, our duplicating queue is designed
+specifically to be correct on architectures satisfying the Total Store
+Order (TSO) memory model (Sindhu et al. 1991) or stronger model. To
+our knowledge, this is one of the first data structures that takes
+specific advantage of weaker memory models to avoid memory
+barriers. An interesting aspect is that the non-determinism that is
+introduced by the weaker memory model is captured in a benign way
+where the number of duplicated elements is non-deterministically
+determined.
+
+\subsubsection{Related Work}
+
+There is a wealth of research into parallel scheduling algorithms,
+data structures, and language designs, and we necessarily restrict
+this section to work that is directly relevant to work stealing and
+embedded library designs.
+
+The idea of duplicating queues has recently been described as
+``idempotent'' queues \cite{Michael2009}. We were not aware of this
+work at the time of writing this paper and arrived at our results
+independently (doing our first implementation in January 2008). Their
+general motivation and the semantics of the idempotent queue seem
+largely identical, but the implementation is quite different. Their
+elegant implementation packs fields together in a memory word and
+relies strictly on atomic compare-and-swap and memory ordering
+instructions. In contrast, our implementation uses a simple lock on
+all but the critical paths which can simplify many implementation
+aspects and also removes a level of indirection on the critical path.
+
+\subsubsection{The design of a task parallel library \cite{Leijen2009} (Full version)}
 
 Under the hood, tasks and replicable tasks are assigned by the runtime
 to special worker threads. TPL uses standard work-stealing for this
@@ -1426,21 +1083,21 @@ to another worker in its group when that worker can be unblocked
 (because the task on which it was waiting has completed for example).
 
 Each worker group keeps tasks in its own doubled-ended queue. The task
-queue provides the operations \lstinline!Push()!, \lstinline!Pop()! and
-\lstinline!Take()!. When a task is created, the running worker thread
-pushes the task onto the local queue of its group. If it finishes its
-current task, it will try to pop a task from the group queue and
-continue with that. This way, a task is always pushed and popped
-locally, which benefits both the data locality of the task and reduces
-the amount of synchronization needed. If a worker thread finds there
-are no more tasks in its queue (and none of the other workers in its
-group can be unblocked), it becomes a thief : it chooses another task
-queue of another worker group at random and tries to steal a task or
-replicable task from the (non-local) end of the task queue using
-\lstinline!Take()!. For many parallel conquer-and-divide algorithms,
-this ensures that the largest tasks are stolen first. For loops,
-which are typically implemented via replicable tasks, it means that
-tasks are only replicated on demand, i.e. when another thread starts
+queue provides the operations \lstinline!put()!, \lstinline!take()!
+and \lstinline!steal()!. When a task is created, the running worker
+thread pushes the task onto the local queue of its group. If it
+finishes its current task, it will try to pop a task from the group
+queue and continue with that. This way, a task is always pushed and
+popped locally, which benefits both the data locality of the task and
+reduces the amount of synchronization needed. If a worker thread finds
+there are no more tasks in its queue (and none of the other workers in
+its group can be unblocked), it becomes a thief : it chooses another
+task queue of another worker group at random and tries to steal a task
+or replicable task from the (non-local) end of the task queue using
+\lstinline!steal()!. For many parallel conquer-and-divide algorithms,
+this ensures that the largest tasks are stolen first. For loops, which
+are typically implemented via replicable tasks, it means that tasks
+are only replicated on demand, i.e. when another thread starts
 idling. Unfortunately, at this point we have to do more
 synchronization for our queues, since we have multiple parties that
 can try to steal at the same time from the same queue, and we can have
@@ -1453,12 +1110,12 @@ to ensure that each pushed task is only popped or taken once such that
 each task is only executed once. To achieve atomic take and pop
 operations, most implementations, like \cite{Arora2001}, rely on the
 THE protocol \cite{Dijkstra1965}, which allow the common
-\lstinline!Push()! and \lstinline!Pop()! operations to be implemented
+\lstinline!put()! and \lstinline!take()! operations to be implemented
 without using expensive atomic compare-and-swap
 operations. Unfortunately, this only works on machines with a
 sequentially consistent memory model, and in practice there are just
 few architectures that support this. On the x86 for example, one needs
-to insert a memory barrier in \lstinline!Pop()! operation which is
+to insert a memory barrier in \lstinline!take()! operation which is
 almost as expensive as taking a lock in the first place.
 
 Moreover, there is an even bigger disadvantage to queues based on the
@@ -1466,7 +1123,7 @@ THE protocol which is more subtle. As shown in Section 4.1, whenever
 f2.Value is called where the future f2 has not yet started, we should
 execute it directly on the calling thread. But if we use the THE
 protocol, there is no mechanism to get f2 exclusively: we can only
-\lstinline!Pop()! it from our queue if it happens to be the last task
+\lstinline!take()! it from our queue if it happens to be the last task
 that was pushed, otherwise one cannot determine whether f2 is on the
 local queue, or resides in a queue of another worker group. Without
 gaining exclusive access in some other way, we cannot execute the task
@@ -1496,14 +1153,14 @@ Effectively, this ensures that each task is only executed once, or
 stated differently: running a task is an idempotent
 operation. Unfortunately, if we would use task queues based on the THE
 protocol we now use two mechanisms for mutual exclusion, and execute
-both a memory barrier instruction on a \lstinline!Pop()! operation, and
-an interlocked instruction when calling Run. Since these are expensive
-instructions that require synchronization among the processors, we
-would like to avoid these. As shown in the previous paragraphs, the
-interlocked instruction in the Run method is essential and since we
-now ensure exclusivity on the task level, it is possible to use a
-weaker data structure for the task queues. In particular, this leads
-to the development of the duplicating queue.
+both a memory barrier instruction on a \lstinline!take()! operation,
+and an interlocked instruction when calling Run. Since these are
+expensive instructions that require synchronization among the
+processors, we would like to avoid these. As shown in the previous
+paragraphs, the interlocked instruction in the Run method is essential
+and since we now ensure exclusivity on the task level, it is possible
+to use a weaker data structure for the task queues. In particular,
+this leads to the development of the duplicating queue.
 
 Note that only tasks need this additional check; for replicating tasks
 there is no need to do the atomic compare-and-swap operation since
@@ -1512,20 +1169,20 @@ they already implement their own mutual exclusion.
 \subsubsection{Duplicating Queues}
 
 A duplicating queue is a double-ended queue that potentially returns a
-pushed element more than once. In particular, the \lstinline!Push()! and
-\lstinline!Pop()! operations behave like normal, but the
-\lstinline!Take()! operation is allowed to either take an element (and
-remove it from the queue), or to just duplicate an element in the
+pushed element more than once. In particular, the \lstinline!put()!
+and \lstinline!take()! operations behave like normal, but the
+\lstinline!steal()! operation is allowed to either take an element
+(and remove it from the queue), or to just duplicate an element in the
 queue. While this nondeterminism might be dangerous for many clients,
 it is fine for our usage of the duplicating queue: the Task's Run
 method is idempotent and ReplicableTask's expect to be executed in
 parallel. Other properties of a duplicating queues are as usual: a
 duplicating queue never loses an element, and returns all pushed
-elements after a finite number of \lstinline!Pop()! (and
-\lstinline!Take()!) operations.
+elements after a finite number of \lstinline!take()! (and
+\lstinline!steal()!) operations.
 
 By allowing duplication we can avoid an expensive memory barrier
-instruction in the \lstinline!Pop()! operation on the x86
+instruction in the \lstinline!take()! operation on the x86
 architecture. More generally, our duplicating queue is designed
 specifically to be correct on architectures satisfying the Total Store
 Order (TSO) memory model (Sindhu et al. 1991) or stronger model. To
@@ -1647,41 +1304,6 @@ algorithms too.
   label=lst:duplicating-work-stealing-deque-expand]{
     ../listings/queues-implementation/DuplicatingWorkStealingDeque-expand.java
 }
-
-
-\section{ABA Problem}
-
-\subsection{Explanation 1}
-
-The ABA problem is fundamental to all CAS-based systems. In our
-current implementation we have not incorporated a remedy to prevent
-it. The ABA problem occurs when a thread $T_1$ reads a value $A$ from
-a shared object and then an interrupting thread $T_2$ modifies the
-value of the shared object from $A$ to $B$ and then back to $A$. When
-$T_1$ resumes, it erroneously assumes that the object has not been
-modified. Given such behavior, there is a serious risk that $T_2$'s
-execution is going to violate the correctness of the object's
-semantics. Practical solutions to the ABA problem include the use of
-hazard pointers \cite{Michael2004} or the association of a version
-counter to each element.
-
-\subsection{Explanation 2}
-
-The \lstinline!top! field encompasses two logical fields; the
-\emph{reference} is the index of the first task in the queue, and the
-\emph{stamp} is a counter incremented each time the reference is
-changed. The stamp is needed to avoid an ``ABA'' problem of the type
-that often arises when using \lstinline!compareAndSet()!. Suppose
-thread \emph{A} tries to steal a task from index 3.  \emph{A} reads a
-reference to the task at that position, and tries to steal it by
-calling compareAndSet() to set the index to 2. It is delayed before
-making the call, and in the meantime, thread \emph{B} removes all the
-tasks and inserts three new tasks. When \emph{A} awakens, its
-\lstinline!compareAndSet()!  call will succeed in changing the index
-from 3 to 2, but it will have removed a task that is already
-complete. The stamp ensures that \emph{A}'s
-\lstinline!compareAndSet()! call will fail because the stamps no
-longer match.
 
 
 %%% Local Variables: 

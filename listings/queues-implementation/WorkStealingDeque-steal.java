@@ -9,13 +9,13 @@ public WorkItem steal(Worker thiefWorker) {
 		WorkItem[] currentWorkItems = workItems;
 		int size = oldBottom - oldTop;
 			
-		if (size <= 0)
-			return null; // empty
+		if (size <= 0) //*\label{lst:work-stealing-deque-steal-empty-1}
+			return null; // empty //*\label{lst:work-stealing-deque-steal-empty-2}
 			
 		workItem = currentWorkItems[oldTop % currentWorkItems.length];
 			
 		 // fetch and increment
-		if (top.compareAndSet(oldTop, oldTop + 1))
+		if (top.compareAndSet(oldTop, oldTop + 1)) //*\label{lst:work-stealing-deque-steal-cas}
 			break;
 	}
 		

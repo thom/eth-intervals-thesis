@@ -200,6 +200,17 @@ steal-half algorithm of Hendler and Shavit \cite{Hendler2002}.
 
 \subsection{Dynamic circular work-stealing deque \cite{Chase2005}}
 
+\textbf{Expanding and shrinking:} We present in detail for each
+algorithm how to expand the queue size, where task arrays are replaced
+by new larger ones. The shown algorithm code assumes support for
+automatic garbage collection, where old arrays are freed
+automatically. Without garbage collection, buffer pools as described
+by Chase and Lev \cite{Chase2005} can be used. The old array can be
+remembered in the \lstinline!expand()! operation and then freed to the
+buffer pools right after the end of the \lstinline!put()!
+operation. As for the actual tasks, they are not dynamic objects. They
+are written and read directly to and from elements of the task array.
+
 \subsubsection{Shrinking After Growth}
 
 One disadvantage of the algorithm as presented is that it does not
@@ -298,6 +309,56 @@ operating system, the deque's owner can reclaim a buffer while there
 may be still some thieves refer- encing it (something that the garage
 collector will not do), which leads to a better use of the allocated
 space.
+
+
+\subsection{The design of a task parallel library \cite{Leijen2009}}
+
+\subsubsection{Performance}
+
+Measuring the performance of the duplicating queue in isolation is not
+very useful. The reason is that the main performance benefit does not
+come from the duplicating queue, but from being able to guarantee
+mutual exclusivity in the tasks themselves, such that a task can be
+executed directly when Wait is called and the task has not started
+yet. Since the task queues no longer need to guarantee mutual
+exclusivity, the duplicating queue is mostly an optimization to avoid
+using too many expensive interlocked instructions.
+
+Therefore, it is better to measure the benefit of being able to
+directly execute a task for which Wait is called (and which has not
+started yet). We created two versions of the library: one based on a
+duplicating queue with direct execution of tasks, and a traditional
+implementation based on the standard THE protocol. The standard
+fibonacci benchmark represents one of the worst-case examples since
+most waits are for tasks that were just pushed on the stack (and
+reside on the top of the stack). We ran this benchmark on a 4
+processor machine which used 196418 tasks ($\approx$ 500.000 tasks per
+second). The implementation based on the duplicating queue was 1.4
+times faster when using all processors. Here are some statistics,
+where DUP refers to the duplicating queue implementation, and THE to
+the implementation based on the THE protocol.
+
+As we can see, the performance of THE mostly suffered because there
+were many more switches between threads, and many more thread
+migrations. This happened precisely when Wait was called for a task
+that had not yet started. Since one cannot reliably determine whether
+this task was on the local queue, a fresh worker thread was needed to
+execute the task resulting in a thread switch. Of course, this
+automatically also lead to more migration of threads where ready
+worker threads were stolen by another worker group. Interestingly,
+the number of task steals are about the same as this is mostly
+determined by the particular algorithm and sizes of the tasks.
+
+Of course, for most fork-join parallelism (including the fibonacci
+benchmark), the task to be waited upon is often right on the top of
+the local task queue. When Wait is called on a task that has not
+started yet, we can optimize for this case in the THE implementation
+by simply popping the top of the stack if that happens to be our task
+and execute it directly. When applying this simple optimization, both
+implementations perform very similar for this benchmark. Of course,
+the DUP implementation outperforms again when the parallelism is less
+structured using futures for example, and in general at any time when
+Wait is called on a task that is not on the top of the stack.
 
 
 %%% Local Variables: 

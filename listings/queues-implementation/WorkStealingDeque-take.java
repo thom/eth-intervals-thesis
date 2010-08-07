@@ -14,8 +14,8 @@ public WorkItem take() {
 	WorkItem workItem = 
 		currentWorkItems[bottom % currentWorkItems.length];
 
-	if (size > 0)
-		return workItem;
+	if (size > 0) //*\label{lst:work-stealing-deque-take-non-empty-1}
+		return workItem; //*\label{lst:work-stealing-deque-take-non-empty-2}
 
 	// fetch and increment
 	if (!top.compareAndSet(oldTop, oldTop + 1)) //*\label{lst:work-stealing-deque-take-cas}

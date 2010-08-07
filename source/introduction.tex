@@ -221,15 +221,15 @@ maintain its own pool of ready tasks from which it obtains work. When
 a worker finds that its pool is empty, it becomes a thief and steals a
 task from the pool of a victim worker chosen at random.
 
-To obtain work, a worker pops the ready task from the bottom of its
+To obtain work, a worker takes the ready task from the bottom of its
 deque and executes it. If the task terminates, the worker goes back to
-the bottom of its deque to pop off another task upon which it can
-work. When assigning a new task to a worker, the worker pushes the
+the bottom of its deque to take off another task upon which it can
+work. When assigning a new task to a worker, the worker putting the
 newly ready task onto the bottom of its deque. Thus, so long as a
 worker's deque is not empty, the worker manipulates its deque in a
 LIFO (stack-like) manner.
 
-When a worker tries to obtain work by popping a task off the bottom of
+When a worker tries to obtain work by taking a task off the bottom of
 its deque and it finds that it is empty, then the worker becomes a
 thief. It picks a victim worker at random and attempts to obtain work
 by removing the task at the top of the victim worker's deque. If the
