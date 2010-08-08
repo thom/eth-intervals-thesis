@@ -504,6 +504,8 @@ case the popped entry is returned. Note that, as in the original ABP
 algorithm, most executions of the method will be short, and will not
 involve any CAS-based synchronization operations.
 
+\todo{Finish section ``Dynamic Work-Stealing Deque''}
+
 \subsection{Duplicating Work-Stealing Queue}
 \label{sec:queues-alternative-implementations-duplicating-queue}
 
@@ -511,56 +513,26 @@ The \emph{Duplicating Work-Stealing Queue} provides an alternative to
 the \emph{Idempotent Work-Stealing Deque}. Its design is based on the
 Task Parallel Library (TPL) \cite{Leijen2009}.
 
-Unlike the \emph{Lazy Deque} (Section
-\ref{sec:queues-background-current-implementation}) or the
-\emph{Work-Stealing Deque} (Section
-\ref{sec:queues-implementation-ws-deque}), the \emph{Idempotent
-  Work-Stealing Deque} does not guarantee that each inserted work item
-is extracted \emph{exactly} once. Instead it uses the relaxed
+Like the \emph{Idempotent Work-Stealing Deque}, the \emph{Duplicating
+  Work-Stealing Queue} does not guarantee that each inserted work item
+is extracted \emph{exactly} once and instead it uses the relaxed
 semantics of guaranteeing that each inserted work item is extracted
 \emph{at least} once.
 
-While this nondeterminism might be dangerous in many applications, it
-is fine for our usage of the deque as we modified the interval's
-\lstinline!exec()! method to be idempotent (see Section
-\ref{sec:queues-implementation-idempotent-ws-deque-interval}).\footnote{If
-  the application can tolerate duplicated work, for example parallel
-  garbage collectors or constraint solvers, we do not have to make the
-  \verb!exec()! method idempotent.}
+As we are also using idempotent intervals together with duplicating
+work-stealing queues, this nondeterminism is fine for our usage.
 
-\subsection{Idempotent Interval}
-
-Listing \ref{lst:interval} shows the idempotent interval
-implementation. Each interval has an associated state
-\lstinline!RunningState! (Line \ref{lst:interval-state}). Upon
-initialization, the state is set to \lstinline!INIT! (Line
-\ref{lst:interval-init}). The internal \lstinline!exec()!  method
-performs an atomic Compare-and-Swap operation to try to switch from
-\lstinline!INIT! to \lstinline!RUNNING! (Line
-\ref{lst:interval-cas}). If the Compare-and-Swap operation succeeds,
-the associated task is executed and the state is set to
-\lstinline!DONE! afterwards (Line \ref{lst:interval-done}).
-
-This ensures that each interval is only executed once, or stated
-differently: running an interval is an idempotent operation.
-
-Idempotent intervals would also simplify the mailbox style
-implementation for locality-aware scheduling \cite{Acar2002}.
-
-\subsection{Implementation}
-
-In contrast to the \emph{Lazy Deque} (Section
-\ref{sec:queues-background-current-implementation}) or the
-\emph{Work-Stealing Deque} (Section
-\ref{sec:queues-implementation-ws-deque}), the owner's methods
-\lstinline!put()! and \lstinline!take()! of the \emph{Idempotent
-  Work-Stealing Deque} do not have to use expensive Compare-and-Swap
-operations. We can optimize the owner's methods by avoiding the high
-overheads of these operations.
-
-Of course, exploiting weak memory models is playing with fire. That's
-why we verified the correctness of the duplicating queue formally
-using the Checkfence tool \cite{Burckhardt2007, Burckhardt2007a}.
+The idea of duplicating queues has recently been described as
+\emph{idempotent} queues \cite{Michael2009}. We were not aware of this
+work at the time of writing this paper and arrived at our results
+independently (doing our first implementation in January 2008). Their
+general motivation and the semantics of the idempotent queue seem
+largely identical, but the implementation is quite different. Their
+elegant implementation packs fields together in a memory word and
+relies strictly on atomic compare-and-swap and memory ordering
+instructions. In contrast, our implementation uses a simple lock on
+all but the critical paths which can simplify many implementation
+aspects and also removes a level of indirection on the critical path.
 
 \subsubsection{Duplicating Queues}
 
@@ -589,26 +561,9 @@ introduced by the weaker memory model is captured in a benign way
 where the number of duplicated elements is non-deterministically
 determined.
 
-\subsubsection{Related Work}
-
-There is a wealth of research into parallel scheduling algorithms,
-data structures, and language designs, and we necessarily restrict
-this section to work that is directly relevant to work stealing and
-embedded library designs.
-
-The idea of duplicating queues has recently been described as
-\emph{idempotent} queues \cite{Michael2009}. We were not aware of this
-work at the time of writing this paper and arrived at our results
-independently (doing our first implementation in January 2008). Their
-general motivation and the semantics of the idempotent queue seem
-largely identical, but the implementation is quite different. Their
-elegant implementation packs fields together in a memory word and
-relies strictly on atomic compare-and-swap and memory ordering
-instructions. In contrast, our implementation uses a simple lock on
-all but the critical paths which can simplify many implementation
-aspects and also removes a level of indirection on the critical path.
-
-\todo{Finish section \emph{Alternative Implementations}}
+Of course, exploiting weak memory models is playing with fire. That's
+why we verified the correctness of the duplicating queue formally
+using the Checkfence tool \cite{Burckhardt2007, Burckhardt2007a}.
 
 
 %%% Local Variables: 
