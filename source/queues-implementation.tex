@@ -113,6 +113,8 @@ read right before the successful Compare-and-Swap operation.
 To prevent \lstinline!steal()! from returning the deque's last work
 item if it was already taken by a concurrent \lstinline!take()! after
 \lstinline!bottom! is read (Line
+\label{sec:queues-implementation-idempotent-ws-deque-interval}
+
 \ref{lst:work-stealing-deque-steal-bottom}), but before the
 Compare-and-Swap operation is executed (Line
 \ref{lst:work-stealing-deque-steal-cas}), any \lstinline!take()! that
@@ -128,22 +130,40 @@ Compare-and-Swap operation.
 \section{Idempotent Work-Stealing Deque}
 \label{sec:queues-implementation-idempotent-ws-deque}
 
-The ``Idempotent Work-Stealing Deque'' is based on ideas from
+The \emph{Idempotent Work-Stealing Deque} is based on ideas from
 \cite{Leijen2009} and \cite{Michael2009}. It is an unbounded
 double-ended queue that can resize itself if needed.
 
-\subsection{The design of a task parallel library \cite{Leijen2009}}
+Unlike the \emph{Lazy Deque} (Section
+\ref{sec:queues-background-current-implementation}) or the
+\emph{Work-Stealing Deque} (Section
+\ref{sec:queues-implementation-ws-deque}), the \emph{Idempotent
+  Work-Stealing Deque} does not guarantee that each inserted work item
+is extracted \emph{exactly} once. Instead it uses the relaxed
+semantics of guaranteeing that each inserted work item is extracted
+\emph{at least} once.
 
-\subsubsection{Work Distribution}
+While this nondeterminism might be dangerous in many applications, it
+is fine for our usage of the deque as we modified the interval's
+\lstinline!exec()! method to be idempotent (see Section
+\ref{sec:queues-implementation-idempotent-ws-deque-interval}).\footnote{If
+  the application can tolerate duplicated work, for example parallel
+  garbage collectors or constraint solvers, we do not have to make the
+  \verb!exec()! method idempotent.}
 
-Each interval uses internally an atomic Compare-and-Swap operation to
-ensure that it only executes once. We assign to each interval an
-associated state, \lstinline!INIT!, \lstinline!RUNNING!,
-\lstinline!DONE!. The internal \lstinline!exec()! method on a task
+\subsection{Idempotent Interval}
+\label{sec:queues-implementation-idempotent-ws-deque-interval}
+
+Listing \ref{lst:interval} shows the idempotent interval
+implementation. Each interval has an associated state
+\lstinline!RunningState! (Line \ref{lst:interval-state}). Upon
+initialization, the state is set to \lstinline!INIT! (Line
+\ref{lst:interval-init}). The internal \lstinline!exec()!  method
 performs an atomic Compare-and-Swap operation to try to switch from
-\lstinline!INIT! to \lstinline!RUNNING!. If the atomic operation
-succeeds, the associated action is executed and the state is set to
-\lstinline!DONE! afterwards:
+\lstinline!INIT! to \lstinline!RUNNING! (Line
+\ref{lst:interval-cas}). If the Compare-and-Swap operation succeeds,
+the associated task is executed and the state is set to
+\lstinline!DONE! afterwards (Line \ref{lst:interval-done}).
 
 \lstinputlisting[style=Numbers,
   caption={Interval}, 
@@ -151,104 +171,23 @@ succeeds, the associated action is executed and the state is set to
     ../listings/queues-implementation/Interval.java
 }
 
-Effectively, this ensures that each interval is only executed once, or
-stated differently: running an interval is an idempotent
-operation. Unfortunately, if we would use traditional work-stealing
-queues we now use two mechanisms for mutual exclusion, and execute
-both a memory barrier instruction on a \lstinline!take()! operation,
-and an interlocked instruction when calling \lstinline!exec()!. Since
-these are expensive instructions that require synchronization among
-the processors, we would like to avoid these. Since we now ensure
-exclusivity on the interval level, it is possible to use a weaker data
-structure for the work queues.
+This ensures that each interval is only executed once, or stated
+differently: running an interval is an idempotent operation.
 
-\subsubsection{Duplicating Queues}
+Idempotent intervals would also simplify the mailbox style
+implementation for locality-aware scheduling \cite{Acar2002}.
 
-A duplicating queue is a double-ended queue that potentially returns a
-pushed element more than once. In particular, the \lstinline!put()!
-and \lstinline!take()! operations behave like normal, but the
-\lstinline!steal()! operation is allowed to either take an element
-(and remove it from the queue), or to just duplicate an element in the
-queue. While this nondeterminism might be dangerous for many clients,
-it is fine for our usage of the duplicating queue: the interval's
-\lstinline!exec()! method is idempotent. Other properties of a
-duplicating queues are as usual: a duplicating queue never loses an
-element, and returns all pushed elements after a finite number of
-\lstinline!take()! and \lstinline!steal()! operations.
+\subsection{Implementation}
+\label{sec:queues-implementation-idempotent-ws-deque-implementation}
 
-\subsection{Idempotent work stealing \cite{Michael2009}}
-
-The conventional semantics of work stealing guarantee that each
-inserted task is eventually extracted exactly once. However,
-correctness of a wide class of applications allows for relaxed
-semantics, because either:
-
-\begin{enumerate}
-\item the application already explicitly checks that no work is
-  repeated or
-\item the application can tolerate repeated work.
-\end{enumerate}
-
-The relaxed semantics of idempotent work stealing guarantee that each
-inserted task is eventually extracted at least once -- instead of
-exactly once.
-
-On mainstream processors, algorithms for conventional work stealing
-require special atomic instructions or store-load memory ordering
-fence instructions in the owner's critical path operations. In
-general, these instructions are substantially slower than regular
-memory access instructions. By exploiting the relaxed semantics, we
-can avoid these instructions in the owner's operations.
-
-\subsubsection{Introduction}
-
-Current algorithms for work stealing queues comply with the following
-semantics: each inserted task is eventually extracted -- by the owner
-thread or other threads -- exactly once. However, these semantics are
-too restrictive for a wide range of applications dealing with
-irregular computation patterns. Sample domains include: parallel
-garbage collection, fixed point computations in program analysis,
-constraint solvers (e.g. SAT solvers), state space search exploration
-in model checking as well as integer and mixed programming solvers.
-
-The key observation is that the correctness invariants of these
-applications allow for a relaxation of the traditional work stealing
-semantics. The fundamental reason is that in these problems:
-
-\begin{enumerate}
-\item the application already ensures that no work is repeated, for
-  example by checking whether a task is completed, or
-\item the application tolerates repeatable work.
-\end{enumerate}
-
-Informally, the relaxed semantics state that each inserted task should
-be eventually extracted at least once -- instead of exactly once as it
-is with the conventional semantics. We exploit this invariant
-relaxation and introduce idempotent work stealing. We present several
-new algorithms that exploit the relaxed semantics to deliver better
-performance. Note that even with these relaxed semantics, subtle
-issues need to be handled in order to ensure correct and efficient
-operation. For example, the algorithms must guarantee that no tasks
-are lost and all extracted tasks contain valid and consistent
-information while at the same time avoiding the use of expensive
-synchronization instructions in the owner's operations:
-\lstinline!put()! and \lstinline!take()!.
-
-On mainstream processors, existing algorithms for conventional work
-stealing queues require store-load memory ordering fence instructions
-in the critical path of the owner's operations \cite{Arora2001,
-  Chase2005, Frigo1998, Hendler2006, Hendler2002}. A store-load fence
-prevents loads from being executed before the completion of stores to
-independent locations where the stores appear earlier in program
-order. In general, special atomic instructions and store-load fence
-instructions are substantially slower than regular instructions. Our
-new algorithms are designed to optimize the owner's operations by
-avoiding the high overheads of these instruction in the owner's
-operations. That is, in our algorithms, unlike existing algorithms,
-owner operations avoid using special atomic instructions and expensive
-store-load fence instructions.
-
-\subsubsection{Algorithm}
+In contrast to the \emph{Lazy Deque} (Section
+\ref{sec:queues-background-current-implementation}) or the
+\emph{Work-Stealing Deque} (Section
+\ref{sec:queues-implementation-ws-deque}), the owner's methods
+\lstinline!put()! and \lstinline!take()! of the \emph{Idempotent
+  Work-Stealing Deque} do not have to use expensive Compare-and-Swap
+operations. We can optimize the owner's methods by avoiding the high
+overheads of these operations.
 
 The \lstinline!IdempotentWorkStealingDeque! class has an inner class,
 \lstinline!ArrayData!, and two fields, \lstinline!anchor! and
@@ -264,166 +203,114 @@ The array \lstinline!workItems! is used in a cyclic way with head and
 size encapsulated in an \lstinline!ArrayData! reference. The
 \lstinline!ArrayData! reference is maintained by the atomic stamped
 reference \lstinline!anchor! together with an integer stamp. Our
-algorithm needs to guard against the ABA problem in the
+algorithm needs to guard against the ABA problem\footnote{If a thread
+  reads a value $A$ from a shared variable, computes a new value, and
+  then attempts a Compare-and-Swap operation, there is a chance that
+  the Compare-and-Swap succeeds even if it should not, because for
+  example between the read and the Compare-and-Swap some other thread
+  changes the $A$ back to $B$ and then back to $A$ again.} in the
 \lstinline!steal()! operation and uses the stamp as an ABA-prevention
 tag.\footnote{The tag is a specific implementation choice. At the
   abstract level, the algorithms do not require the use of the tag
   mechanism but can use any ABA prevention mechanism, like bounded
   tags \cite{Moir1997} or hazard pointers \cite{Michael2004}}
 
-Typically, the ABA problem occurs when a thread reads some value A
-from a shared variable, and then other threads write to the variable
-some value B, and then A again. Later, when the original thread checks
-if the variable holds the value A, e.g., using CAS, the comparison
-succeeds, while the intention of the algorithm designer is for such a
-comparison to fail in this case, and to succeed only if the variable
-has not been written after the initial read. However, the semantics of
-CAS prevent it from distinguishing the two cases. The classic solution
-for the ABA problem \cite{IBM1974} is to pack a tag with the shared
-variable and increment the tag when the associated variable is
-updated, so that other threads can detect that the variable has been
-updated. This solution assumes that the tag is large enough that it is
-unlikely to wrap around and reach the same value while a thread is
-executing the read-check scenario mentioned above. The packing of a
-tag with index variables in one atomic word limits the size of the
-index.
-
 Listing \ref{lst:idempotent-work-stealing-deque-put} shows the
-\lstinline!put()! method. The owner starts the \lstinline!put()!
-operation by reading the anchor variable in line 1. In line 2, the
-owner checks if there is enough space to \lstinline!put()! the new
-task by checking if the size subfield is less than the size of the
-tasks array. If not, it expands the array and restarts. Otherwise, it
-proceeds to line 3 and writes the task information into the task array
-at the tail of the queue (i.e., h+s modulo the size of the array). The
-writing of the task information which can span multiple words need not
-be atomic.
+\lstinline!put()! method. First the owner reads the anchor to get the
+head and size of the queue as well as the ABA-prevention tag (Lines
+\ref{lst:idempotent-work-stealing-deque-put-read-1} --
+\ref{lst:idempotent-work-stealing-deque-put-read-2}). Then the owner
+checks whether the array is full of not (Line
+\ref{lst:idempotent-work-stealing-deque-put-full}). If it is full, the
+owner expands the array by calling \lstinline!expand()! and loops
+around (Line
+\ref{lst:idempotent-work-stealing-deque-put-expand}). Otherwise, it
+adds the work item at the tail of the queue (Line
+\ref{lst:idempotent-work-stealing-deque-put-insert}). In Line
+\ref{lst:idempotent-work-stealing-deque-put-update-anchor} the owner
+updates the anchor by incrementing the queues size and ABA-prevention
+tag.
 
-Finally, in line 4, the owner writes to the anchor variable the three
-packed values as read in line 1 with the size and tag subfields each
-incremented by 1, indicating the addition of a task and to prevent
-the ABA problem in concurrent \lstinline!steal()! operations as
-discussed below.
-
-\lstinputlisting[style=Numbers,
+\lstinputlisting[style=FloatNumbers,
   caption={Idempotent work-stealing deque: \lstinline!put()! method},
   label=lst:idempotent-work-stealing-deque-put]{
     ../listings/queues-implementation/IdempotentWorkStealingDeque-put.java
 }
 
-Listing \ref{lst:idempotent-work-stealing-deque-expand},
-\lstinline!expand()!: Array expansion for this algorithm is similar to
-the array expansion for the idempotent FIFO algorithm.
+The method \lstinline!expand()! is defined in Listing
+\ref{lst:idempotent-work-stealing-deque-expand}. For the owner to
+expand a full queue, it allocates a new array with double the current
+capacity (Line
+\ref{lst:idempotent-work-stealing-deque-expand-new-array}) and copies
+the work items from the current array to the newly allocated one
+(Lines \ref{lst:idempotent-work-stealing-deque-expand-copy-1} --
+\ref{lst:idempotent-work-stealing-deque-expand-copy-2}). After that,
+it sets \lstinline!workItems! to the new array (Line
+\ref{lst:idempotent-work-stealing-deque-expand-assign}).
 
-FIFO queue: For the owner to expand a full queue, it allocates a new
-larger array (e.g., with double the current capacity) in line 2. Then,
-it copies the tasks from the current array to the newly allocated one
-in lines 3 and 4. After that, it sets the tasks pointer to the new
-array in line 5. The writes in lines 2 and 4 must be ordered before
-the write in line 5. Otherwise, a thief may read uninitialized task
-information.
-
-The write in line 5 must be ordered before the subsequent write in
-line 5 of put that updates the tail variable. Otherwise, a
-\lstinline!steal()! operation may return an old task, while the new
-task is lost without ever being executed.
-
-\lstinputlisting[style=Numbers,
+\lstinputlisting[style=FloatNumbers,
   caption={Idempotent work-stealing deque: \lstinline!expand()! method},
   label=lst:idempotent-work-stealing-deque-expand]{
     ../listings/queues-implementation/IdempotentWorkStealingDeque-expand.java
 }
 
-The method \lstinline!take()! is defined in Listing
-\ref{lst:idempotent-work-stealing-deque-take}. The owner starts the
-\lstinline!take()! operation by reading the anchor variable in line
-1, then checking in line 2 if the queue is empty (i.e., if s = 0). If
-so, the operation returns an indicator of an empty queue. Otherwise,
-it proceeds to line 3 and reads the task information at the tail of
-the queue, i.e., from the array element with index h+s−1 modulo the
-array size.
+Listing \ref{lst:idempotent-work-stealing-deque-take} defines the
+method \lstinline!take()!. The owner reads the anchor variable to get
+the head and size of the queue, and also the ABA-prevention tag (Lines
+\ref{lst:idempotent-work-stealing-deque-take-read-anchor-1} --
+\ref{lst:idempotent-work-stealing-deque-take-read-anchor-2}). Then it
+checks if the queue is empty (Line
+\ref{lst:idempotent-work-stealing-deque-take-check-size}). If it is
+empty, \lstinline!take()! return \lstinline!null!. Otherwise, it reads
+the work item at the tail of the queue (Lines
+\ref{lst:idempotent-work-stealing-deque-take-get}). In Line
+\ref{lst:idempotent-work-stealing-deque-put-update-anchor} the method
+updates the anchor by decrementing the queues size to indicate the
+extraction of a work item.
 
-In line 4, the owner writes to the anchor variable the three packed
-subfield values read in line 1 with the size subfield decremented by
-one to indicate the extraction of a task.
-
-\lstinputlisting[style=Numbers,
+\lstinputlisting[style=FloatNumbers,
   caption={Idempotent work-stealing deque: \lstinline!take()! method},
   label=lst:idempotent-work-stealing-deque-take]{
     ../listings/queues-implementation/IdempotentWorkStealingDeque-take.java
 }
 
 
-A thread starts the \lstinline!steal()! operation (Listing
-\ref{lst:idempotent-work-stealing-deque-steal}) by reading the anchor
-variable in line 1. In line 2, the thread checks if the queue is empty
-(i.e., if s = 0). If so, the operation returns an indicator of an
-empty queue. Otherwise, it proceeds to step 3 and reads a pointer to
-the tasks array. The read in line 3 must be ordered after the read in
-line 1. Otherwise, a thief may dereference a stale pointer to the
-tasks array after it has been replaced by the owner in order to expand
-the queue, which may lead to a lost task scenario.
+The \lstinline!steal()! method (Listing
+\ref{lst:idempotent-work-stealing-deque-steal}) starts by reading the
+anchor variable to get the head and size of the queue as well as the
+ABA-prevention tag (Lines
+\ref{lst:idempotent-work-stealing-deque-steal-read-anchor-1} --
+\ref{lst:idempotent-work-stealing-deque-steal-read-anchor-2}). In Line
+\ref{lst:idempotent-work-stealing-deque-steal-check-size} the thread
+checks if the queue is empty. If it is empty, \lstinline!steal()!
+returns \lstinline!null!. Otherwise it gets a pointer to
+\lstinline!workItems!. In Line
+\ref{lst:idempotent-work-stealing-deque-steal-read}, the thread reads
+the work item at the head of the queue.
 
-In line 4, the thread reads the array element with index h. Reading
-the task information which can span multiple words need not be atomic,
-as the reading is synchronized by being ordered in between the read in
-line 1 and the CAS in line 5.
+The \lstinline!compareAndSet()! in Line
+\ref{lst:idempotent-work-stealing-steal-cas} checks that no work item
+was lost: Checking of the ABA-prevention tag makes sure that since the
+reads in Lines
+\ref{lst:idempotent-work-stealing-deque-steal-read-anchor-1} --
+\ref{lst:idempotent-work-stealing-deque-steal-read-anchor-2} the deque
+owner has not overwritten the work item read in Line
+\ref{lst:idempotent-work-stealing-deque-steal-read}. If the
+\lstinline!compareAndSet()! is successful, it updates the anchor with
+the incremented head and decremented size to indicate the stealing and
+returns the stolen work item. Else, the thread tries to steal again.
 
-Finally, the CAS in line 6 checks that values of three subfield of
-anchor are the same as when read in line 1. The checking of the tag
-subfield (or ABA prevention in general) guarantees that since the read
-in line 1 the owner has not overwritten the array element with index h
-modulo the array size. That is, the task information read in line 4
-was indeed consistent and that no task was lost. The CAS in line 6, if
-successful, updates the anchor variable with the values read in line 1
-except with the head subfield incremented (modulo some size bound) to
-indicate the stealing of a task.
-
-\lstinputlisting[style=Numbers,
+\lstinputlisting[style=FloatNumbers,
   caption={Idempotent work-stealing deque: \lstinline!steal()! method},
   label=lst:idempotent-work-stealing-deque-steal]{
     ../listings/queues-implementation/IdempotentWorkStealingDeque-steal.java
 }
 
-\todo[inline]{Finish section ``Idempotent Work-Stealing Deque''}
-
-\minisec{References}
-
-\begin{itemize}
-\item Idempotent work stealing \cite{Michael2009}
-\item The design of a task parallel library \cite{Leijen2009}
-\item Checkfence: checking consistency of concurrent data types on
-  relaxed memory models \cite{Burckhardt2007}
-\item Checkfence: checking consistency of concurrent data types on
-  relaxed memory models \cite{Burckhardt2007a}
-\end{itemize}
-
-\minisec{Things to mention}
-
-\begin{itemize}
-\item Idempotent FIFO queues: Idempotent queue
-\item Idempotent LIFO queues: Idempotent stack
-\item Duplicating queues as an alternative to idempotent queues
-\item State of interval task (init, running, done) could be helpful
-  when using a mailbox style implementation for locality-aware
-  scheduling \cite{Acar2002}
-\end{itemize}
-
-We present three algorithms, each with a different choice for how the
-items are extracted. In all of our algorithms, the owner inserts new
-tasks at the tail of the queue. In the first algorithm (idempotent
-LIFO) tasks are always extracted from the tail, while in the second
-algorithm (idempotent FIFO) tasks are always extracted from the
-head. In the third algorithm (idempotent double-ended), the owner
-extracts from the tail while thieves extract from the head of the
-queue. We use the term queue loosely to mean a structure with items
-stored in the order in which they were inserted.
-
 
 \section{Alternative Implementations}
 \label{sec:queues-alternative-implementations}
 
-\todo[inline]{Finish section ``Alternative Implementations''}
+\todo[inline]{Finish section \emph{Alternative Implementations}}
 
 \subsection{Dynamic Work-Stealing Deque}
 
@@ -450,8 +337,8 @@ complexity due to the extra work required for the list's maintenance.
 This paper presents the first dynamic memory work-stealing
 algorithm. It is based on a novel way of building non-blocking
 dynamic-sized work stealing deques by detecting synchronization
-conflicts based on ``pointer-crossing'' rather than ``gaps between
-indices'' as in the original ABP algorithm. As we show, the new
+conflicts based on \emph{pointer-crossing} rather than \emph{gaps between
+indices} as in the original ABP algorithm. As we show, the new
 algorithm dramatically increases robustness and memory efficiency,
 while causing applications no observable performance penalty. We
 therefore believe it can replace array-based ABP work stealing deques,
@@ -507,8 +394,8 @@ Blumofe and Leiserson \cite{Blumofe1999} that allows each process to
 maintain a local work deque,\footnote{Actually, the work stealing
   algorithm uses a work stealing deque, which is like a deque
   \cite{Knuth1997} except that only one process can access one end of
-  the queue (the ``bottom''), and only Pop operations can be invoked
-  on the other end (the ``top''). For brevity, we refer to the data
+  the queue (the \emph{bottom}), and only Pop operations can be invoked
+  on the other end (the \emph{top}). For brevity, we refer to the data
   structure as a deque in the remainder of the paper.} and steal an
 item from others if its deque becomes empty. It has been extended in
 various ways such as stealing multiple items \cite{Hendler2002} and
@@ -537,7 +424,7 @@ over-allocation based on an application's maximal execution-DAG depth
 of non-preempted processes end up queuing most of the work items,
 since the ABP algorithm sometimes starts pushing items from the middle
 of the array even when the deque is empty, this can lead to
-overflow.\footnote{The ABP algorithm's built-in ``reset on empty''
+overflow.\footnote{The ABP algorithm's built-in \emph{reset on empty}
   mechanism helps in some, but not all, of these cases.}
 
 This state of affairs leaves open the question of designing a
@@ -568,8 +455,8 @@ ABP algorithm in multiprogrammed environments.
 
 An ABP-style work stealing algorithm consists of a collection of deque
 data structures with each process performing pushes and pops on the
-``bottom'' end of its local deque and multiple thieves performing pops
-on the ``top'' end. The new algorithm implements each deque as a
+\emph{bottom} end of its local deque and multiple thieves performing pops
+on the \emph{top} end. The new algorithm implements each deque as a
 doubly linked list of nodes, each of which is a short array that is
 dynamically allocated from and freed to a shared pool; see Fig. 1. It
 can also use malloc to add nodes to the shared pool in case its node
@@ -587,7 +474,7 @@ when a pop by a local process and a pop by a thief might both be
 trying to remove the same item from the deque. The original ABP
 algorithm detects this scenario by examining the gap between the
 \lstinline!Top! and \lstinline!Bottom! array indices, and uses a CAS
-operation only when they are ``too close''. Moreover, in the original
+operation only when they are \emph{too close}. Moreover, in the original
 algorithm, the empty deque scenario is checked simply by checking
 whether \lstinline!Bottom $\le$ Top!.
 
@@ -645,7 +532,7 @@ thief's \lstinline!PopTop! operations concurrently try to remove the
 last item from the deque. Our solution is based on the observation
 that when the deque is empty, one can restrict the number of possible
 scenarios among the pointers. Given one pointer, we show that the
-``virtual'' distance of the other, ignoring which array it resides in,
+\emph{virtual} distance of the other, ignoring which array it resides in,
 cannot be more than 1 if the deque is empty. We can thus easily test
 for each of these scenarios. (Several such scenarios are depicted in
 parts (a) and (b) of Fig. 2).
@@ -777,7 +664,7 @@ uses a mechanism that resets \lstinline!Top! and \lstinline!Bottom! to
 point back to the beginning of the array every time it detects an
 empty deque (including the case of popping the last entry by
 \lstinline!PopBottom!). This reset operation is necessary in ABP since
-it is the only ``anti-overflow'' mechanism at its disposal.
+it is the only \emph{anti-overflow} mechanism at its disposal.
 
 Our algorithm does not need this method to prevent overflows, since it
 works with the dynamic nodes. However, adding a version of this
@@ -1006,7 +893,7 @@ this section to work that is directly relevant to work stealing and
 embedded library designs.
 
 The idea of duplicating queues has recently been described as
-``idempotent'' queues \cite{Michael2009}. We were not aware of this
+\emph{idempotent} queues \cite{Michael2009}. We were not aware of this
 work at the time of writing this paper and arrived at our results
 independently (doing our first implementation in January 2008). Their
 general motivation and the semantics of the idempotent queue seem
@@ -1248,7 +1135,7 @@ this section to work that is directly relevant to work stealing and
 embedded library designs.
 
 The idea of duplicating queues has recently been described as
-``idempotent'' queues \cite{Michael2009}. We were not aware of this
+\emph{idempotent} queues \cite{Michael2009}. We were not aware of this
 work at the time of writing this paper and arrived at our results
 independently (doing our first implementation in January 2008). Their
 general motivation and the semantics of the idempotent queue seem

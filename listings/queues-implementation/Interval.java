@@ -1,28 +1,21 @@
 public abstract class Interval extends WorkItem {		
-	/**
-	 * State used to indicate whether interval has been initialized, 
-	 * is running or is done already.
-	 */
+	// Interval states
 	enum RunningState {
-		INIT, RUNNING, DONE
+		INIT, RUNNING, DONE //*\label{lst:interval-state}
 	}
 
-	/**
-	 * Indicates whether interval has been initialized, is running or 
-	 * is done already.
-	 */
+	// Indicates whether interval has been initialized, is running or 
+	// is done already.
 	private final AtomicReference<RunningState> runningState = 
-		new AtomicReference<RunningState>(RunningState.INIT);
+		new AtomicReference<RunningState>(RunningState.INIT); //*\label{lst:interval-init}
 	
-	/**
-	 * The "main" method for this interval: invoked when we are 
-	 * scheduled. Simply invokes "exec()".
-	 */
+	// The "main" method for this interval: invoked when we are 
+	// scheduled. Simply invokes "exec()".
 	void exec(Worker worker) {
 		if (runningState.compareAndSet(RunningState.INIT, 
-				RunningState.RUNNING)) {
+				RunningState.RUNNING)) { //*\label{lst:interval-cas}
 			exec();  // execute the associated action
-			runningState.set(RunningState.DONE);
+			runningState.set(RunningState.DONE); //*\label{lst:interval-done}
 		}
 	}
 
