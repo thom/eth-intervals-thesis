@@ -5,15 +5,15 @@
 \chapter{Investigated Queues}
 \label{chap:queues-implementation}
 
-% We present three algorithms, each with a different choice for how the
-% items are extracted. In all of our algorithms, the owner inserts new
-% tasks at the tail of the queue. In the first algorithm (idempotent
-% LIFO) tasks are always extracted from the tail, while in the second
-% algorithm (idempotent FIFO) tasks are always extracted from the
-% head. In the third algorithm (idempotent double-ended), the owner
-% extracts from the tail while thieves extract from the head of the
-% queue. We use the term queue loosely to mean a structure with items
-% stored in the order in which they were inserted.
+Besides the \emph{Work-Stealing Deque} (Section
+\ref{sec:queues-implementation-ws-deque}) and \emph{Idempotent
+  Work-Stealing Deque} (Section
+\ref{sec:queues-implementation-idempotent-ws-deque}) we also
+implemented the alternative work-stealing queues \emph{Dynamic
+  Work-Stealing Deque} (Section
+\ref{sec:queues-alternative-implementations-dynamic-deque}) and
+\emph{Duplicating Work-Stealing Queue} (Section
+\ref{sec:queues-alternative-implementations-duplicating-queue}).
 
 \section{Work-Stealing Deque}
 \label{sec:queues-implementation-ws-deque}
@@ -25,7 +25,7 @@ dynamically resizes itself as needed. Its design is based on the
 The \lstinline!WorkStealingDeque! class has three fields,
 \lstinline!workItems!, \lstinline!bottom!, and \lstinline!top!:
 
-\lstinputlisting[style=Listing, nolol,]
+\lstinputlisting[style=Skip, nolol,]
 %  caption={Work-stealing deque}, 
 %  label=lst:work-stealing-deque,]
 {
@@ -48,7 +48,7 @@ we can put the new work item in the location specified by
 \lstinline!bottom!, and then increment \lstinline!bottom! by 1 (Line
 \ref{lst:work-stealing-deque-put-update-bottom}).
 
-\lstinputlisting[style=Numbers,
+\lstinputlisting[style=FloatNumbers,
   caption={Work-stealing deque: \lstinline!put()! method}, 
   label=lst:work-stealing-deque-put]{
     ../listings/queues-implementation/WorkStealingDeque-put.java
@@ -61,7 +61,7 @@ arithmetic ensures that even though the array has changed size and the
 work items may have shifted positions, there is no need to update the
 \lstinline!top! or \lstinline!bottom! fields.
 
-\lstinputlisting[style=Numbers,
+\lstinputlisting[style=FloatNumbers,
   caption={Work-stealing deque: \lstinline!expand()! method}, 
   label=lst:work-stealing-deque-expand]{
     ../listings/queues-implementation/WorkStealingDeque-expand.java
@@ -146,9 +146,9 @@ While this nondeterminism might be dangerous in many applications, it
 is fine for our usage of the deque as we modified the interval's
 \lstinline!exec()! method to be idempotent (see Section
 \ref{sec:queues-implementation-idempotent-ws-deque-interval}).\footnote{If
-the application can tolerate duplicated work, for example parallel
-garbage collectors or constraint solvers, we do not have to make the
-\verb!exec()! method idempotent.}
+  the application can tolerate duplicated work, for example parallel
+  garbage collectors \cite{Flood2001} or constraint solvers, we do not
+  have to make the \verb!exec()! method idempotent.}
 
 \subsection{Idempotent Interval}
 \label{sec:queues-implementation-idempotent-ws-deque-interval}
@@ -164,7 +164,7 @@ performs an atomic Compare-and-Swap operation to try to switch from
 the associated task is executed and the state is set to
 \lstinline!DONE! afterwards (Line \ref{lst:interval-done}).
 
-\lstinputlisting[style=Numbers, 
+\lstinputlisting[style=SkipNumbers, 
   caption={Idempotent interval},
   label=lst:interval]{ 
     ../listings/queues-implementation/Interval.java 
@@ -192,7 +192,7 @@ The \lstinline!IdempotentWorkStealingDeque! class has an inner class,
 \lstinline!ArrayData!, and two fields, \lstinline!anchor! and
 \lstinline!workItems!:
 
-\lstinputlisting[style=Listing, nolol,]
+\lstinputlisting[style=Skip, nolol,]
 %  caption={Idempotent work-stealing deque}, 
 %  label=lst:idempotent-work-stealing-deque]
 {
@@ -310,201 +310,43 @@ returns the stolen work item. Else, the thread tries to steal again.
 \section{Alternative Implementations}
 \label{sec:queues-alternative-implementations}
 
-Besides the \emph{Work-Stealing Deque} and \emph{Idempotent
-  Work-Stealing Deque} we also implemented the alternative
-work-stealing queues \emph{Dynamic Work-Stealing Deque} (Section
-\ref{sec:queues-alternative-implementations-dynamic-deque}) and
-\emph{Duplicating Work-Stealing Queue} (Section
-\ref{sec:queues-alternative-implementations-duplicating-queue}).
-
 \subsection{Dynamic Work-Stealing Deque}
 \label{sec:queues-alternative-implementations-dynamic-deque}
 
-The list-based work-stealing deque algorithm presented by Hendler, Lev
-and Shavit \cite{Hendler2006, Hendler2006a} uses a list of small
-arrays to eliminate the overflow problem. However, it is relatively
-complicated, does not use cyclic arrays (and therefore wastes some
-memory), and introduces a trade-off between its time and space
-complexity due to the extra work required for the list's maintenance.
+The \emph{Dynamic Work-Stealing Deque} uses a list of small arrays to
+manage work items. It is based on the work-stealing deque algorithm
+presented by Hendler, Lev and Shavit \cite{Hendler2006, Hendler2006a}.
 
-\subsubsection{The new algorithm}
+The algorithm implements each deque as a doubly linked list of nodes,
+each of which is a short array, with \lstinline!top! and
+\lstinline!bottom! indicating the two ends of the deque:
 
-This paper introduces the first lock-free\footnote{Our abstract deque
-  definition is such that the original ABP algorithm is also
-  lock-free.} dynamic-sized version of the ABP work-stealing
-algorithm. It provides a near-optimal memory-size/robustness tradeoff:
-for n processes and total pre-allocated memory size m, it can
-potentially tolerate up to $O(m)$ items in a single deque. It also
-allows one to malloc additional memory beyond m when needed, and as
-our empirical data shows, it is far more robust than the array-based
-ABP algorithm in multiprogrammed environments.
+\lstinputlisting[style=Skip, nolol,]
+%  caption={Work-stealing deque}, 
+%  label=lst:work-stealing-deque,]
+{
+    ../listings/queues-implementation/DynamicWorkStealingDeque.java
+}
 
-An ABP-style work stealing algorithm consists of a collection of deque
-data structures with each process performing pushes and pops on the
-\emph{bottom} end of its local deque and multiple thieves performing pops
-on the \emph{top} end. The new algorithm implements each deque as a
-doubly linked list of nodes, each of which is a short array that is
-dynamically allocated from and freed to a shared pool; see Fig. 1. It
-can also use malloc to add nodes to the shared pool in case its node
-supply is exhausted.
+\lstinline!top! and \lstinline!bottom! are instances of the
+\lstinline!Index! class pointing to a deque's node with an offset into
+that node's array. For the doubly linked list to have a good
+performance, it must only resorts to using a costly Compare-and-Swap
+operation when a potential conflict requires it. The potential
+conflict occurs when a \lstinline!take()!  and \lstinline!steal()!
+concurrently try to remove the last item from the deque.
 
-The main technical difficulties in the design of the new algorithm
-arise from the need to provide performance comparable to that of
-ABP. This means the doubly linked list must be manipulated using only
-loads and stores in the common case, resorting to using a costly CAS
-only when a potential conflict requires it; it is challenging to make
-this transition correctly while maintaining lock-freedom.
+To do this, we need to have an efficient mechanism to allow detection
+of these boundary situations using the relations between the
+\lstinline!top! and \lstinline!bottom! pointers, even though these
+point to entries that may reside in different nodes. We observe that
+given one pointer ignoring which array it resides in, the distance of
+the other, cannot be more than 1 if the deque is empty (see
+\cite{Hendler2006, Hendler2006a} for a detailed description).
 
-The potential conflict that requires CAS-based synchronization occurs
-when a pop by a local process and a pop by a thief might both be
-trying to remove the same item from the deque. The original ABP
-algorithm detects this scenario by examining the gap between the
-\lstinline!Top! and \lstinline!Bottom! array indices, and uses a CAS
-operation only when they are \emph{too close}. Moreover, in the original
-algorithm, the empty deque scenario is checked simply by checking
-whether \lstinline!Bottom $\le$ Top!.
-
-A key algorithmic feature of our new algorithm is the creation of an
-equivalent mechanism to allow detection of these boundary situations
-in our linked list structures using the relations between the
-\lstinline!Top! and \lstinline!Bottom! pointers, even though these
-point to entries that may reside in different nodes. On a high level,
-our idea is to prove that one can restrict the number of possible ways
-the pointers interact, and therefore, given one pointer, it is
-possible to calculate the different possible positions for the other
-pointer that imply such a boundary scenario.
-
-The other key feature of our algorithm is that the dynamic insertion
-and deletion operations of nodes into the doubly linked-list (when
-needed in a push or pop) are performed in such a way that the local
-thread uses only loads and stores. This contrasts with the more
-general linked-list deque implementations [11, 12] which require a
-double-compare-and-swap synchronization operation [13] to insert and
-delete nodes.
-
-\subsubsection{Description}
-
-Figure 1b presents our new deque data-structure. The doubly-linked
-list's nodes are allocated from and freed to a shared pool, and the
-only case in which one may need to malloc additional storage is if the
-shared pool is exhausted. The deque supports the
-\lstinline!PushBottom! and \lstinline!PopBottom! operations for the
-local process, and the \lstinline!PopTop! operation for the thieves.
-
-The first technical difficulty we encountered is in detecting the
-conflict that may arise when the local \lstinline!PopBottom! and a
-thief's \lstinline!PopTop! operations concurrently try to remove the
-last item from the deque. Our solution is based on the observation
-that when the deque is empty, one can restrict the number of possible
-scenarios among the pointers. Given one pointer, we show that the
-\emph{virtual} distance of the other, ignoring which array it resides in,
-cannot be more than 1 if the deque is empty. We can thus easily test
-for each of these scenarios. (Several such scenarios are depicted in
-parts (a) and (b) of Fig. 2).
-
-The next problem one faces is the maintenance of the deque's
-doubly-linked list structure. We wish to avoid using CAS operations
-when updating the next and previous pointers, since this would cause a
-significant performance penalty. Our solution is to allow only the
-local process to update these fields, thus preventing
-\lstinline!PopTop! operations from doing so when moving from one node
-to another. We would like to keep the deque dynamic, which means
-freeing old nodes when they're not needed anymore. This restriction
-immediately implies that an active list node may point to an already
-freed node, or even to a node which was freed and reallocated again,
-essentially ruining the list structure. As we prove, the algorithm can
-overcome this problem by having a \lstinline!PopTop! operation that
-moves to a new node free only the node preceding the old node and not
-the old node itself. This allows us to maintain the invariant that the
-doubly-linked list structure between the \lstinline!Top! and
-\lstinline!Bottom! pointers is preserved. This is true even in
-scenarios such as that depicted in parts b and c of Fig. 2 where the
-pointers cross over.
-
-\subsubsection{Implementation}
-
-C++-like pseudocode for our deque algorithm is given in Figs. 3 --
-5. As depicted in Fig. 3, the deque object stores the
-\lstinline!Bottom! and \lstinline!Top! pointers information in the
-\lstinline!Bottom! and \lstinline!Top! data members. This information
-includes the pointer to a list's node and an offset into that node's
-array. For the \lstinline!Top! variable, it also includes a tag value
-to prevent the ABA problem \cite{Dechev2006}. The deque methods uses
-the \lstinline!EncodeBottom!, \lstinline!DecodeBottom!,
-\lstinline!EncodeTop! and \lstinline!DecodeTop! macros to
-encode/decode this information to/from a value that fits in a CAS-able
-size word.\footnote{If the architecture does not support a 64-bit CAS
-  operation, we may not have the space to save the whole node
-  pointer. In this case, we might use the offset of the node from some
-  base address given by the shared memory pool. For example, if the
-  nodes are allocated continuously, the address of the first node can
-  be such a base address.} Underlined procedures in the pseudocode
-represent code blocks which are presented in the detailed algorithm
-presentation used for the correctness proof in Sect. 4. We now
-describe each of the methods.
-
-\minisec{PushBottom}
-
-The \lstinline!PushBottom! method begins by reading \lstinline!Bottom!
-and storing the pushed value in the cell it's pointing to (Lines
-1 -- 2). Then it calculates the next value of \lstinline!Bottom! linking
-a new node to the list if necessary (Lines 3 -- 14). Finally the method
-updates \lstinline!Bottom! to its new value (Line 15). As in the
-original ABP algorithm, this method is executed only by the owner
-process, and therefore regular writes suffice (both for the value and
-\lstinline!Bottom! updates). Note that the new node is linked to the
-list before \lstinline!Bottom! is updated, so the list structure is
-preserved for the nodes between \lstinline!Bottom! and
-\lstinline!Top!.
-
-\minisec{PopTop}
-
-The \lstinline!PopTop! method begins by reading the \lstinline!Top!
-and \lstinline!Bottom! values, in that order (Lines 16 -- 18). Then it
-tests whether these values indicate an empty deque, and returns
-\lstinline!EMPTY! if they do\footnote{This test may also return
-  \lstinline!ABORT! if \lstinline!Top! was modified, since then it is
-  not guaranteed that the tested values represent a consistent view of
-  the memory.} (Line 19). Otherwise, it calculates the next position
-for \lstinline!Top! (Lines 20 -- 31). Before updating \lstinline!Top! to
-its new value, the method must read the value which should be returned
-if the steal succeeds (Line 32) (this read cannot be done after the
-update of \lstinline!Top! because by then the node may already be
-freed by some other concurrent \lstinline!PopTop! execution). Finally
-the method tries to update \lstinline!Top! to its new value using a
-CAS operation (Line 34), returning the popped value if it succeeds, or
-\lstinline!ABORT! if it fails. (In the work stealing algorithm, if a
-thief process encounters contention with another, it may be preferable
-to try stealing from a different deque; returning \lstinline!ABORT! in
-this case provides the opportunity for the system to decide between
-retrying on the same deque or doing something different.) If the CAS
-succeeds, the method also checks whether there is an old node that
-needs to be freed (Line 36). As explained earlier, a node is released
-only if \lstinline!Top! moved to a new node, and the node released is
-not the old top node, but the preceding one.
-
-\minisec{PopBottom}
-
-The \lstinline!PopBottom! method begins by reading \lstinline!Bottom!
-and updating it to its new value (Lines 43 -- 55) after reading the value
-to be popped (Line 54). Then it reads the value of \lstinline!Top!
-(Line 56), to check for the special cases of popping the last entry of
-the deque, and popping from an empty deque. If the \lstinline!Top!
-value read points to the old \lstinline!Bottom! position (Lines 58 -- 
-63), then the method rewrites \lstinline!Bottom! to its old position,
-and returns \lstinline!EMPTY! (since the deque was empty even without
-this \lstinline!PopBottom! operation). Otherwise, if \lstinline!Top!
-is pointing to the new \lstinline!Bottom! position (Lines 64 -- 78), then
-the popped entry was the last in the deque, and as in the original ABP
-algorithm, the method updates the \lstinline!Top! tag value using a
-CAS, to prevent a concurrent \lstinline!PopTop! operation from
-popping out the same entry. Otherwise there was at least one entry in
-the deque after the \lstinline!Bottom! update (lines 79 -- 83), in which
-case the popped entry is returned. Note that, as in the original ABP
-algorithm, most executions of the method will be short, and will not
-involve any CAS-based synchronization operations.
-
-\todo{Finish section ``Dynamic Work-Stealing Deque''}
+As it turned out, the dynamic work-stealing deque's complexity -- due
+to the extra work required for the list's maintenance -- reflects in
+its performance (see Chapter \ref{chap:queues-evaluation}).
 
 \subsection{Duplicating Work-Stealing Queue}
 \label{sec:queues-alternative-implementations-duplicating-queue}
@@ -514,56 +356,23 @@ the \emph{Idempotent Work-Stealing Deque}. Its design is based on the
 Task Parallel Library (TPL) \cite{Leijen2009}.
 
 Like the \emph{Idempotent Work-Stealing Deque}, the \emph{Duplicating
-  Work-Stealing Queue} does not guarantee that each inserted work item
-is extracted \emph{exactly} once and instead it uses the relaxed
-semantics of guaranteeing that each inserted work item is extracted
-\emph{at least} once.
+  Work-Stealing Queue} potentially returns a pushed element more than
+once. In particular, the \lstinline!put()!  and \lstinline!take()!
+operations behave like normal, but the \lstinline!steal()! operation
+is allowed to either take an element and remove it from the queue, or
+to just duplicate an element in the queue. By allowing duplication we
+can avoid an expensive memory barrier instruction in the
+\lstinline!take()! operation.
 
 As we are also using idempotent intervals together with duplicating
 work-stealing queues, this nondeterminism is fine for our usage.
 
-The idea of duplicating queues has recently been described as
-\emph{idempotent} queues \cite{Michael2009}. We were not aware of this
-work at the time of writing this paper and arrived at our results
-independently (doing our first implementation in January 2008). Their
-general motivation and the semantics of the idempotent queue seem
-largely identical, but the implementation is quite different. Their
-elegant implementation packs fields together in a memory word and
-relies strictly on atomic compare-and-swap and memory ordering
-instructions. In contrast, our implementation uses a simple lock on
-all but the critical paths which can simplify many implementation
-aspects and also removes a level of indirection on the critical path.
-
-\subsubsection{Duplicating Queues}
-
-A duplicating queue is a double-ended queue that potentially returns a
-pushed element more than once. In particular, the \lstinline!put()!
-and \lstinline!take()! operations behave like normal, but the
-\lstinline!steal()! operation is allowed to either take an element
-(and remove it from the queue), or to just duplicate an element in the
-queue. While this nondeterminism might be dangerous for many clients,
-it is fine for our usage of the duplicating queue: the Task's Run
-method is idempotent and ReplicableTask's expect to be executed in
-parallel. Other properties of a duplicating queues are as usual: a
-duplicating queue never loses an element, and returns all pushed
-elements after a finite number of \lstinline!take()! (and
-\lstinline!steal()!) operations.
-
-By allowing duplication we can avoid an expensive memory barrier
-instruction in the \lstinline!take()! operation on the x86
-architecture. More generally, our duplicating queue is designed
-specifically to be correct on architectures satisfying the Total Store
-Order (TSO) memory model (Sindhu et al. 1991) or stronger model. To
-our knowledge, this is one of the first data structures that takes
-specific advantage of weaker memory models to avoid memory
-barriers. An interesting aspect is that the non-determinism that is
-introduced by the weaker memory model is captured in a benign way
-where the number of duplicated elements is non-deterministically
-determined.
-
-Of course, exploiting weak memory models is playing with fire. That's
-why we verified the correctness of the duplicating queue formally
-using the Checkfence tool \cite{Burckhardt2007, Burckhardt2007a}.
+Whereas the idempotent work-stealing deque implementation relies on
+atomic Compare-and-Swap operations and uses a tag to prevent the ABA
+problem, the duplicating queue implementation uses a lock on all but
+the critical paths. This simplifies the implementation but we could
+not find any drastic performance difference (see Chapter
+\ref{chap:queues-evaluation}).
 
 
 %%% Local Variables: 

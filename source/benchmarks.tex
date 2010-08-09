@@ -7,9 +7,7 @@
 
 We evaluate the \emph{intervals} scheduler implementation on a variety
 of parallel Java Grande Forum benchmarks \cite{Smith2001, Mathew1999,
-  Gregg2003} ported to use \emph{intervals}.
-
-\todo{Mention that they have been ported already}
+  Gregg2003} that have been ported to use \emph{intervals}.
 
 The JVM used on both machines described in Appendix
 \ref{chap:experimental-setup} is Sun Hotspot JDK 1.6. In both cases,
@@ -19,7 +17,8 @@ the JVM was invoked with the following parameters:
     -server -Xmx2048M -Xms2048M -Xss8m
 \end{verbatim}
 
-\todo{Do we really need this appendix?}
+The following is a summary of the benchmarks described in
+\cite{Smith2001, Mathew1999, Gregg2003}.
 
 \subsection*{Crypt}
 
@@ -71,9 +70,6 @@ This benchmark measures the performance of a 3D ray tracer rendering a
 scene containing 64 spheres at a resolution of $N \times N$
 pixels. The loop over rows of pixels has been distributed to
 \emph{intervals} using fork-join sections.
-
-\todo{Mention that this is a summary of \cite{Smith2001, Mathew1999,
-    Gregg2003}}
 
 
 %%% Local Variables: 

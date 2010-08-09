@@ -269,12 +269,10 @@ priority to the intervals with affinity for the place \cite{Acar2002,
 
 In the non-blocking work-stealing algorithm, the deques are
 implemented with non-blocking synchronization \cite{Arora2001}. The
-current deque implementation of intervals however uses a lock when
-trying to steal. As a separate effort, we designed and explored
-alternative non-blocking queue implementations with the aim to improve
-scheduling performance (see \autoref{part:queues}).
-
-\todo{Rewrite overview}
+current deque implementation of intervals however uses mutual
+exclusion when trying to steal. As a separate effort, we designed and
+explored alternative non-blocking queue implementations with the aim
+to improve scheduling performance (see \autoref{part:queues}).
 
 % The goal of the thesis is to improve the implementation of the
 % intervals scheduler and it is divided into two parts.
@@ -297,6 +295,7 @@ scheduling performance (see \autoref{part:queues}).
 % \autoref{part:queues} of this thesis we explore alternative
 % non-blocking queue implementations and compare them to the current
 % one.
+
 
 %%% Local Variables: 
 %%% mode: latex

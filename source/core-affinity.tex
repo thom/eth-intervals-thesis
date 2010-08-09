@@ -71,21 +71,17 @@ declarations which are implemented in Listing
 \lstinline!set(int[] physicalUnits)! and \lstinline!get()! is declared
 on Line \ref{lst:core-affinity-jni-h-get}.
 
-\lstinputlisting[style=SkipNumbersC, 
+\lstinputlisting[style=FloatNumbersC, 
   caption={\lstinline{Affinity} class: JNI C header}, 
   label=lst:core-affinity-jni-header]{
     ../listings/core-affinity/ch_ethz_hwloc_Affinity.h 
 }
-
-\newpage
 
 \lstinputlisting[style=FloatNumbersC, 
   caption={\lstinline{Affinity} class: JNI C implementation to set the affinity},
   label=lst:core-affinity-jni-set]{
     ../listings/core-affinity/ch_ethz_hwloc_Affinity_set.c 
 }
-
-\newpage
 
 The implementation for setting the affinity is shown in Listing
 \ref{lst:core-affinity-jni-set}. When setting the affinity, we first

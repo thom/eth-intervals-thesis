@@ -1,6 +1,6 @@
 public class DynamicWorkStealingDeque implements WorkStealingQueue {
 	class Node {
-		static final int SIZE = 1024;
+		static final int SIZE = 512;
 		WorkItem[] workItems = new WorkItem[SIZE];
 		Node next, prev;
 	}
