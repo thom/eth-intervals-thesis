@@ -27,6 +27,21 @@ Both machines invoke the JVM with the following parameters:
 The execution time reported is the average of the three best benchmark
 iterations from ten separate invocations.
 
+
+\section{Intervals}
+\label{sec:queues-performance-intervals}
+
+To validate the design of intervals, we are in the process of porting
+a number of threaded benchmarks to use intervals, beginning with the
+Java Grande Forum's multithreaded benchmarks. The benchmarks we have
+ported so far make use of the many of the patterns presented in this
+paper, including point-to-point synchronization (SOR), barriers
+(MolDyn), and fork-join sections (Crypt, LUFact, Series, MonteCarlo,
+and RayTracer). We have found that using intervals results in fewer
+lines of code when compared against the original threaded
+versions. Performance generally improves as well due to the improved
+load balancing offered by a work-stealing execution engine.
+
 \begin{figure}[ht]
   \centering
   \subfigure[Intel Core2 Duo: 2 threads, 2 workers]{
@@ -43,25 +58,108 @@ iterations from ten separate invocations.
   \label{fig:queues-evaluation-threads}
 \end{figure}
 
-\todo[inline]{Finish chapter \emph{Performance}}
 
-\begin{itemize}
-\item Benchmarks
-\item Idempotent FIFO and LIFO queue, deque; duplicating queues
-\item Global shared work queue
-\item $\le 8$ cores
-\end{itemize}
+\section{Work-Stealing Queues}
+\label{sec:queues-performance-ws}
 
-To validate the design of intervals, we are in the process of porting
-a number of threaded benchmarks to use intervals, beginning with the
-Java Grande Forum's multithreaded benchmarks. The benchmarks we have
-ported so far make use of the many of the patterns presented in this
-paper, including point-to-point synchronization (SOR), barriers
-(MolDyn), and fork-join sections (Crypt, LUFact, Series, MonteCarlo,
-and RayTracer). We have found that using intervals results in fewer
-lines of code when compared against the original threaded
-versions. Performance generally improves as well due to the improved
-load balancing offered by a work-stealing execution engine.
+\begin{figure}[ht]
+  \centering
+  \subfigure[Intel Core2 Duo: 2 threads, 2 workers]{
+    \includegraphics[width=0.47\linewidth]{queues-evaluation/marvin-deques}
+    \label{fig:queues-evaluation-marvin-deques}
+  }
+  \subfigure[Intel Nehalem: 8 threads, 8 workers]{
+    \includegraphics[width=0.47\linewidth]{queues-evaluation/mafushi-deques}
+    \label{fig:queues-evaluation-mafushi-deques}
+  }
+  \caption{Deques benchmarks running on Intel Core2 Duo (Appendix
+    \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
+    \ref{sec:experimental-setup-mafushi})}
+  \label{fig:queues-evaluation-threads}
+\end{figure}
+
+
+\section{Alternative Work-Stealing Queues}
+\label{sec:queues-performance-alternative}
+
+\subsection{Dynamic Work-Stealing Queue}
+\label{sec:queues-performance-alternative-dynamic}
+
+\begin{figure}[ht]
+  \centering
+  \subfigure[Intel Core2 Duo: 2 threads, 2 workers]{
+    \includegraphics[width=0.47\linewidth]{queues-evaluation/marvin-dynamic}
+    \label{fig:queues-evaluation-marvin-dynamic}
+  }
+  \subfigure[Intel Nehalem: 8 threads, 8 workers]{
+    \includegraphics[width=0.47\linewidth]{queues-evaluation/mafushi-dynamic}
+    \label{fig:queues-evaluation-mafushi-dynamic}
+  }
+  \caption{Dynamic benchmarks running on Intel Core2 Duo (Appendix
+    \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
+    \ref{sec:experimental-setup-mafushi})}
+  \label{fig:queues-evaluation-threads}
+\end{figure}
+
+\subsection{Duplicating and Idempotent Work-Stealing Queues}
+\label{sec:performance-alternative-duplicating}
+
+\begin{figure}[ht]
+  \centering
+  \subfigure[Intel Core2 Duo: 2 threads, 2 workers]{
+    \includegraphics[width=0.47\linewidth]{queues-evaluation/marvin-duplicating}
+    \label{fig:queues-evaluation-marvin-duplicating}
+  }
+  \subfigure[Intel Nehalem: 8 threads, 8 workers]{
+    \includegraphics[width=0.47\linewidth]{queues-evaluation/mafushi-duplicating}
+    \label{fig:queues-evaluation-mafushi-duplicating}
+  }
+  \caption{Duplicating benchmarks running on Intel Core2 Duo (Appendix
+    \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
+    \ref{sec:experimental-setup-mafushi})}
+  \label{fig:queues-evaluation-threads}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \subfigure[Intel Core2 Duo: 2 threads, 2 workers]{
+    \includegraphics[width=0.47\linewidth]{queues-evaluation/marvin-idempotent}
+    \label{fig:queues-evaluation-marvin-idempotent}
+  }
+  \subfigure[Intel Nehalem: 8 threads, 8 workers]{
+    \includegraphics[width=0.47\linewidth]{queues-evaluation/mafushi-idempotent}
+    \label{fig:queues-evaluation-mafushi-idempotent}
+  }
+  \caption{Idempotent benchmarks running on Intel Core2 Duo (Appendix
+    \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
+    \ref{sec:experimental-setup-mafushi})}
+  \label{fig:queues-evaluation-threads}
+\end{figure}
+
+\section{Shared Work Queue}
+\label{sec:queues-performance-shared-queue}
+
+None of the queues we developed significantly improves work-stealing
+performance on the machines we had to test them with.
+
+$\Rightarrow\text{ }\le 8$ cores, mention \cite{Saha2007}.
+
+\begin{figure}[ht]
+  \centering
+  \subfigure[Intel Core2 Duo: 2 threads, 2 workers]{
+    \includegraphics[width=0.47\linewidth]{queues-evaluation/marvin-shared-queue}
+    \label{fig:queues-evaluation-marvin-shared-queue}
+  }
+  \subfigure[Intel Nehalem: 8 threads, 8 workers]{
+    \includegraphics[width=0.47\linewidth]{queues-evaluation/mafushi-shared-queue}
+    \label{fig:queues-evaluation-mafushi-shared-queue}
+  }
+  \caption{Shared-Queue benchmarks running on Intel Core2 Duo (Appendix
+    \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
+    \ref{sec:experimental-setup-mafushi})}
+  \label{fig:queues-evaluation-threads}
+\end{figure}
+
 
 \section{References}
 
@@ -169,9 +267,11 @@ performance on the machines we had to test them with (Appendix
 \ref{sec:experimental-setup-marvin} and
 \ref{sec:experimental-setup-mafushi}). Possible reasons for this are
 given in the performance evaluation in Chapter
-\ref{chap:queues-performance}. Chapter\ref{chap:queues-conclusions}
+\ref{chap:queues-performance}. Chapter \ref{chap:queues-conclusions}
 concludes and summarizes the encountered problems in order to preserve
 this research for future reference.
+
+\todo{Finish chapter ``Performance''}
 
 
 %%% Local Variables: 
