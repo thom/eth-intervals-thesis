@@ -16,7 +16,7 @@ JVM process. This means there is a 1-to-1 correspondence between Java
 and native threads. When using the GNU C library on Linux, native
 threads are implemented with NPTL (Native POSIX Threads Library). NPTL
 is also an 1-to-1 implementation, meaning that each thread maps to a
-kernel scheduling entity (see Figure
+kernel scheduling entity (Figure
 \ref{fig:core-affinity-thread-mapping}).
 
 \begin{figure}[htb]
@@ -44,7 +44,7 @@ affinity of threads would be desirable \cite{Love2003, Dow2005,
 \label{sec:appendix-core-affinity-implementation}
 
 For binding the workers to a specific core, we wrote a small JNI
-library (see Listing \ref{lst:core-affinity} for the API). The method
+library -- see Listing \ref{lst:core-affinity} for the API. The method
 \lstinline!set(int physicalUnit)!  (Line
 \ref{lst:core-affinity-set-unit}) is used to bind the current thread
 to a physical unit. With \lstinline!set(int[] physicalUnits)! the

@@ -1,11 +1,49 @@
 %==============================================================================
-% queues-evaluation.tex
+% queues-performance.tex
 %==============================================================================
 
-\chapter{Evaluation}
-\label{chap:queues-evaluation}
+\chapter{Performance}
+\label{chap:queues-performance}
 
-\todo[inline]{Finish chapter ``Evaluation''}
+We evaluate the performance of the different queue implementations
+with a variety of parallel Java Grande Forum benchmarks (Appendix
+\ref{chap:appendix-benchmarks}) on two different machines:
+
+\begin{itemize}
+\item Intel Core2 Duo with one processor and two cores, running Ubuntu
+  10.04 64-bit with kernel 2.6.32 and Sun Hotspot JDK 1.6.0\_20
+  (Appendix \ref{sec:experimental-setup-marvin})
+\item Intel Nehalem with two processors and eight cores, running
+  Ubuntu 9.04 64-bit with kernel 2.6.29 and Sun Hotspot JDK 1.6.0\_20
+  (Appendix \ref{sec:experimental-setup-mafushi})
+\end{itemize}
+
+Both machines invoke the JVM with the following parameters:
+
+\begin{lstlisting}
+  -server -Xmx2048M -Xms2048M -Xss8m
+\end{lstlisting}
+
+The execution time reported is the average of the three best benchmark
+iterations from ten separate invocations.
+
+\begin{figure}[ht]
+  \centering
+  \subfigure[Intel Core2 Duo: 2 threads, 2 workers]{
+    \includegraphics[width=0.47\linewidth]{queues-evaluation/marvin-threads}
+    \label{fig:queues-evaluation-marvin-threads}
+  }
+  \subfigure[Intel Nehalem: 8 threads, 8 workers]{
+    \includegraphics[width=0.47\linewidth]{queues-evaluation/mafushi-threads}
+    \label{fig:queues-evaluation-mafushi-threads}
+  }
+  \caption{Threads and intervals benchmarks running on Intel Core2 Duo
+    (Appendix \ref{sec:experimental-setup-marvin}) and Intel
+    Nehalem (Appendix \ref{sec:experimental-setup-mafushi})}
+  \label{fig:queues-evaluation-threads}
+\end{figure}
+
+\todo[inline]{Finish chapter \emph{Performance}}
 
 \begin{itemize}
 \item Benchmarks
@@ -13,6 +51,17 @@
 \item Global shared work queue
 \item $\le 8$ cores
 \end{itemize}
+
+To validate the design of intervals, we are in the process of porting
+a number of threaded benchmarks to use intervals, beginning with the
+Java Grande Forum's multithreaded benchmarks. The benchmarks we have
+ported so far make use of the many of the patterns presented in this
+paper, including point-to-point synchronization (SOR), barriers
+(MolDyn), and fork-join sections (Crypt, LUFact, Series, MonteCarlo,
+and RayTracer). We have found that using intervals results in fewer
+lines of code when compared against the original threaded
+versions. Performance generally improves as well due to the improved
+load balancing offered by a work-stealing execution engine.
 
 \section{References}
 
@@ -107,6 +156,22 @@ copy may become outdated because of changes to the shared
 \lstinline!top!, \lstinline!top! is never decremented, so the real
 size of the \lstinline!UnboundedDEQueue! object can only be smaller
 than the one calculated using the local variable.
+
+\subsection{Work-Stealing}
+
+Chapter \ref{chap:queues-background} summarizes the properties of
+work-stealing queues and introduces ``lazy deque'', the queue
+currently used by the intervals scheduler. Chapter
+\ref{chap:queues-implementation} describes the investigated queue
+implementations. None of the approaches that were developed as part of
+this research yielded a queue that was improving work-stealing
+performance on the machines we had to test them with (Appendix
+\ref{sec:experimental-setup-marvin} and
+\ref{sec:experimental-setup-mafushi}). Possible reasons for this are
+given in the performance evaluation in Chapter
+\ref{chap:queues-performance}. Chapter\ref{chap:queues-conclusions}
+concludes and summarizes the encountered problems in order to preserve
+this research for future reference.
 
 
 %%% Local Variables: 

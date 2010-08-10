@@ -5,20 +5,10 @@
 \chapter{Java Grande Forum Benchmarks}
 \label{chap:appendix-benchmarks}
 
-We evaluate the \emph{intervals} scheduler implementation on a variety
-of parallel Java Grande Forum benchmarks \cite{Smith2001, Mathew1999,
-  Gregg2003} that have been ported to use \emph{intervals}.
-
-The JVM used on both machines described in Appendix
-\ref{chap:experimental-setup} is Sun Hotspot JDK 1.6. In both cases,
-the JVM was invoked with the following parameters:
-
-\begin{verbatim}
-    -server -Xmx2048M -Xms2048M -Xss8m
-\end{verbatim}
-
-The execution time reported is the average of the three best benchmark
-iterations from ten separate invocations.
+We evaluate the \emph{intervals} scheduler implementation with a
+variety of parallel Java Grande Forum benchmarks \cite{Smith2001,
+  Mathew1999, Gregg2003} that have been ported to use
+\emph{intervals}.
 
 The following is a summary of the benchmarks described in
 \cite{Smith2001, Mathew1999, Gregg2003}.

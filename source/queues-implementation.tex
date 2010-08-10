@@ -144,7 +144,7 @@ semantics of guaranteeing that each inserted work item is extracted
 
 While this nondeterminism might be dangerous in many applications, it
 is fine for our usage of the deque as we modified the interval's
-\lstinline!exec()! method to be idempotent (see Section
+\lstinline!exec()! method to be idempotent (Section
 \ref{sec:queues-implementation-idempotent-ws-deque-interval}).\footnote{If
   the application can tolerate duplicated work, for example parallel
   garbage collectors \cite{Flood2001} or constraint solvers, we do not
@@ -341,12 +341,12 @@ of these boundary situations using the relations between the
 \lstinline!top! and \lstinline!bottom! pointers, even though these
 point to entries that may reside in different nodes. We observe that
 given one pointer ignoring which array it resides in, the distance of
-the other, cannot be more than 1 if the deque is empty (see
-\cite{Hendler2006, Hendler2006a} for a detailed description).
+the other, cannot be more than 1 if the deque is empty -- see
+\cite{Hendler2006, Hendler2006a} for a detailed description.
 
 As it turned out, the dynamic work-stealing deque's complexity -- due
 to the extra work required for the list's maintenance -- reflects in
-its performance (see Chapter \ref{chap:queues-evaluation}).
+its performance (Chapter \ref{chap:queues-performance}).
 
 \subsection{Duplicating Work-Stealing Queue}
 \label{sec:queues-alternative-implementations-duplicating-queue}
@@ -371,8 +371,8 @@ Whereas the idempotent work-stealing deque implementation relies on
 atomic Compare-and-Swap operations and uses a tag to prevent the ABA
 problem, the duplicating queue implementation uses a lock on all but
 the critical paths. This simplifies the implementation but we could
-not find any drastic performance difference (see Chapter
-\ref{chap:queues-evaluation}).
+not find any drastic performance difference (Chapter
+\ref{chap:queues-performance}).
 
 
 %%% Local Variables: 
