@@ -52,19 +52,19 @@ invoked only by the queue's owner.
 \section{Current Queue Implementation}
 \label{sec:queues-background-current-implementation}
 
-The queue currently used by the intervals scheduler is the lazy
-work-stealing deque. This deque is unbounded and uses a cyclic array
-to store its work items.
+The queue currently used by the intervals scheduler is the
+\emph{Work-Stealing Lazy Deque}. This deque is unbounded and uses a
+cyclic array to store its work items.
 
 It is called \emph{lazy} because the owner of the deque only lazily
 updates the location of the deque's head. This means it only updates
 the head when its owner tries to take a work item and finds it was
 stolen by a competing thief.
 
-The members of the lazy deque are defined as:
+The members of the \emph{Work-Stealing Lazy Deque} are defined as:
 
 \lstinputlisting[style=Skip, nolol,]
-%  caption={Lazy deque}, 
+%  caption={Work-Stealing Lazy Deque}, 
 %  label=lst:work-stealing-lazy-deque]
 {
     ../listings/queues-background/WorkStealingLazyDeque.java
@@ -83,7 +83,7 @@ array containing the work items is full (Line
 \ref{lst:work-stealing-lazy-deque-put-expand}).
 
 \lstinputlisting[style=FloatNumbers,
-  caption={Lazy deque: \lstinline!put()! method}, 
+  caption={Work-Stealing Lazy Deque: \lstinline!put()! method}, 
   label=lst:work-stealing-lazy-deque-put]{
     ../listings/queues-background/WorkStealingLazyDeque-put.java
 }
@@ -103,7 +103,7 @@ can update our notion of the head of the deque (Line
 \ref{lst:work-stealing-lazy-deque-take-update}).
 
 \lstinputlisting[style=FloatNumbers,
-  caption={Lazy deque: \lstinline!take()! method}, 
+  caption={Work-Stealing Lazy Deque: \lstinline!take()! method}, 
   label=lst:work-stealing-lazy-deque-take]{
     ../listings/queues-background/WorkStealingLazyDeque-take.java
 }
@@ -119,7 +119,7 @@ returned if a \lstinline!steal()! operation lost a race for the last
 work item caused by a concurrent \lstinline!take()! operation.
 
 \lstinputlisting[style=FloatNumbers,
-  caption={Lazy deque: \lstinline!steal()! method}, 
+  caption={Work-Stealing Lazy Deque: \lstinline!steal()! method}, 
   label=lst:work-stealing-lazy-deque-steal]{
     ../listings/queues-background/WorkStealingLazyDeque-steal.java
 }
@@ -136,7 +136,7 @@ replaces the old array with the new one (Lines
 \ref{lst:work-stealing-lazy-deque-expand-reset-2}).
 
 \lstinputlisting[style=FloatNumbers,
-  caption={Lazy deque: \lstinline!expand()! method}, 
+  caption={Work-Stealing Lazy Deque: \lstinline!expand()! method}, 
   label=lst:work-stealing-lazy-deque-expand]{
     ../listings/queues-background/WorkStealingLazyDeque-expand.java
 }

@@ -6,8 +6,9 @@
 \label{chap:queues-performance}
 
 We evaluate the performance of the different queue implementations
-with a variety of parallel Java Grande Forum benchmarks (Appendix
-\ref{chap:appendix-benchmarks}) on two different machines:
+when used by the intervals scheduler with a variety of parallel Java
+Grande Forum benchmarks (Appendix \ref{chap:appendix-benchmarks}) on
+two different machines:
 
 \begin{itemize}
 \item Intel Core2 Duo with one processor and two cores, running Ubuntu
@@ -31,110 +32,226 @@ iterations from ten separate invocations.
 \section{Intervals}
 \label{sec:queues-performance-intervals}
 
-To validate the design of intervals, we are in the process of porting
-a number of threaded benchmarks to use intervals, beginning with the
-Java Grande Forum's multithreaded benchmarks. The benchmarks we have
-ported so far make use of the many of the patterns presented in this
-paper, including point-to-point synchronization (SOR), barriers
-(MolDyn), and fork-join sections (Crypt, LUFact, Series, MonteCarlo,
-and RayTracer). We have found that using intervals results in fewer
-lines of code when compared against the original threaded
-versions. Performance generally improves as well due to the improved
-load balancing offered by a work-stealing execution engine.
+The performance of the intervals implementation of the JGF benchmarks
+is comparable to the threaded implementation (Figure
+\ref{fig:queues-performance-threads}).
 
-\begin{figure}[ht]
+\begin{figure}[htb]
   \centering
-  \subfigure[Intel Core2 Duo: 2 threads, 2 workers]{
-    \includegraphics[width=0.47\linewidth]{queues-evaluation/marvin-threads}
-    \label{fig:queues-evaluation-marvin-threads}
+  \subfloat[Intel Core2 Duo: 2 threads, 2 workers]{
+    \includegraphics[width=0.5\linewidth]{queues-performance/marvin-threads}
+    \label{fig:queues-performance-marvin-threads}
   }
-  \subfigure[Intel Nehalem: 8 threads, 8 workers]{
-    \includegraphics[width=0.47\linewidth]{queues-evaluation/mafushi-threads}
-    \label{fig:queues-evaluation-mafushi-threads}
+  \subfloat[Intel Nehalem: 8 threads, 8 workers]{
+    \includegraphics[width=0.5\linewidth]{queues-performance/mafushi-threads}
+    \label{fig:queues-performance-mafushi-threads}
   }
   \caption{Threads and intervals benchmarks running on Intel Core2 Duo
     (Appendix \ref{sec:experimental-setup-marvin}) and Intel
     Nehalem (Appendix \ref{sec:experimental-setup-mafushi})}
-  \label{fig:queues-evaluation-threads}
+  \label{fig:queues-performance-threads}
 \end{figure}
+
+The only benchmarks where intervals are considerably slower than
+threads \emph{LuFact} and \emph{MolDyn}. The main reason is that the
+way work is distributed between intervals makes the workers run out of
+work too often. When a worker runs out of work, it becomes idle and
+only wakes up if a new work item is added to its queue. Idle workers
+acquire a local semaphore which blocks until release is invoked by
+some other worker and are added to a global idle list guarded by a
+shared lock. If there is an idle worker, adding a new work item
+releases the semaphore of the worker and removes it from the idle
+list.
+
+Putting a worker to sleep and waking up again is quite
+expensive. Compared to other benchmarks, workers in \emph{LuFact} and
+\emph{MolDyn} run out of work more often (Table
+\ref{tab:queues-performance-threads}).
+
+\begin{table}[htb]
+  \centering
+  \subfloat[Intel Core2 Duo]{
+    \begin{tabular}{|l*{5}{|c}|}
+      \hline
+      & \emph{LuFact} (C) & \emph{MolDyn} (B) & \emph{Crypt} (C) & \emph{SOR} (C) & \emph{RayTracer} (B) \\
+      \hline
+      Idle & 3533 & 271 & 9 & 6 & 6 \\
+      Woke up & 3531 & 269 & 7 & 4 & 4 \\
+      \hline
+    \end{tabular}
+    \label{tab:queues-performance-marvin-threads}
+  }
+  \\
+  \subfloat[Intel Nehalem]{
+    \begin{tabular}{|l*{5}{|c}|}
+      \hline
+      & \emph{LuFact} (C) & \emph{MolDyn} (B) & \emph{Crypt} (C) & \emph{SOR} (C) & \emph{RayTracer} (B) \\
+      \hline
+      Idle & 11226 & 1057 & 27 & 22 & 17 \\
+      Woke up & 11218 & 1051 & 19 & 14 & 9 \\
+      \hline
+    \end{tabular}
+    \label{tab:queues-performance-mafushi-threads}
+  }
+  \caption[Idle workers]{Times workers run out of work and become idle, and get woken up again}
+  \label{tab:queues-performance-threads}
+\end{table}
 
 
 \section{Work-Stealing Queues}
 \label{sec:queues-performance-ws}
 
-\begin{figure}[ht]
+When comparing our implementations of the work-stealing queue,
+\emph{Work-Stealing Deque} (Section
+\ref{sec:queues-implementation-ws-deque}) and \emph{Idempotent
+  Work-Stealing Deque} (Section
+\ref{sec:queues-implementation-idempotent-ws-deque}), with the
+original \emph{Work-Stealing Lazy Deque} (Section
+\ref{sec:queues-background-current-implementation}) we do not see a
+significant difference in the runtime of the JGF benchmarks (Figure
+\ref{fig:queues-performance-deques}) on both machines we tested them
+on.
+
+\begin{figure}[!ht]
   \centering
-  \subfigure[Intel Core2 Duo: 2 threads, 2 workers]{
-    \includegraphics[width=0.47\linewidth]{queues-evaluation/marvin-deques}
-    \label{fig:queues-evaluation-marvin-deques}
+  \subfloat[Intel Core2 Duo]{
+    \includegraphics[width=0.68\linewidth]{queues-performance/marvin-deques}
+    \label{fig:queues-performance-marvin-deques}
   }
-  \subfigure[Intel Nehalem: 8 threads, 8 workers]{
-    \includegraphics[width=0.47\linewidth]{queues-evaluation/mafushi-deques}
-    \label{fig:queues-evaluation-mafushi-deques}
+  \\
+  \subfloat[Intel Nehalem]{
+    \includegraphics[width=0.68\linewidth]{queues-performance/mafushi-deques}
+    \label{fig:queues-performance-mafushi-deques}
   }
   \caption{Deques benchmarks running on Intel Core2 Duo (Appendix
     \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
     \ref{sec:experimental-setup-mafushi})}
-  \label{fig:queues-evaluation-threads}
+  \label{fig:queues-performance-deques}
 \end{figure}
+
+The \emph{Work-Stealing Lazy Deque} implementation is very efficient
+already. Using a lock in the \lstinline!steal()! method is of less
+impact than we thought it would be.
+
+\emph{Work-Stealing Lazy Deque} uses an
+\lstinline!AtomicReferenceArray! to maintain work items. The
+\lstinline!AtomicReferenceArray! provides volatile access semantics
+for its array elements, which is not supported for ordinary
+arrays. Because of this, \emph{Work-Stealing Lazy Deque} does not have
+to use additional volatile or atomic variables like the other deque
+implementations do. This allows for a simpler implementation.
+
+The owner of the deque \emph{Work-Stealing Lazy Deque} only lazily
+updates the location of the deque's head. This means it only updates
+the head when its owner tries to take a work item and finds it was
+stolen by a competing thief. As opposed to the methods
+\lstinline!take()! and \lstinline!steal()!  of the \emph{Work-Stealing
+  Deque} which attempt to update the location of the deque's head on
+every execution with a Compare-and-Swap operation. Similarly the
+methods \lstinline!take()! and \lstinline!steal()! of the
+\emph{Idempotent Work-Stealing Deque} have to update the size of the
+deque in the anchor on every execution.
+
+Another reason for the lack of difference between the queue
+implementations might be the small number of cores of the systems we
+had to test them on (see Section
+\ref{sec:queues-performance-shared-queue} for more details).
 
 
 \section{Alternative Work-Stealing Queues}
 \label{sec:queues-performance-alternative}
 
-\subsection{Dynamic Work-Stealing Queue}
+\subsection{Dynamic Work-Stealing Deque}
 \label{sec:queues-performance-alternative-dynamic}
 
-\begin{figure}[ht]
+The implementation of the \emph{Dynamic Work-Stealing Deque} (Section
+\ref{sec:queues-alternative-implementations-dynamic-deque}) requires
+extra work for the list's maintenance which reflects in its
+performance (Figure \ref{fig:queues-performance-dynamic}).
+
+\begin{figure}[!htb]
   \centering
-  \subfigure[Intel Core2 Duo: 2 threads, 2 workers]{
-    \includegraphics[width=0.47\linewidth]{queues-evaluation/marvin-dynamic}
-    \label{fig:queues-evaluation-marvin-dynamic}
+  \subfloat[Intel Core2 Duo: 2 threads, 2 workers]{
+    \includegraphics[width=0.5\linewidth]{queues-performance/marvin-dynamic}
+    \label{fig:queues-performance-marvin-dynamic}
   }
-  \subfigure[Intel Nehalem: 8 threads, 8 workers]{
-    \includegraphics[width=0.47\linewidth]{queues-evaluation/mafushi-dynamic}
-    \label{fig:queues-evaluation-mafushi-dynamic}
+  \subfloat[Intel Nehalem: 8 threads, 8 workers]{
+    \includegraphics[width=0.5\linewidth]{queues-performance/mafushi-dynamic}
+    \label{fig:queues-performance-mafushi-dynamic}
   }
   \caption{Dynamic benchmarks running on Intel Core2 Duo (Appendix
     \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
     \ref{sec:experimental-setup-mafushi})}
-  \label{fig:queues-evaluation-threads}
+  \label{fig:queues-performance-dynamic}
 \end{figure}
 
-\subsection{Duplicating and Idempotent Work-Stealing Queues}
-\label{sec:performance-alternative-duplicating}
+\subsection{Idempotent Work-Stealing Queues}
+\label{sec:performance-alternative-idempotent}
 
-\begin{figure}[ht]
-  \centering
-  \subfigure[Intel Core2 Duo: 2 threads, 2 workers]{
-    \includegraphics[width=0.47\linewidth]{queues-evaluation/marvin-duplicating}
-    \label{fig:queues-evaluation-marvin-duplicating}
-  }
-  \subfigure[Intel Nehalem: 8 threads, 8 workers]{
-    \includegraphics[width=0.47\linewidth]{queues-evaluation/mafushi-duplicating}
-    \label{fig:queues-evaluation-mafushi-duplicating}
-  }
-  \caption{Duplicating benchmarks running on Intel Core2 Duo (Appendix
-    \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
-    \ref{sec:experimental-setup-mafushi})}
-  \label{fig:queues-evaluation-threads}
-\end{figure}
+When experimenting with idempotent queues, we also implemented the
+\emph{Idempotent Work-Stealing FIFO Queue} and \emph{Idempotent
+  Work-Stealing LIFO Queue} to compare them to the \emph{Idempotent
+  Work-Stealing Deque}. It turned out that the \emph{Idempotent
+  Work-Stealing Deque} has the best performance in combination with
+the intervals scheduler.
 
-\begin{figure}[ht]
+The \emph{Idempotent Work-Stealing FIFO Queue} behaves like a normal
+queue: \lstinline!put()! puts tasks at the tail, and
+\lstinline!take()!  and \lstinline!steal()! remove tasks at the
+head. As \lstinline!take()! and \lstinline!steal()! work on the same
+side of the queue, this increases contention. This
+
+LIFO Queue $\rightarrow$ Stack! All operations work on the tail
+$\rightarrow$ too much contention.
+
+\begin{figure}[!htb]
   \centering
-  \subfigure[Intel Core2 Duo: 2 threads, 2 workers]{
-    \includegraphics[width=0.47\linewidth]{queues-evaluation/marvin-idempotent}
-    \label{fig:queues-evaluation-marvin-idempotent}
+  \subfloat[Intel Core2 Duo: 2 threads, 2 workers]{
+    \includegraphics[width=0.5\linewidth]{queues-performance/marvin-idempotent}
+    \label{fig:queues-performance-marvin-idempotent}
   }
-  \subfigure[Intel Nehalem: 8 threads, 8 workers]{
-    \includegraphics[width=0.47\linewidth]{queues-evaluation/mafushi-idempotent}
-    \label{fig:queues-evaluation-mafushi-idempotent}
+  \subfloat[Intel Nehalem: 8 threads, 8 workers]{
+    \includegraphics[width=0.5\linewidth]{queues-performance/mafushi-idempotent}
+    \label{fig:queues-performance-mafushi-idempotent}
   }
   \caption{Idempotent benchmarks running on Intel Core2 Duo (Appendix
     \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
     \ref{sec:experimental-setup-mafushi})}
-  \label{fig:queues-evaluation-threads}
+  \label{fig:queues-performance-idempotent}
 \end{figure}
+
+\subsection{Duplicating Work-Stealing Queue}
+\label{sec:performance-alternative-duplicating}
+
+We implemented the \emph{Duplicating Work-Stealing Queue} (Section
+\ref{sec:queues-alternative-implementations-duplicating-queue}) as an
+alternative to the \emph{Idempotent Work-Stealing Deque}. Both use
+idempotent intervals, but whereas the idempotent work-stealing deque
+relies on atomic Compare-and-Swap operations and uses a tag to prevent
+the ABA problem, the duplicating work-stealing queue uses a lock on
+all but the critical paths. Despite the usage of locks in the
+duplicating work-stealing queue we could not find any significant
+performance difference to the idempotent work-stealing deque (Figure
+\ref{fig:queues-performance-duplicating}).
+
+\begin{figure}[!htb]
+  \centering
+  \subfloat[Intel Core2 Duo: 2 threads, 2 workers]{
+    \includegraphics[width=0.5\linewidth]{queues-performance/marvin-duplicating}
+    \label{fig:queues-performance-marvin-duplicating}
+  }
+  \subfloat[Intel Nehalem: 8 threads, 8 workers]{
+    \includegraphics[width=0.5\linewidth]{queues-performance/mafushi-duplicating}
+    \label{fig:queues-performance-mafushi-duplicating}
+  }
+  \caption{Duplicating benchmarks running on Intel Core2 Duo (Appendix
+    \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
+    \ref{sec:experimental-setup-mafushi})}
+  \label{fig:queues-performance-duplicating}
+\end{figure}
+
+\todo{Finish section ``Alternative Work-Stealing Queues''}
+
 
 \section{Shared Work Queue}
 \label{sec:queues-performance-shared-queue}
@@ -142,135 +259,44 @@ load balancing offered by a work-stealing execution engine.
 None of the queues we developed significantly improves work-stealing
 performance on the machines we had to test them with.
 
-$\Rightarrow\text{ }\le 8$ cores, mention \cite{Saha2007}.
+$\Rightarrow\mbox{ }\le 8$ cores, mention \cite{Saha2007}.
 
-\begin{figure}[ht]
+The original work-stealing algorithm uses non-blocking algorithms to
+implement queue operations \cite{Arora2001}. However, we have decided
+to simplify our scheduler implementation by protecting each run queue
+with its own lock. We believed that this would not impact scalability
+on our machine, because others \cite{Saha2007} have reported that even
+a single, centralized queue protected by a single, central lock does
+not hurt performance on up to 8 CPUs, which is a decidedly worse
+situation for scalability as the number of CPUs grows. Since we use
+locks to protect the run queues, and our networks are static, our
+implementation does not benefit from the first two advantages of
+accessing the run queues at different ends. Nevertheless, this helps
+with increasing locality: since the arrival of a message unblocks a
+proces, placing it at the front of the ready queue increases
+probability that the required data will remain in the CPU's caches.
+
+\begin{figure}[htb]
   \centering
-  \subfigure[Intel Core2 Duo: 2 threads, 2 workers]{
-    \includegraphics[width=0.47\linewidth]{queues-evaluation/marvin-shared-queue}
-    \label{fig:queues-evaluation-marvin-shared-queue}
+  \subfloat[Intel Core2 Duo: 2 threads, 2 workers]{
+    \includegraphics[width=0.5\linewidth]{queues-performance/marvin-shared-queue}
+    \label{fig:queues-performance-marvin-shared-queue}
   }
-  \subfigure[Intel Nehalem: 8 threads, 8 workers]{
-    \includegraphics[width=0.47\linewidth]{queues-evaluation/mafushi-shared-queue}
-    \label{fig:queues-evaluation-mafushi-shared-queue}
+  \subfloat[Intel Nehalem: 8 threads, 8 workers]{
+    \includegraphics[width=0.5\linewidth]{queues-performance/mafushi-shared-queue}
+    \label{fig:queues-performance-mafushi-shared-queue}
   }
   \caption{Shared-Queue benchmarks running on Intel Core2 Duo (Appendix
     \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
     \ref{sec:experimental-setup-mafushi})}
-  \label{fig:queues-evaluation-threads}
+  \label{fig:queues-performance-shared-queue}
 \end{figure}
 
+Conclusion: To really study the impact of work-stealing queues on the
+intervals implementation we need to do extend our experiments on
+machines with more than 8 cores.
 
-\section{References}
-
-\subsection{Dynamic circular work-stealing deque \cite{Chase2005}}
-
-We evaluated the performance of the new dynamic circular work-stealing
-algorithm in comparison to the original fixed-array ABP work-stealing
-algorithm. We implemented both algorithms in C++, and used a simple
-shared pool algorithm that allocates and frees a buffer with a single
-CAS instruction.
-
-The benchmark we ran simulates load balancing of a general computation
-by building the DAG corresponding to the computation
-\cite{Blumofe1999}, as follows: Initially a single deque contains a
-single node representing the first work item of the
-computation. Processes pop nodes from their own deques, and
-\lstinline!steal! nodes from other deques if their own deque is
-empty. Each time a process pops a node from a deque, it generates up
-to B child nodes, and pushes them into its deque (B represents the
-maximum branch of the DAG, and it is a configurable parameter). The
-number of child nodes generated for a node is randomly chosen with
-probability that is inversely proportional to the depth of that node
-in the DAG. The expected number of child nodes for a node of depth $d$
-in a DAG of maximum depth $D$ is: $B \cdot \left(1 - \frac{d}{D}
-\right)$. To get the most accurate measure of the performance
-difference between the two algorithms, we did not perform any work on
-a node other than pushing its child nodes to the process's deque.
-
-We ran the benchmark on a 16 node Sun Enterprise 6500, an SMP machine
-formed from 8 boards of two 400MHz UltraSparc processors, connected by
-a crossbar UPA switch, and running a SolarisTM 9 operating system. We
-chose the maximum branch of the DAG to be 13, and the maximum depth to
-be 10. We used 72-element arrays for the original ABP deques, and our
-algorithm allocated the deques with an initial size of 64-elements,
-plus a few 128-element arrays in the shared pool.
-
-Figure 9 presents the throughput of both algorithms, running
-stand-alone, as a function of the number of processes. As can be
-seen, both algorithms scale well, and the performance difference is
-relatively small. Recall that our benchmark does not perform any real
-computation -- it only measures the load-balancing algorithm
-overhead. In real applications the time spent on the load-balancing
-algorithm Next we ran our benchmark in a multiprogrammed fashion by
-running multiple instances of it in parallel, where each instance is
-running with 16 processes (as the number of processors on the
-machine). Figure 10 presents the throughput of an instance as a
-function the multiprogramming level. As can be seen, there is no
-significant difference in the performance of the two algorithms.
-
-To compare the stability of the two algorithms, we measured how many
-of our 64-element arrays overflowed and needed a 128-element array
-from the shared pool, and noticed that at most one 128-element array
-is ever needed. On the other hand, the 72-element array allocated for
-each of the deques in the original ABP algorithm was not always
-sufficient, and in some cases the algorithm failed to complete due to
-an overflow of an array. These failures became more frequent as the
-level of multiprogramming increased. Therefore, for the same amount of
-array space (notice that $16 \cdot 72 = 128 + (16 \cdot 64)$), we get
-more robustness with our new algorithm than with the original ABP
-algorithm, without a noticeable cost in performance.
-
-\subsection{Avoid \lstinline!top! accesses in \lstinline!put()!}
-
-Unlike the original ABP algorithm, the new algorithm requires reading
-\lstinline!top! on every execution of the \lstinline!put()!
-operation. This may result in more data-cache misses compared to the
-original algorithm (recall that unlike \lstinline!bottom!,
-\lstinline!top! is modified by all processes).
-
-The frequency of accesses to the \lstinline!top! variable can be
-significantly reduced, by keeping a local upper bound on the size of
-the deque, and only read \lstinline!top! when the upper bound
-indicates that an array expansion may be necessary. Such a local upper
-bound can be easily achieved by saving the last value of
-\lstinline!top! read in a local variable, and using this variable to
-compute the size of the deque (instead of the real value of
-\lstinline!top!). Because \lstinline!top! is never decremented, the
-real size of the deque can only be smaller than the one calculated
-using this local variable.
-
-\minisec{Herlihy}
-
-The ability to resize carries a price: every call must read
-\lstinline!top! (Line 21) to determine if a resize is necessary,
-possibly causing more cache misses because \lstinline!top!  is
-modified by all processes. We can reduce this overhead by having
-threads save a local value of \lstinline!top!  and using it to compute
-the size of the \lstinline!UnboundedDEQueue!  object. A thread reads
-the \lstinline!top!field only when this bound is exceeded, indicating
-that a \lstinline!resize()! may be necessary.  Even though the local
-copy may become outdated because of changes to the shared
-\lstinline!top!, \lstinline!top! is never decremented, so the real
-size of the \lstinline!UnboundedDEQueue! object can only be smaller
-than the one calculated using the local variable.
-
-\subsection{Work-Stealing}
-
-Chapter \ref{chap:queues-background} summarizes the properties of
-work-stealing queues and introduces ``lazy deque'', the queue
-currently used by the intervals scheduler. Chapter
-\ref{chap:queues-implementation} describes the investigated queue
-implementations. None of the approaches that were developed as part of
-this research yielded a queue that was improving work-stealing
-performance on the machines we had to test them with (Appendix
-\ref{sec:experimental-setup-marvin} and
-\ref{sec:experimental-setup-mafushi}). Possible reasons for this are
-given in the performance evaluation in Chapter
-\ref{chap:queues-performance}. Chapter \ref{chap:queues-conclusions}
-concludes and summarizes the encountered problems in order to preserve
-this research for future reference.
-
+\todo{Finish section ``Shared Work Queue''}
 \todo{Finish chapter ``Performance''}
 
 

@@ -26,7 +26,7 @@ The \lstinline!WorkStealingDeque! class has three fields,
 \lstinline!workItems!, \lstinline!bottom!, and \lstinline!top!:
 
 \lstinputlisting[style=Skip, nolol,]
-%  caption={Work-stealing deque}, 
+%  caption={Work-Stealing Deque}, 
 %  label=lst:work-stealing-deque,]
 {
     ../listings/queues-implementation/WorkStealingDeque.java
@@ -49,7 +49,7 @@ we can put the new work item in the location specified by
 \ref{lst:work-stealing-deque-put-update-bottom}).
 
 \lstinputlisting[style=FloatNumbers,
-  caption={Work-stealing deque: \lstinline!put()! method}, 
+  caption={Work-Stealing Deque: \lstinline!put()! method}, 
   label=lst:work-stealing-deque-put]{
     ../listings/queues-implementation/WorkStealingDeque-put.java
 }
@@ -62,7 +62,7 @@ work items may have shifted positions, there is no need to update the
 \lstinline!top! or \lstinline!bottom! fields.
 
 \lstinputlisting[style=FloatNumbers,
-  caption={Work-stealing deque: \lstinline!expand()! method}, 
+  caption={Work-Stealing Deque: \lstinline!expand()! method}, 
   label=lst:work-stealing-deque-expand]{
     ../listings/queues-implementation/WorkStealingDeque-expand.java
 }
@@ -89,7 +89,7 @@ incremented top value in \lstinline!bottom! which resets the deque to
 an empty state (Line \ref{lst:work-stealing-deque-take-update}).
 
 \lstinputlisting[style=FloatNumbers,
-  caption={Work-stealing deque: \lstinline!take()! method},
+  caption={Work-stealing Deque: \lstinline!take()! method},
   label=lst:work-stealing-deque-take]{
     ../listings/queues-implementation/WorkStealingDeque-take.java
 }
@@ -121,10 +121,11 @@ empties the deque tries to modify \lstinline!top! using a
 Compare-and-Swap operation.
 
 \lstinputlisting[style=FloatNumbers,
-  caption={Work-stealing deque: \lstinline!steal()! method}, 
+  caption={Work-Stealing Deque: \lstinline!steal()! method}, 
   label=lst:work-stealing-deque-steal]{
     ../listings/queues-implementation/WorkStealingDeque-steal.java
 }
+
 
 \section{Idempotent Work-Stealing Deque}
 \label{sec:queues-implementation-idempotent-ws-deque}
@@ -133,11 +134,11 @@ The \emph{Idempotent Work-Stealing Deque} is based on ideas from
 \cite{Leijen2009} and \cite{Michael2009}. It is an unbounded
 double-ended queue that can resize itself if needed.
 
-Unlike the \emph{Lazy Deque} (Section
+Unlike the \emph{Work-Stealing Lazy Deque} (Section
 \ref{sec:queues-background-current-implementation}) or the
 \emph{Work-Stealing Deque} (Section
 \ref{sec:queues-implementation-ws-deque}), the \emph{Idempotent
-Work-Stealing Deque} does not guarantee that each inserted work item
+  Work-Stealing Deque} does not guarantee that each inserted work item
 is extracted \emph{exactly} once. Instead it uses the relaxed
 semantics of guaranteeing that each inserted work item is extracted
 \emph{at least} once.
@@ -179,12 +180,12 @@ implementation for locality-aware scheduling \cite{Acar2002}.
 \subsection{Implementation}
 \label{sec:queues-implementation-idempotent-ws-deque-implementation}
 
-In contrast to the \emph{Lazy Deque} (Section
+In contrast to the \emph{Work-Stealing Lazy Deque} (Section
 \ref{sec:queues-background-current-implementation}) or the
 \emph{Work-Stealing Deque} (Section
 \ref{sec:queues-implementation-ws-deque}), the owner's methods
 \lstinline!put()! and \lstinline!take()! of the \emph{Idempotent
-Work-Stealing Deque} do not have to use expensive Compare-and-Swap
+  Work-Stealing Deque} do not have to use expensive Compare-and-Swap
 operations. We can optimize the owner's methods by avoiding the high
 overheads of these operations.
 
@@ -193,7 +194,7 @@ The \lstinline!IdempotentWorkStealingDeque! class has an inner class,
 \lstinline!workItems!:
 
 \lstinputlisting[style=Skip, nolol,]
-%  caption={Idempotent work-stealing deque}, 
+%  caption={Idempotent Work-Stealing Deque}, 
 %  label=lst:idempotent-work-stealing-deque]
 {
     ../listings/queues-implementation/IdempotentWorkStealingDeque.java
@@ -232,7 +233,7 @@ updates the anchor by incrementing the queues size and ABA-prevention
 tag.
 
 \lstinputlisting[style=FloatNumbers,
-  caption={Idempotent work-stealing deque: \lstinline!put()! method},
+  caption={Idempotent Work-Stealing Deque: \lstinline!put()! method},
   label=lst:idempotent-work-stealing-deque-put]{
     ../listings/queues-implementation/IdempotentWorkStealingDeque-put.java
 }
@@ -249,7 +250,7 @@ it sets \lstinline!workItems! to the new array (Line
 \ref{lst:idempotent-work-stealing-deque-expand-assign}).
 
 \lstinputlisting[style=FloatNumbers,
-  caption={Idempotent work-stealing deque: \lstinline!expand()! method},
+  caption={Idempotent Work-Stealing Deque: \lstinline!expand()! method},
   label=lst:idempotent-work-stealing-deque-expand]{
     ../listings/queues-implementation/IdempotentWorkStealingDeque-expand.java
 }
@@ -269,11 +270,10 @@ updates the anchor by decrementing the queues size to indicate the
 extraction of a work item.
 
 \lstinputlisting[style=FloatNumbers,
-  caption={Idempotent work-stealing deque: \lstinline!take()! method},
+  caption={Idempotent Work-Stealing Deque: \lstinline!take()! method},
   label=lst:idempotent-work-stealing-deque-take]{
     ../listings/queues-implementation/IdempotentWorkStealingDeque-take.java
 }
-
 
 The \lstinline!steal()! method (Listing
 \ref{lst:idempotent-work-stealing-deque-steal}) starts by reading the
@@ -301,7 +301,7 @@ the incremented head and decremented size to indicate the stealing and
 returns the stolen work item. Else, the thread tries to steal again.
 
 \lstinputlisting[style=FloatNumbers,
-  caption={Idempotent work-stealing deque: \lstinline!steal()! method},
+  caption={Idempotent Work-Stealing Deque: \lstinline!steal()! method},
   label=lst:idempotent-work-stealing-deque-steal]{
     ../listings/queues-implementation/IdempotentWorkStealingDeque-steal.java
 }
@@ -322,8 +322,8 @@ each of which is a short array, with \lstinline!top! and
 \lstinline!bottom! indicating the two ends of the deque:
 
 \lstinputlisting[style=Skip, nolol,]
-%  caption={Work-stealing deque}, 
-%  label=lst:work-stealing-deque,]
+%  caption={Dynamic Work-Stealing Deque}, 
+%  label=lst:dynamic-work-stealing-deque,]
 {
     ../listings/queues-implementation/DynamicWorkStealingDeque.java
 }
@@ -346,7 +346,8 @@ the other, cannot be more than 1 if the deque is empty -- see
 
 As it turned out, the dynamic work-stealing deque's complexity -- due
 to the extra work required for the list's maintenance -- reflects in
-its performance (Chapter \ref{chap:queues-performance}).
+its performance (Section
+\ref{sec:queues-performance-alternative-dynamic}).
 
 \subsection{Duplicating Work-Stealing Queue}
 \label{sec:queues-alternative-implementations-duplicating-queue}
@@ -369,10 +370,10 @@ work-stealing queues, this nondeterminism is fine for our usage.
 
 Whereas the idempotent work-stealing deque implementation relies on
 atomic Compare-and-Swap operations and uses a tag to prevent the ABA
-problem, the duplicating queue implementation uses a lock on all but
-the critical paths. This simplifies the implementation but we could
-not find any drastic performance difference (Chapter
-\ref{chap:queues-performance}).
+problem, the duplicating work-stealing queue implementation uses a
+lock on all but the critical paths. This simplifies the implementation
+but we could not find any drastic performance difference (Section
+\ref{sec:performance-alternative-duplicating}).
 
 
 %%% Local Variables: 
