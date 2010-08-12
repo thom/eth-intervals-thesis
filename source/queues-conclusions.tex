@@ -5,10 +5,8 @@
 \chapter{Conclusions}
 \label{chap:queues-conclusions}
 
-\todo[inline]{Finish chapter ``Conclusions''}
-
-The alternative implementations often even have catastrophic
-performance (Section \ref{sec:queues-performance-alternative}).
+In this part of the thesis we developed and tested several
+work-stealing queues.
 
 We could not find a huge difference when running the benchmarks using
 the alternative queue implementations. The paper ``Enabling
@@ -20,176 +18,20 @@ not more than 8 cores.
 To check this hypothesis, we rewrote the intervals scheduler to use a
 single shared work deque and use it in a LIFO (stack) manner.
 
-\todo[inline]{Mention the experiment with a single shared work queue}
+The alternative implementations often even have catastrophic
+performance (Section \ref{sec:queues-performance-alternative}).
 
-\section{References}
+\todo{Mention the experiment with a single shared work queue}
 
-\subsection{Limits of work-stealing scheduling \cite{Vrba2009}}
-
-The original work-stealing algorithm uses non-blocking algorithms to
-implement queue operations \cite{Arora2001}. However, we have decided
-to simplify our scheduler implementation by protecting each run queue
-with its own lock. We believed that this would not impact scalability
-on our machine, because others \cite{Saha2007} have reported that even
-a single, centralized queue protected by a single, central lock does
-not hurt performance on up to 8 CPUs, which is a decidedly worse
-situation for scalability as the number of CPUs grows. Since we use
-locks to protect the run queues, and our networks are static, our
-implementation does not benefit from the first two advantages of
-accessing the run queues at different ends:
-
-The reasons for accessing the run queues at different ends are several
-\cite{Frigo1998}: 1) it reduces contention by having stealing threads
-operate on the opposite end of the queue than the thread they are
-stealing from; 2) it works better for parallelized divide-and-conquer
-algorithms which typically generate large chunks of work early, so the
-older stolen task is likely to further provide more work to the
-stealing thread; 3) stealing a process also migrates its future
-workload, which helps to increase locality.
-
-Nevertheless, this helps with increasing locality: since the arrival
-of a message unblocks a proces, placing it at the front of the ready
-queue increases probability that the required data will remain in the
-CPU’s caches.
-
-
-\section{Related Work}
-\label{sec:queues-conclusion-related-work}
-
-\todo[inline]{Finish section ``Related Work''}
-
-Coroutines \cite{Conway1963} and continuations \cite{Reynolds1993} are
-two building blocks for manipulating control-flow in a sequential
-context. Either would make a useful primitive on which to build the
-intervals library and would provide an alternative to rewriting
-programs in an event-oriented style.
-
-Futures are annotations for parallel execution which act similarly to
-a lazy or deferred execution. Expressions annotated as being safe for
-parallel execution are executed in parallel; when the program reaches
-a point where the result of the expression is needed, the main thread
-blocks until the evaluation of the expression has completed. Futures
-were first implemented for MULTILISP \cite{Halstead1985} but have
-since been ported to a number of other languages, including Java
-\cite{Navabi2008}.  Futures can be seen as a subset of intervals that
-lack the extended happens before relationships. Furthermore, most
-implementations of futures make no guarantees with respect to
-deadlock-freedom or other safety properties.
-
-Jade \cite{Rinard1998} uses programmer-provided specifications to
-dynamically parallelize a program. Shared objects were specially
-integrated into the type system. Tasks declare those objects that they
-affect and how; adherence to these declarations is checked
-dynamically. The ability for intervals to be associated with locks
-works in a similar fashion, but Jade did not attempt to model happens
-before relationships in its task specifications.
-
-Erlang \cite{Erlang2010} embodies a strict share-nothing philosophy,
-in which actors with disjoint heaps communicate with messages. The
-simplicity of this approach is appealing, but we believe there are
-many scenarios where shared memory is an easier and better choice,
-given the right tools.
-
-Cilk \cite{Blumofe1995, Frigo1998} and JCilk \cite{Danaher2005} are
-supersets of C and Java respectively which add support for
-parallelism, primarily in the form of fork-join or barrier style
-computations. Cilk pioneered many of the dynamic scheduling and work
-stealing techniques used in the intervals implementation itself.
-
-Cilk \cite{Blumofe1995, Frigo1998} and OpenMP 3.0 \cite{OpenMP2008}
-both offer lightweight task frameworks where tasks are executed in a
-tree structure.  Tasks in these languages are not first-class objects,
-however, and they do not support arbitrary dependency graphs. Java's
-Fork-Join Framework \cite{Lea2006, Lea2000, Lea2000a} and Intel's
-Threading Building Blocks (TBB) \cite{Reinders2007, Contreras2008}
-both offer a more flexible alternative, but lack a higher-level
-interface to task dependencies. The fork-join framework permits
-lightweight tasks to be joined, and TBB allows tasks to delay starting
-until an associated counter is decremented to zero.
-
-JSR166 \cite{Lea2004} introduced a number of concurrency-related
-utility classes to Java, including futures, thread pools, read-write
-locks, and concurrent containers such as maps and queues. Java 7 will
-likely contain additional classes \cite{Lea2006}, among them the
-fork-join framework that intervals itself is built upon. For C\#, the
-Parallel Extensions \cite{Leijen2009} library promises a similar
-lightweight task framework.  Neither of these frameworks includes any
-mechanism for declarative or explicit happens before relationships;
-instead, users use traditional joins to wait for tasks to complete.
-
-The parallel extensions for .NET \cite{Leijen2009} offer a task
-library with a similar feeling to intervals. In addition to the usual
-join-based task routines, they also permit tasks to have
-continuations, which are dependent tasks that execute and are given
-the result of the previous task to begin (the equivalent of edges from
-the end of one interval to the start of another). This approach is
-powerful but does not permit the full range of happens before edges
-supported by intervals.
-
-X10 \cite{Charles2005, Saraswat2010} offers a revised threading model
-which includes a number of innovative synchronization
-constructs. Among them are phasers \cite{Shirako2008, Shirako2010}, a
-combination of barriers and signals which can guarantee data-race
-freedom. Intervals can be used to construct the same patterns as
-phasers with similar guarantees, but also go further by replacing
-thread joins and other constructs in the X10 toolset.
-
-X10 \cite{Charles2005, Saraswat2010} introduced a number of innovative
-synchronization constructs. The most recent, phasers
-\cite{Shirako2008, Shirako2010}, are a combination of barriers and
-signals. Threads wishing to synchronize with one another make use of a
-shared phaser object.  Threads indicate how they will use a phaser by
-placing it into different modes, such as signal-wait-next or
-wait-only, that grant different capabilities. A combination of static
-and dynamic safety checks ensures that programs cannot be deadlocked
-through using a phaser. When synchronizing on a barrier, a special
-“single” mode allows a small section of code to be executed by a
-single thread before the waiting threads resume. Intervals can be used
-to perform the same kinds of synchronizations as phasers and with
-similar safety guarantees. However, intervals are a standalone
-mechanism that also replaces threads, thread joins, and integrates
-locks, all of which are beyond the scope of phasers. On the other
-hand, phasers are closer to existing threading primitives and
-therefore can be adopted more easily.
-
-OpenMP \cite{OpenMP2008} and the Message Passing Interface (MPI)
-\cite{MPI2009} are two higher-level alternatives to threads for
-writing parallel programs. Unlike intervals, they are focussed on SIMD
-programming, although both can be used more generally.
-
-Apple's Cocoa framework includes a class NSOperation \cite{Apple2008}
-that is similar to intervals. Like an Interval, each NSOperation
-embodies a particular task, and a user may declaratively specify that
-one operation cannot execute until another has finished (the
-equivalent of a startAfterEndOf() dependency). Unlike intervals,
-however, NSOperations do not permit other kinds of dependencies nor
-are they integrated with locks. This means that they cannot easily be
-used to describe the patterns in this paper, with the exception of
-point to point synchronization.
-
-Intervals in Java align nicely with the Java Memory Model
-\cite{Manson2005}: The happens before relation defined by intervals
-can be seen as a deterministic subset of the full happens before
-relation defined by the memory model, which includes edges due to
-constructs like volatile fields or synchronized sections.
-
-The Java Memory Model \cite{Manson2005} defines how parallel threads
-in Java interact with shared memory. In addition to defining formally
-what it means for a Java program to be correctly synchronized, it
-describes the legal behaviors of incorrectly synchronized programs
-which include data races. In the Java Memory Model, happens before
-relationships potentially result from imperative actions such as
-acquiring locks, accessing volatile fields, or joining a thread. This
-model can be easily adapted to the explicit happens before
-relationships used by intervals. When using our data race analysis,
-however, there is no need to define the semantics of incorrectly
-synchronized programs, because they cannot occur.
+We believed that this would not impact scalability on our machine,
+because others \cite{Saha2007} have reported that even a single,
+centralized queue protected by a single, central lock does not hurt
+performance on up to 8 CPUs, which is a decidedly worse situation for
+scalability as the number of CPUs grows.
 
 
 \section{Limitations and Future Work}
 \label{sec:queues-conclusion-future-work}
-
-\todo[inline]{Finish section ``Limitations and Future Work''}
 
 \begin{itemize}
 \item Non-blocking steal-half work queues \cite{Hendler2002}
@@ -201,7 +43,7 @@ schemes that improve on ABP-work stealing such as the locality-guided
 work-stealing of Acar, Blelloch and Blumofe \cite{Acar2002} or the
 steal-half algorithm of Hendler and Shavit \cite{Hendler2002}.
 
-\subsection{Dynamic circular work-stealing deque \cite{Chase2005}}
+\subsection*{Dynamic circular work-stealing deque \cite{Chase2005}}
 
 \textbf{Expanding and shrinking:} We present in detail for each
 algorithm how to expand the queue size, where task arrays are replaced
@@ -313,55 +155,8 @@ may be still some thieves refer- encing it (something that the garage
 collector will not do), which leads to a better use of the allocated
 space.
 
-
-\subsection{The design of a task parallel library \cite{Leijen2009}}
-
-\subsubsection{Performance}
-
-Measuring the performance of the duplicating queue in isolation is not
-very useful. The reason is that the main performance benefit does not
-come from the duplicating queue, but from being able to guarantee
-mutual exclusivity in the tasks themselves, such that a task can be
-executed directly when Wait is called and the task has not started
-yet. Since the task queues no longer need to guarantee mutual
-exclusivity, the duplicating queue is mostly an optimization to avoid
-using too many expensive interlocked instructions.
-
-Therefore, it is better to measure the benefit of being able to
-directly execute a task for which Wait is called (and which has not
-started yet). We created two versions of the library: one based on a
-duplicating queue with direct execution of tasks, and a traditional
-implementation based on the standard THE protocol. The standard
-fibonacci benchmark represents one of the worst-case examples since
-most waits are for tasks that were just pushed on the stack (and
-reside on the top of the stack). We ran this benchmark on a 4
-processor machine which used 196418 tasks ($\approx$ 500.000 tasks per
-second). The implementation based on the duplicating queue was 1.4
-times faster when using all processors. Here are some statistics,
-where DUP refers to the duplicating queue implementation, and THE to
-the implementation based on the THE protocol.
-
-As we can see, the performance of THE mostly suffered because there
-were many more switches between threads, and many more thread
-migrations. This happened precisely when Wait was called for a task
-that had not yet started. Since one cannot reliably determine whether
-this task was on the local queue, a fresh worker thread was needed to
-execute the task resulting in a thread switch. Of course, this
-automatically also lead to more migration of threads where ready
-worker threads were stolen by another worker group. Interestingly,
-the number of task steals are about the same as this is mostly
-determined by the particular algorithm and sizes of the tasks.
-
-Of course, for most fork-join parallelism (including the fibonacci
-benchmark), the task to be waited upon is often right on the top of
-the local task queue. When Wait is called on a task that has not
-started yet, we can optimize for this case in the THE implementation
-by simply popping the top of the stack if that happens to be our task
-and execute it directly. When applying this simple optimization, both
-implementations perform very similar for this benchmark. Of course,
-the DUP implementation outperforms again when the parallelism is less
-structured using futures for example, and in general at any time when
-Wait is called on a task that is not on the top of the stack.
+\todo{Finish section ``Limitations and Future Work''}
+\todo{Finish chapter ``Conclusions''}
 
 
 %%% Local Variables: 
