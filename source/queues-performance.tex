@@ -109,23 +109,6 @@ significant difference in the runtime of the JGF benchmarks (Figure
 \ref{fig:queues-performance-deques}) on both machines we tested them
 on.
 
-\begin{figure}[!ht]
-  \centering
-  \subfloat[Intel Core2 Duo]{
-    \includegraphics[width=0.89\linewidth]{queues-performance/marvin-deques}
-    \label{fig:queues-performance-marvin-deques}
-  }
-  \\
-  \subfloat[Intel Nehalem]{
-    \includegraphics[width=0.89\linewidth]{queues-performance/mafushi-deques}
-    \label{fig:queues-performance-mafushi-deques}
-  }
-  \caption{Deques benchmarks running on Intel Core2 Duo (Appendix
-    \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
-    \ref{sec:experimental-setup-mafushi})}
-  \label{fig:queues-performance-deques}
-\end{figure}
-
 The \emph{Work-Stealing Lazy Deque} implementation is very efficient
 already. Using a lock in the \lstinline!steal()! method is of less
 impact than we thought it would be.
@@ -153,6 +136,23 @@ Another reason for the lack of difference between the queue
 implementations might be the small number of cores of the systems we
 had to test them on (see Section
 \ref{sec:queues-performance-single-shared-queue} for more details).
+
+\begin{figure}[!ht]
+  \centering
+  \subfloat[Intel Core2 Duo]{
+    \includegraphics[width=0.89\linewidth]{queues-performance/marvin-deques}
+    \label{fig:queues-performance-marvin-deques}
+  }
+  \\
+  \subfloat[Intel Nehalem]{
+    \includegraphics[width=0.89\linewidth]{queues-performance/mafushi-deques}
+    \label{fig:queues-performance-mafushi-deques}
+  }
+  \caption{Deques benchmarks running on Intel Core2 Duo (Appendix
+    \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
+    \ref{sec:experimental-setup-mafushi})}
+  \label{fig:queues-performance-deques}
+\end{figure}
 
 
 \section{Alternative Work-Stealing Queues}
