@@ -11,12 +11,12 @@
 \section{Motivation}
 \label{sec:queues-intro-motivation}
 
-The intervals implementation uses a work-stealing scheduler. It
+The intervals implementation uses a work-stealing scheduler that
 employs a fixed number of threads called workers. Each worker has a
 local double-ended queue, or deque, to maintain its own pool of ready
-intervals from which it obtains work. When a worker finds that its
-pool is empty, it becomes a thief and steals an interval from the pool
-of a victim worker chosen at random.
+intervals from which it obtains work. When a worker's pool becomes
+empty, it tries to steal an interval from the pool of a victim worker
+chosen at random.
 
 % The performance of work-stealing algorithms is in a large part
 % determined by the efficiency of their work queue implementations.
@@ -29,15 +29,13 @@ work-stealing algorithm,\footnote{Non-blocking -- in contrast to
   workers. Live-locks cannot occur as if one worker starves, then
   others must be making progress.} the deques are implemented with
 non-blocking synchronization \cite{Arora2001}. That is, instead of
-using mutual exclusion, it uses powerful atomic synchronization
-primitives such as Compare-and-Swap \cite{Moir1997}. The current deque
-implementation of intervals however uses mutual exclusion when trying
-to steal.
+using mutual exclusion, it uses atomic synchronization primitives such
+as Compare-and-Swap \cite{Moir1997}. The current deque implementation
+of intervals however uses mutual exclusion when trying to steal.
 
-Our hypothesis was that we could improve the performance of the
-intervals scheduler with non-blocking queues. Thus, as a separate
-effort, we designed and explored alternative non-blocking queue
-implementations.
+Our hypothesis is that we can improve the performance of the intervals
+scheduler with non-blocking queues. Thus, as a separate effort, we
+design and explore alternative non-blocking queue implementations.
 
 \section{Overview}
 \label{sec:queues-intro-overview}
@@ -53,8 +51,8 @@ on the machines we had to test them with (Appendix
 \ref{sec:experimental-setup-mafushi}). Possible reasons for this are
 given in the performance evaluation in Chapter
 \ref{chap:queues-performance}. Chapter \ref{chap:queues-conclusions}
-concludes and summarizes the encountered problems in order to preserve
-this research for future reference.
+concludes and summarizes our findings and encountered problems in
+order to preserve this research for future reference.
 
 
 %%% Local Variables: 
