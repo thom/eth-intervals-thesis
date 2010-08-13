@@ -106,6 +106,9 @@ Department of Computer Science\\
 
 \usepackage[colorinlistoftodos,shadow]{todonotes}
 \usepackage{booktabs}
+\usepackage[style=numeric,hyperref,subentry]{biblatex}
+\bibliography{../bib/thesis}
+
 
 %------------------------------------------------------------------------------
 % Configuration
@@ -287,6 +290,11 @@ Department of Computer Science\\
 \include{literature-review}
 
 \backmatter
-\include{bibliography}
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}
+%\bibliographystyle{plain}
+%\include{bibliography}
+\printbibliography
 
 \end{document}
