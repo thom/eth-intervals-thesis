@@ -315,7 +315,7 @@ returns the stolen work item. Else, the thread tries to steal again.
 
 The \emph{Dynamic Work-Stealing Deque} uses a list of small arrays to
 manage work items. It is based on the work-stealing deque algorithm
-presented by Hendler, Lev and Shavit \cite{Hendler2006, Hendler2006a}.
+presented by \textcite{Hendler2006}.
 
 The algorithm implements each deque as a doubly linked list of nodes,
 each of which is a short array, with \lstinline!top! and
@@ -342,7 +342,7 @@ of these boundary situations using the relations between the
 point to entries that may reside in different nodes. We observe that
 given one pointer ignoring which array it resides in, the distance of
 the other, cannot be more than 1 if the deque is empty -- see
-\cite{Hendler2006, Hendler2006a} for a detailed description.
+\cite{Hendler2006} for a detailed description.
 
 As it turned out, the dynamic work-stealing deque's complexity -- due
 to the extra work required for the list's maintenance -- reflects in
