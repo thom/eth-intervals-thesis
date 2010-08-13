@@ -345,12 +345,11 @@ performance difference to the idempotent work-stealing deque (Figure
 None of the work-stealing queues we developed significantly improves
 work-stealing performance (Section \ref{sec:queues-performance-ws}) on
 the machines we had to test them with (Appendix
-\ref{chap:experimental-setup}). Saha et al. \cite{Saha2007} state that
-there is no noticeable difference between the speedup of work-stealing
-and a global shared work queue when not using more than 8 cores. If
-this is the case, then the optimizations we did in our work-stealing
-queue implementations most likely wont have a significant effect
-either.
+\ref{chap:experimental-setup}). \textcite{Saha2007} state that there
+is no noticeable difference between the speedup of work-stealing and a
+global shared work queue when not using more than 8 cores. If this is
+the case, then the optimizations we did in our work-stealing queue
+implementations most likely wont have a significant effect either.
 
 To check this hypothesis, we rewrote the intervals scheduler to use a
 single shared work deque. The shared work deque is implemented with
