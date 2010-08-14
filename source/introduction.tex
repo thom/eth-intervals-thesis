@@ -5,7 +5,7 @@
 \chapter{Introduction}
 \label{chap:introduction}
 
-Intervals \cite{Matsakis2009b} are a new, higher-level primitive for
+Intervals \cite{Matsakis2009a} are a new, higher-level primitive for
 parallel programming with which programmers directly construct the
 program schedule. They are under active development at ETH Zürich as
 part of the PhD research of Nicholas Matsakis \cite{Matsakis2010}.
@@ -37,25 +37,23 @@ runtime system.
 
 The intervals API supports arbitrary \emph{happens before} relations
 making the model very flexible. Intervals can be used to emulate
-existing thread primitives \cite{Matsakis2009b}, but they can also be
+existing thread primitives \cite{Matsakis2009a}, but they can also be
 used to easily create program schedules for which no standard thread
 primitives exist, such as peer-to-peer synchronization.
 
-One of the primary goals in developing intervals is that program
-errors should not lead to deadlocks. This includes both misuse of the
-APIs but also miscellaneous errors which causes tasks to abort
-unexpectedly, such as dereferencing a null pointer
-\cite{Matsakis2009}. A further goal is that an error in one task
-should prevent other, dependent tasks from executing
-\cite{Matsakis2010a}.
+Intervals are first-class objects in the programming language that
+represent the slice of program time used to execute a parallel
+task. The presence of a first-class, queryable program schedule allows
+us to support both static and dynamic checks such as data race
+protection \cite{Matsakis2010b} and checking for deadlocks
+\cite{Matsakis2009}. An error in one task prevents other, dependent
+tasks from executing \cite{Matsakis2010a}.
 
 \subsection{Model}
 \label{sec:intro-intervals-model}
 
-Intervals are first-class objects in the programming language that
-represent the slice of program time used to execute a parallel
-task. Intervals are structured hierarchically in a tree. The root of
-the interval tree represents the entire program execution. Program
+Intervals are structured hierarchically in a tree. The root of the
+interval tree represents the entire program execution. Program
 execution itself begins in a child of the root interval.
 
 The conceptual model for intervals consists of points in time ordered
