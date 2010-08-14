@@ -2,161 +2,67 @@
 % queues-conclusions.tex
 %==============================================================================
 
-\chapter{Conclusions}
-\label{chap:queues-conclusions}
+\chapter{Conclusions and Future Work}
+\label{chap:queues-conclusions-and-future-work}
 
-In this part of the thesis we developed and tested several
-work-stealing queues.
+\section{Conclusions}
+\label{sec:queues-conclusions-and-future-work-conclusions}
 
-We could not find a huge difference when running the benchmarks using
-the alternative queue implementations. The paper ``Enabling
-scalability and performance in a large scale CMP environment''
-\cite{Saha2007} states that there is no noticeable difference between
-the speedup of work-stealing and global shared work queue when using
-not more than 8 cores.
+Our hypothesis was that we could improve the performance of the
+intervals scheduler with non-blocking work-stealing queues. Thus, we
+designed and implemented several work-stealing queues.
 
-To check this hypothesis, we rewrote the intervals scheduler to use a
-single shared work deque and use it in a LIFO (stack) manner.
+We evaluated the performance of our queue implementations by using the
+intervals implementations of various Java Grande Forum
+benchmarks. None of the work-stealing queues we developed
+significantly improves work-stealing performance on the machines we
+had to test them with: The runtime of the benchmarks using our
+implementations of the work-stealing queue, \emph{Work-Stealing Deque}
+and \emph{Idempotent Work-Stealing Deque}, with the original
+\emph{Work-Stealing Lazy Deque} are almost the same. The alternative
+queue implementations, \emph{Dynamic Work-Stealing Deque},
+\emph{Idempotent FIFO Work-Stealing Queue}, and \emph{Idempotent LIFO
+  Work-Stealing Queue} are often significantly slower then the other
+queues. The \emph{Duplicating Work-Stealing Queue}'s performance is
+comparable to the \emph{Idempotent Work-Stealing Deque}.
 
-The alternative implementations often even have catastrophic
-performance (Section \ref{sec:queues-performance-alternative}).
+Apart from the complexer implementation compared to the original
+\emph{Work-Stealing Lazy Deque}, a possible reason for this could be
+the rather small number of cores of our benchmark machines (Appendix
+\ref{chap:experimental-setup}). As \textcite{Saha2007} state, there is
+no noticeable difference between the speedup of work-stealing and a
+global shared work queue when not using more than 8 cores. Our
+experiments confirmed those findings for the JGF benchmarks. There is
+no significant difference between the runtimes of the different
+implementations -- whether we use work-stealing or the single shared
+work queue, we get almost the same results.
 
-\todo{Mention the experiment with a single shared work queue}
 
-We believed that this would not impact scalability on our machine,
-because others \cite{Saha2007} have reported that even a single,
-centralized queue protected by a single, central lock does not hurt
-performance on up to 8 CPUs, which is a decidedly worse situation for
-scalability as the number of CPUs grows.
+\section{Future Work}
+\label{sec:queues-conclusions-and-future-work-future-work}
 
+Given the results of the performance evaluation, a direction for
+future research would be to explore the performance of the different
+work-stealing queue implementations on machines featuring more than 8
+cores.
 
-\section{Limitations and Future Work}
-\label{sec:queues-conclusion-future-work}
+It may also be interesting to see how our work-stealing queues would
+benefit from using the steal-half algorithm of \textcite{Hendler2002}.
 
-\begin{itemize}
-\item Non-blocking steal-half work queues \cite{Hendler2002}
-\item Let benchmarks run on more than 8 cores
-\end{itemize}
+One disadvantage of the queues using arrays to maintain work items is
+that they do not shrink them again once the queue contains less work
+items. This might result in a big waste of
+memory. \textcite{Chase2005} present a way of shrinking an array
+without copying by keeping the reference to the smaller array when
+expanding. When the queue shrinks back its array to the smaller
+previous array, only the elements that were modified while the larger
+array was active need to be copied.
 
-It may be interesting to see how our techniques are applied to other
-schemes that improve on ABP-work stealing such as the locality-guided
-work-stealing of Acar, Blelloch and Blumofe \cite{Acar2002} or the
-steal-half algorithm of Hendler and Shavit \cite{Hendler2002}.
-
-\subsection*{Dynamic circular work-stealing deque \cite{Chase2005}}
-
-\textbf{Expanding and shrinking:} We present in detail for each
-algorithm how to expand the queue size, where task arrays are replaced
-by new larger ones. The shown algorithm code assumes support for
-automatic garbage collection, where old arrays are freed
-automatically. Without garbage collection, buffer pools as described
-by Chase and Lev \cite{Chase2005} can be used. The old array can be
-remembered in the \lstinline!expand()! operation and then freed to the
-buffer pools right after the end of the \lstinline!put()!
-operation. As for the actual tasks, they are not dynamic objects. They
-are written and read directly to and from elements of the task array.
-
-\subsubsection{Shrinking After Growth}
-
-One disadvantage of the algorithm as presented is that it does not
-shrink the array as the deque retreats from its maximum. That means
-that the memory used by the deque is a constant factor times its
-maximum size, which might result in a big waste of memory.
-
-Shrinking the array is no harder than growing the array; it only
-requires that the algorithm check against a minimum use fraction of
-the current array when performing a \lstinline!take!
-operation.\footnote{With the current implementation, this fraction
-  must be strictly less than $\frac{1}{2}$, to guarantee that the
-  deque elements could fit into the smaller array while leaving one
-  array cell unused.} The code for the \lstinline!take!
-operation with the possible shrinking operation appears in Figures 5
-and 6. As illustrated by the code, Line 31 was modified to call the
-\lstinline!perhapsShrink! method just before returning the popped
-value. The \lstinline!perhapsShrink! method shrinks the array if the
-number of elements in the deque is less than some fraction
-$\frac{1}{K}$ of the array size, where $K \ge 3$. We omit the code for
-the \lstinline!CircularArray!'s shrink method since it is almost
-identical to the code of this class's \lstinline!grow! method.
-Finally, note that the \lstinline!perhapsShrink! method is independent
-of the \lstinline!take! operation, and therefore can be invoked
-by the deque's owner on other occasions (for example after a
-\lstinline!put! operation).
-
-\minisec{Shrinking without copying}
-
-The simplest way to shrink back to a smaller array is similar to the
-way we grow it: Allocate a new smaller array, and copy the data from
-the big array to the smaller one. We can save the allocation time,
-however, if whenever we extend an array, we retain a reference from
-the bigger array to the smaller one. If each array has a reference to
-the smaller array from which it was extended, then the garbage
-collector cannot deallocate all the arrays that precede the current
-active one, and the algorithm can reuse these arrays when shrinking.
-
-Keeping the references to the smaller arrays not only saves the
-allocation time, it can also save some of the copying work: when the
-algorithm shrinks back from the big array to its previous smaller
-array, only the elements that were modified while the bigger array was
-active need to be copied (because the smaller array was not
-deallocated and therefore was not modified while the bigger array was
-active). This can be accomplished by maintaining a low-water-mark with
-each array: an integer that indicates the lowest value of
-\lstinline!bottom! in which an element was stored while the array was
-active. When a deque shrinks its array, only the elements stored in
-indexes greater than or equal to the low water mark of the bigger
-array are copied. Also, the smaller array's low water mark is updated
-to the minimum of the larger and smaller array's low water mark
-values.
-
-Note that the space overhead for referencing all the smaller arrays
-when growing is relatively low: if we double the array size every time
-we grow the array, the total overhead is less than the size of the
-current array.
-
-\minisec{Combining multiple shrinks}
-
-Sometimes it is useful to combine multiple shrink operations, that is
-to shrink back not to the previous smaller array, but to one (or more)
-preceding it. For example, suppose that we had 5 growing operations:
-$a_1 \rightarrow a_2 \rightarrow a_3 \rightarrow a_4 \rightarrow a_5$
-(here $a_i$ represents an array, and $a_{i+1}$ is a bigger array than
-$a_i$), and that on the next \lstinline!take! operation we find
-out that almost all the deque elements were stolen, and that the
-number of elements left is less than some fraction of the size of
-$a_1$. In such a case it makes more sense to shrink from $a_5$
-directly to $a_1$, without going through all the intermediate
-arrays. Extra caution should be taken, however, when choosing which
-entries to copy using the low water mark: when copying from $a_5$ to
-$a_1$ , the low water mark is the minimum of the low water marks of
-$a_5$ and all the intermediate arrays (that is $a_4$, $a_3$ and
-$a_2$).
-
-\subsubsection{Working With a Shared Pool of Buffers}
-
-The deque algorithm presented depends upon a garbage collector to
-reclaim the unused buffers. For work-stealing algorithms, where each
-process has its own deque and the maximum amount of memory needed by
-all deques together can usually be bounded, it is often more suitable
-to use the shared pool model.
-
-With the shared pool model, the extra available buffers for all the
-deques are kept in a shared pool. Whenever the deque's owner needs a
-bigger array, it allocates one (of the appropriate size) from the
-pool, and whenever it shrinks to a smaller array and does not need the
-bigger array anymore, it can return it to the pool. There are two main
-advantages for the shared pool model: First, it is much less expensive
-to reclaim and allocate buffers from the shared pool than to allocate
-them from the heap and use the garbage collec- tor for
-reclamation. Second, as described in this section, by assuming that
-the reclaimed buffers are not returned to a global use by the
-operating system, the deque's owner can reclaim a buffer while there
-may be still some thieves refer- encing it (something that the garage
-collector will not do), which leads to a better use of the allocated
-space.
-
-\todo{Finish section ``Limitations and Future Work''}
-\todo{Finish chapter ``Conclusions''}
+Another optimization \textcite{Chase2005} mention is working with a
+shared pool of arrays. With the shared pool implementation, whenever
+the queue needs a larger array, it allocates one of the appropriate
+size from the pool, and whenever it shrinks to a smaller array and
+does not need the larger array anymore, it can return it to the pool.
 
 
 %%% Local Variables: 
