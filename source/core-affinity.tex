@@ -14,15 +14,15 @@ threads, so a Java program using threads is no different from a native
 program using threads: A Java thread is just a thread belonging to a
 JVM process. This means there is a 1-to-1 correspondence between Java
 and native threads. When using the GNU C library on Linux, native
-threads are implemented with NPTL (Native POSIX Threads Library). NPTL
-is also an 1-to-1 implementation, meaning that each thread maps to a
-kernel scheduling entity (Figure
+threads are implemented with the NPTL (Native POSIX Threads
+Library). NPTL is also an 1-to-1 implementation, meaning that each
+thread maps to a kernel scheduling entity (Figure
 \ref{fig:core-affinity-thread-mapping}).
 
 \begin{figure}[htb]
   \centering
   \begin{tikzpicture}
-    [node distance=0.8cm,
+    [node distance=0.6cm,
     start chain=going below,]
     \node[box, join] {Java Thread};
     \node[box, join] {Native POSIX Thread};
@@ -34,17 +34,18 @@ kernel scheduling entity (Figure
 
 Unfortunately the Java Threads API does not expose the ability to set
 the CPU or core affinity despite numerous use cases where setting the
-affinity of threads would be desirable \cite{Love2003, Dow2005,
-  Foong2008}.  There exists a request for enhancement
-\cite{Oracle1999} on this issue but it got set to the state
-\emph{``Closed, Will Not Fix''}.
+affinity of threads would be beneficial -- such as improving cache and
+network performance or real-time applications \cite{Love2003, Dow2005,
+  Foong2008}. There exists a request for enhancement on this issue but
+it got set to the state \emph{``Closed, Will Not Fix''}
+\cite{Oracle1999}.
 
 
 \section{Implementation}
 \label{sec:appendix-core-affinity-implementation}
 
-For binding the workers to a specific core, we wrote a small JNI
-library -- see Listing \ref{lst:core-affinity} for the API. The method
+To bind the workers to a specific core, we wrote a small JNI library
+-- see Listing \ref{lst:core-affinity} for the API. The method
 \lstinline!set(int physicalUnit)!  (Line
 \ref{lst:core-affinity-set-unit}) is used to bind the current thread
 to a physical unit. With \lstinline!set(int[] physicalUnits)! the
@@ -67,7 +68,7 @@ declarations which are implemented in Listing
 \ref{lst:core-affinity-jni-get}. Line
 \ref{lst:core-affinity-jni-h-set-unit} declares
 \lstinline!set(int physicalUnit)!. On Line
-\ref{lst:core-affinity-jni-h-set-node} we declared the method
+\ref{lst:core-affinity-jni-h-set-node} we declare the method
 \lstinline!set(int[] physicalUnits)! and \lstinline!get()! is declared
 on Line \ref{lst:core-affinity-jni-h-get}.
 
@@ -90,7 +91,7 @@ initialize the CPU set structure (Lines
 \ref{lst:core-affinity-jni-set-node-init-cpuset}) and then we set it
 to the specified physical units (Lines
 \ref{lst:core-affinity-jni-set-unit-set-cpuset} and
-\ref{lst:core-affinity-jni-set-unit-set-cpuset}). Actual setting of
+\ref{lst:core-affinity-jni-set-node-set-cpuset}). The actual setting of
 the affinity is done in function
 \lstinline!set_affinity(JNIEnv *env, const cpu_set_t *cpuset)! on Lines
 \ref{lst:core-affinity-jni-set-impl-start} --
@@ -127,7 +128,7 @@ mask of the thread thread in the buffer pointed to by
 \section{Restrictions}
 \label{sec:appendix-core-affinity-restrictions}
 
-\subsubsection{Portability}
+\subsection{Portability}
 
 As we are directly using functions provided by POSIX threads, our
 implementation is not portable across operating systems that do not
@@ -136,7 +137,7 @@ rewritten using Portable Linux Processor Affinity (PLPA)
 \cite{OpenMPI2010a} or Portable Hardware Locality (hwloc)
 \cite{OpenMPI2010}.
 
-\subsubsection{Data Locality}
+\subsection{Data Locality}
 
 By setting the core affinity of threads, we only control the locality
 of the work but we do not have control over data locality.
@@ -145,21 +146,22 @@ On a NUMA system every processor in the system has a local memory that
 provides low access latency and high bandwidth, and a remote memory
 that is considerably slower to access.
 
-In the Java HotSpot VM, the NUMA-aware allocator has been implemented
-to provide automatic memory placement optimisations for Java
-applications \cite{Masamitsu2008, Oracle2010, Humble2010}. On Linux,
-the implementation is based on \cite{Kleen2004}. It can be enabled by
-using the option \verb!-XX:+UseNUMA!.
+In the Java HotSpot VM, the NUMA-aware
+allocator\footnote{\cite{Oracle2010}: The allocator controls the eden
+  space of the young generation of the heap, where most of the new
+  objects are created. It divides the space into regions each of which
+  is placed in the memory of a specific node. The allocator relies on
+  a hypothesis that a thread that allocates the object will be the
+  most likely to use the object. To ensure the fastest access to the
+  new object, the allocator places it in the region local to the
+  allocating thread. The regions can be dynamically resized to reflect
+  the allocation rate of the application threads running on different
+  nodes.} has been implemented to provide automatic memory placement
+optimisations for Java applications \cite{Masamitsu2008, Oracle2010,
+  Humble2010}. On Linux, the implementation is based on
+\cite{Kleen2004}. It can be enabled by using the option
+\verb!-XX:+UseNUMA!.
 
-The allocator controls the eden space of the young generation of the
-heap, where most of the new objects are created. It divides the space
-into regions each of which is placed in the memory of a specific
-node. The allocator relies on a hypothesis that a thread that
-allocates the object will be the most likely to use the object. To
-ensure the fastest access to the new object, the allocator places it
-in the region local to the allocating thread. The regions can be
-dynamically resized to reflect the allocation rate of the application
-threads running on different nodes.
 
 %%% Local Variables: 
 %%% mode: latex
