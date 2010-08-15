@@ -11,6 +11,7 @@ public class IdempotentWorkStealingDeque
 
 	private AtomicStampedReference<ArrayData> anchor = 
 		new AtomicStampedReference<ArrayData>(new ArrayData(0, 0), 0);
+
 	private WorkItem[] workItems = new WorkItem[1024];
 
 	// ...

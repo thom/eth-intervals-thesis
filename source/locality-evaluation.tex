@@ -5,7 +5,30 @@
 \chapter{Evaluation}
 \label{chap:locality-evaluation}
 
-\todo[inline]{Finish chapter ``Evaluation''}
+We evaluate the performance of the different queue implementations
+when used by the intervals scheduler with a variety of parallel Java
+Grande Forum benchmarks (Appendix \ref{chap:appendix-benchmarks}) on
+two different machines:
+
+\begin{itemize}
+\item Intel Core2 Duo with one processor and two cores, running Ubuntu
+  10.04 64-bit with kernel 2.6.32 and Sun Hotspot JDK 1.6.0\_20
+  (Appendix \ref{sec:experimental-setup-marvin})
+\item Intel Nehalem with two processors and eight cores, running
+  Ubuntu 9.04 64-bit with kernel 2.6.29 and Sun Hotspot JDK 1.6.0\_20
+  (Appendix \ref{sec:experimental-setup-mafushi})
+\end{itemize}
+
+Both machines invoke the JVM with the following parameters:
+
+\begin{lstlisting}
+  -server -Xmx2048M -Xms2048M -Xss8m
+\end{lstlisting}
+
+The execution time reported is the average of the three best benchmark
+iterations from ten separate invocations.
+
+\todo{Finish chapter ``Evaluation''}
 
 %%% Local Variables: 
 %%% mode: latex

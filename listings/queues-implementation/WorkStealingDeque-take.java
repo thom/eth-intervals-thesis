@@ -17,7 +17,6 @@ public WorkItem take() {
 	if (size > 0) //*\label{lst:work-stealing-deque-take-non-empty-1}
 		return workItem; //*\label{lst:work-stealing-deque-take-non-empty-2}
 
-	// fetch and increment
 	if (!top.compareAndSet(oldTop, oldTop + 1)) //*\label{lst:work-stealing-deque-take-cas}
 		workItem = null; // queue is empty
 

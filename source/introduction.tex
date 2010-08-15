@@ -6,13 +6,13 @@
 \label{chap:introduction}
 
 Intervals \cite{Matsakis2009a} are a new, higher-level primitive for
-parallel programming with which programmers directly construct the
+parallel programming allowing programmers to directly construct the
 program schedule. They are under active development at ETH Zürich as
-part of the PhD research of Nicholas Matsakis \cite{Matsakis2010}.
+part of the PhD research of Nicholas D. Matsakis \cite{Matsakis2010}.
 
-The intervals implementation in Java uses a work-stealing scheduler in
-which a worker that runs out of work tries to ``steal'' work from
-others. The scope of this thesis is to improve the efficiency of the
+The intervals implementation in Java uses a work-stealing scheduler
+where a worker running out of work tries to ``steal'' work from
+others. The scope of this thesis is to improve the performance of the
 intervals scheduler.
 
 
@@ -22,16 +22,16 @@ intervals scheduler.
 Traditional primitives for synchronizing multi-threaded programs, such
 as semaphores and barriers, are low-level and dangerous to use. They
 require careful attention to implementation details to achieve good
-performance, and they are prone to errors, particularly deadlocks and
-race conditions.
+performance, and are prone to errors, especially deadlocks and race
+conditions.
 
 Intervals are a higher-level alternative that make parallel
-programming safer while retaining the flexibility and efficiency of
-threads. In the Intervals model, users create lightweight tasks and
-order them using explicit \emph{happens before} relations
-\cite{Lamport1978}. Users need not specify when a thread should block
-or acquire a lock. Instead they specify when a task should execute
-relative to other tasks, and what locks it should hold when it
+programming safer while maintaining the flexibility and efficiency of
+threads. When using intervals, programmers create lightweight tasks
+and order them using explicit \emph{happens before} relations
+\cite{Lamport1978}. Programmers need not specify when a thread should
+block or acquire a lock. Instead they specify when a task should
+execute relative to other tasks, and what locks it should hold when it
 executes. The details of making this schedule pass are left to the
 runtime system.
 
@@ -41,7 +41,7 @@ existing thread primitives \cite{Matsakis2009a}, but they can also be
 used to easily create program schedules for which no standard thread
 primitives exist, such as peer-to-peer synchronization.
 
-Intervals are first-class objects in the programming language that
+Intervals are first-class objects in the programming language which
 represent the slice of program time used to execute a parallel
 task. The presence of a first-class, queryable program schedule allows
 us to support both static and dynamic checks such as data race
@@ -68,7 +68,9 @@ different intervals. An edge \lstinline|p1 $\rightarrow$ p2| indicates
 that the point \lstinline|p1| must occur before the point
 \lstinline|p2|. It also indicates that any memory writes which
 \emph{happen before} \lstinline|p1| must be visible to
-\lstinline|p2|.
+\lstinline|p2|. This is in line with the Java Memory Model
+\cite{Manson2005}, and the semantics of volatile fields and
+synchronized sections.
 
 \begin{figure}[htb]
   \centering
@@ -83,22 +85,17 @@ An interval can be associated with one or more locks. The intervals
 runtime will automatically acquire those locks before the interval's
 start point occurs and release them after its end point has occurred.
 
-When an interval executes, it begins by invoking the sequential method
-\lstinline|run()|. \lstinline|run()| may either perform the task
-directly or create a number of subintervals to achieve the task in
-parallel. These subintervals begin to execute once the
-\lstinline|run()| method has completed and they are ready to run. A
-subinterval is ready to run when it could execute without violating
-the \emph{happens before} relation. It will be executed when it is
-ready and acquired all its locks.
+When an interval executes, it begins by invoking the sequential
+\lstinline|run()| method. \lstinline|run()| may either perform the
+task directly or create a number of subintervals to achieve the task
+in parallel.
 
 The interval model can be depicted as a graph, as shown in Figure
 \ref{fig:interval-graph}. The graph contains a single interval with
 four subintervals, \lstinline|a|, \lstinline|b|, \lstinline|c| and
 \lstinline|d|. The start and end points of each interval are
 represented as opaque circles. The subintervals of an interval are
-enclosed in a dashed box. This dashed box is omitted for leaf
-intervals.
+enclosed in a dashed box which is omitted for leaf intervals.
 
 The dashed edges connecting different points indicate user-specified
 additions to the \emph{happens before} relation. For example, the end
@@ -111,10 +108,10 @@ of \lstinline|a| \emph{happens before} the start of \lstinline|b| and
 
 In the Java API, intervals are represented as instances of the
 abstract class \lstinline|Interval| (Listing
-\ref{lst:interval-class}). \lstinline|Interval| provides immutable
-fields to access the interval's start point, end point, and parent,
-along with an abstract \lstinline|run()| method which must be
-redefined in a concrete subtype.
+\ref{lst:interval-class}). \lstinline|Interval| provides final fields
+to access the interval's start point, end point, and parent, along
+with an abstract \lstinline|run()| method which must be redefined in a
+concrete subtype.
 
 \begin{lstlisting}[
   style=Float, 
@@ -130,9 +127,8 @@ public abstract class Interval {
 }
 \end{lstlisting}
 
-Listing \ref{lst:interval-graph} contains Java code which uses the
-Intervals API to construct the graph shown in Figure
-\ref{fig:interval-graph}.
+Listing \ref{lst:interval-graph} shows the code used to construct the
+graph shown in Figure \ref{fig:interval-graph}.
 
 \begin{lstlisting}[
   style=FloatNumbers, 
@@ -171,16 +167,16 @@ public class ExampleInterval extends Interval {
 \label{sec:intro-intervals-creating-intervals}
 
 To start program execution, the programmer has to create a new child
-of the root interval. One could for example use an inline interval to
-do so. Inline intervals execute a task during the current interval and
-do not return until the task has completed.
+of the root interval, for example by using an inline interval. Inline
+intervals execute a task during the current interval and do not return
+until the task has completed.
 
 Lines \ref{lst:interval-graph-inline-start} --
-\ref{lst:interval-graph-inline-end} create the inline subinterval
-\lstinline|start| by providing an anonymous task class redefining its
-\lstinline|run()| method. \lstinline|start| has four subintervals,
-\lstinline|a|, \lstinline|b|, \lstinline|c| and \lstinline|d|. They
-are created on Lines \ref{lst:interval-graph-new-start} --
+\ref{lst:interval-graph-inline-end} create an inline interval by
+providing an anonymous task class redefining its \lstinline|run()|
+method. The interval has four subintervals, \lstinline|a|,
+\lstinline|b|, \lstinline|c| and \lstinline|d|. They are created on
+Lines \ref{lst:interval-graph-new-start} --
 \ref{lst:interval-graph-new-end} and are normal, non-blocking
 intervals.
 
@@ -198,9 +194,9 @@ would be unsafe if \lstinline|b| could begin immediately, as it would
 be possible that \lstinline|b.start| had already occurred before the
 call to \lstinline|addHb()| could add the new dependency.
 
-Explicit calls to \lstinline|schedule()| are unusual, however. This is
-because the runtime automatically invokes \lstinline|schedule()| when
-the \lstinline|run()| method of an interval returns.
+Explicit calls to \lstinline|schedule()| are unusual as the runtime
+automatically invokes \lstinline|schedule()| when the
+\lstinline|run()| method of an interval returns.
 
 
 \section{Work-Stealing Scheduler}
@@ -222,10 +218,10 @@ task from the pool of a victim worker chosen at random.
 To obtain work, a worker takes the ready task from the bottom of its
 deque and executes it. If the task terminates, the worker goes back to
 the bottom of its deque to take off another task upon which it can
-work. When assigning a new task to a worker, the worker putting the
-newly ready task onto the bottom of its deque. Thus, so long as a
-worker's deque is not empty, the worker manipulates its deque in a
-LIFO (stack-like) manner.
+work. When assigning a new task to a worker, the worker puts the newly
+ready task onto the bottom of its deque. Thus, so long as a worker's
+deque is not empty, the worker manipulates its deque in a LIFO
+(stack-like) manner.
 
 When a worker tries to obtain work by taking a task off the bottom of
 its deque and it finds that it is empty, then the worker becomes a
@@ -242,7 +238,7 @@ Accessing the run queues at different ends offers several advantages
 
 \begin{itemize}
 \item It reduces contention by having stealers operate on the opposite
-  side of the deque as owners
+  side of the deque as owners.
 \item It exploits the property of recursive divide-and-conquer
   algorithms of generating ``large'' tasks early. Thus, an older
   stolen task is likely to provide a larger unit of work, leading to
@@ -268,31 +264,9 @@ priority to the intervals with affinity for the place \cite{Acar2002,
 In the non-blocking work-stealing algorithm, the deques are
 implemented with non-blocking synchronization \cite{Arora2001}. The
 current deque implementation of intervals however uses mutual
-exclusion when trying to steal. As a separate effort, we designed and
-explored alternative non-blocking queue implementations with the aim
-to improve scheduling performance (\autoref{part:queues}).
-
-% The goal of the thesis is to improve the implementation of the
-% intervals scheduler and it is divided into two parts.
-
-% \subsubsection{\autoref{part:locality}. Locality-Aware Work-Stealing}
-
-% In \autoref{part:locality} of the thesis we implement and analyze
-% locality-aware scheduling of intervals. Locality-aware scheduling
-% allows each interval to be given an affinity for a place, and when a
-% worker belonging to a certain place obtains an interval, it gives
-% priority to the intervals with affinity for the place \cite{Acar2002,
-%   Guo2010}.
-
-% \subsubsection{\autoref{part:queues}. Work-Stealing Queue
-%   Implementations}
-
-% The original work-stealing algorithm uses non-blocking algorithms to
-% implement queue operations \cite{Arora2001}. However, the current
-% deque implementation of intervals uses a lock when trying to steal. In
-% \autoref{part:queues} of this thesis we explore alternative
-% non-blocking queue implementations and compare them to the current
-% one.
+exclusion when trying to steal. As a separate effort, we design and
+explore alternative non-blocking queue implementations with the aim to
+improve work-stealing performance (\autoref{part:queues}).
 
 
 %%% Local Variables: 

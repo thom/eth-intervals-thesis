@@ -5,10 +5,10 @@
 \chapter{Performance}
 \label{chap:queues-performance}
 
-We evaluate the performance of the different queue implementations
-when used by the intervals scheduler with a variety of parallel Java
-Grande Forum benchmarks (Appendix \ref{chap:appendix-benchmarks}) on
-two different machines:
+We evaluate the performance of the different work-stealing queue
+implementations when used by the intervals scheduler with a variety of
+parallel Java Grande Forum benchmarks (Appendix
+\ref{chap:appendix-benchmarks}) on two different machines:
 
 \begin{itemize}
 \item Intel Core2 Duo with one processor and two cores, running Ubuntu
@@ -38,40 +38,41 @@ is comparable to the threaded implementation (Figure
 
 \begin{figure}[!ht]
   \centering
-  \subfloat[Intel Core2 Duo: 2 threads, 2 workers]{
+  \subfloat[Results for the Intel Core2 Duo machine]{
     \includegraphics[width=0.89\linewidth]{queues-performance/marvin-threads}
     \label{fig:queues-performance-marvin-threads}
   }
   \\
-  \subfloat[Intel Nehalem: 8 threads, 8 workers]{
+  \subfloat[Results for the Intel Nehalem machine]{
     \includegraphics[width=0.89\linewidth]{queues-performance/mafushi-threads}
     \label{fig:queues-performance-mafushi-threads}
   }
-  \caption{Threads and intervals benchmarks running on Intel Core2 Duo
-    (Appendix \ref{sec:experimental-setup-marvin}) and Intel
-    Nehalem (Appendix \ref{sec:experimental-setup-mafushi})}
+  \caption[Threads and intervals benchmark results]{Threads and
+    intervals benchmarks running on our Intel Core2 Duo (Appendix
+    \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
+    \ref{sec:experimental-setup-mafushi}) test machines}
   \label{fig:queues-performance-threads}
 \end{figure}
 
 The only benchmarks where intervals are considerably slower than
-threads \emph{LuFact} and \emph{MolDyn}. The main reason is that the
-way work is distributed between intervals makes the workers run out of
-work too often. When a worker runs out of work, it becomes idle and
-only wakes up if a new work item is added to its queue. Idle workers
-acquire a local semaphore which blocks until release is invoked by
-some other worker and are added to a global idle list guarded by a
-shared lock. If there is an idle worker, adding a new work item
-releases the semaphore of the worker and removes it from the idle
-list.
+threads are \emph{LuFact} and \emph{MolDyn}. The main reason is that
+the way work is distributed between intervals makes the workers run
+out of work too often. When a worker runs out of work, it becomes idle
+and only wakes up if a new work item is added to its queue. Idle
+workers acquire a local semaphore which blocks until release is
+invoked by some other worker and are added to a global idle list
+guarded by a shared lock. If there is an idle worker, adding a new
+work item releases the semaphore of the worker and removes it from the
+idle list.
 
-Putting a worker to sleep and waking up again is quite
+Putting a worker to sleep and waking it up again is quite
 expensive. Compared to other benchmarks, workers in \emph{LuFact} and
 \emph{MolDyn} run out of work more often (Table
 \ref{tab:queues-performance-threads}).
 
 \begin{table}[htb]
   \centering
-  \subfloat[Intel Core2 Duo]{
+  \subfloat[Results for the Intel Core2 Duo machine]{
     \begin{tabular}{l*{5}{c}}
       \toprule
       & \emph{LuFact} (C) & \emph{MolDyn} (B) & \emph{Crypt} (C) & \emph{SOR} (C) & \emph{RayTracer} (B) \\\midrule
@@ -80,8 +81,8 @@ expensive. Compared to other benchmarks, workers in \emph{LuFact} and
     \end{tabular}
     \label{tab:queues-performance-marvin-threads}
   }
-  \\
-  \subfloat[Intel Nehalem]{
+  \\[10ex]
+  \subfloat[Results for the Intel Nehalem machine]{
     \begin{tabular}{l*{5}{c}}
       \toprule
       & \emph{LuFact} (C) & \emph{MolDyn} (B) & \emph{Crypt} (C) & \emph{SOR} (C) & \emph{RayTracer} (B) \\\midrule
@@ -90,7 +91,8 @@ expensive. Compared to other benchmarks, workers in \emph{LuFact} and
     \end{tabular}
     \label{tab:queues-performance-mafushi-threads}
   }
-  \caption[Idle workers]{Number of times workers run out of work and become idle, and get woken up again}
+  \\[2ex]
+  \caption[Idle workers]{Number of times workers run out of work, become idle, and get woken up again}
   \label{tab:queues-performance-threads}
 \end{table}
 
@@ -109,11 +111,12 @@ significant difference in the runtime of the JGF benchmarks (Figure
 \ref{fig:queues-performance-deques}) on both machines we tested them
 on.
 
-The \emph{Work-Stealing Lazy Deque} implementation is very efficient
-already. Using a lock in the \lstinline!steal()! method is of less
-impact than we thought it would be.
+The reason for this is, that the \emph{Work-Stealing Lazy Deque}
+implementation is very efficient already. Using a lock in the
+\lstinline!steal()! method is of less impact than we thought it would
+be.
 
-\emph{Work-Stealing Lazy Deque} uses an
+The \emph{Work-Stealing Lazy Deque} uses an
 \lstinline!AtomicReferenceArray! to maintain work items. The
 \lstinline!AtomicReferenceArray! provides volatile access semantics
 for its array elements, which is not supported for ordinary
@@ -121,34 +124,35 @@ arrays. Because of this, \emph{Work-Stealing Lazy Deque} does not have
 to use additional volatile or atomic variables like the other deque
 implementations do. This allows for a simpler implementation.
 
-The owner of the deque \emph{Work-Stealing Lazy Deque} only lazily
-updates the location of the deque's head. This means it only updates
-the head when its owner tries to take a work item and finds it was
-stolen by a competing thief. As opposed to the methods
+The location of the head of the \emph{Work-Stealing Lazy Deque} is
+only lazily updated by its owner. This means the location of the head
+is only updated when its owner tries to take a work item and finds it
+was stolen by a competing thief. As opposed to the methods
 \lstinline!take()! and \lstinline!steal()!  of the \emph{Work-Stealing
-  Deque} which attempt to update the location of the deque's head on
-every execution with a Compare-and-Swap operation. Similarly the
-methods \lstinline!take()! and \lstinline!steal()! of the
-\emph{Idempotent Work-Stealing Deque} have to update the size of the
-deque in the anchor on every execution.
+  Deque} which attempt to update the location of the head on every
+execution with a Compare-and-Swap operation. Similarly the methods
+\lstinline!take()!  and \lstinline!steal()! of the \emph{Idempotent
+  Work-Stealing Deque} have to update the size in the anchor on every
+execution.
 
 Another reason for the lack of difference between the queue
 implementations might be the small number of cores of the systems we
-had to test them on (see Section
-\ref{sec:queues-performance-single-shared-queue} for more details).
+had to test them on. See Section
+\ref{sec:queues-performance-single-shared-queue} for more details.
 
 \begin{figure}[!ht]
   \centering
-  \subfloat[Intel Core2 Duo]{
+  \subfloat[Results for the Intel Core2 Duo machine]{
     \includegraphics[width=0.89\linewidth]{queues-performance/marvin-deques}
     \label{fig:queues-performance-marvin-deques}
   }
   \\
-  \subfloat[Intel Nehalem]{
+  \subfloat[Results for the Intel Nehalem machine]{
     \includegraphics[width=0.89\linewidth]{queues-performance/mafushi-deques}
     \label{fig:queues-performance-mafushi-deques}
   }
-  \caption{Deques benchmarks running on Intel Core2 Duo (Appendix
+  \caption[Work-stealing deques benchmark results]{Work-stealing
+    deques benchmarks running on Intel Core2 Duo (Appendix
     \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
     \ref{sec:experimental-setup-mafushi})}
   \label{fig:queues-performance-deques}
@@ -164,7 +168,11 @@ had to test them on (see Section
 The implementation of the \emph{Dynamic Work-Stealing Deque} (Section
 \ref{sec:queues-alternative-implementations-dynamic-deque}) requires
 extra work for the list's maintenance which reflects in its
-performance (Figure \ref{fig:queues-performance-dynamic}).
+performance: Most of the benchmarks are slightly slower in comparison
+to other queue implementations. Figure
+\ref{fig:queues-performance-dynamic} shows the benchmark runtimes of
+the \emph{Dynamic Work-Stealing Deque} in comparison to the
+\emph{Work-Stealing Deque}.
 
 % Bug in dynamic work-stealing deque implementation: steal() always
 % returns null and never succeeds! This is the reason why benchmarks
@@ -173,17 +181,18 @@ performance (Figure \ref{fig:queues-performance-dynamic}).
 
 \begin{figure}[!htb]
   \centering
-  \subfloat[Intel Core2 Duo: 2 threads, 2 workers]{
+  \subfloat[Results for the Intel Core2 Duo machine]{
     \includegraphics[width=0.5\linewidth]{queues-performance/marvin-dynamic}
     \label{fig:queues-performance-marvin-dynamic}
   }
-  \subfloat[Intel Nehalem: 8 threads, 8 workers]{
+  \subfloat[Results for the Intel Nehalem machine]{
     \includegraphics[width=0.5\linewidth]{queues-performance/mafushi-dynamic}
     \label{fig:queues-performance-mafushi-dynamic}
   }
-  \caption{Dynamic benchmarks running on Intel Core2 Duo (Appendix
-    \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
-    \ref{sec:experimental-setup-mafushi})}
+  \caption[Dynamic work-stealing deques benchmark results]{Dynamic
+    work-stealing deques benchmarks running on Intel Core2 Duo
+    (Appendix \ref{sec:experimental-setup-marvin}) and Intel Nehalem
+    (Appendix \ref{sec:experimental-setup-mafushi})}
   \label{fig:queues-performance-dynamic}
 \end{figure}
 
@@ -206,23 +215,26 @@ end of the queue, they have to deal with increased contention. This
 often reflects itself in a lower performance due to a higher number of
 take and steal failures in the \emph{Idempotent Work-Stealing FIFO
   Queue} compared to the \emph{Idempotent Work-Stealing Deque} (Table
-\ref{tab:queues-performance-idempotent-fifo}). In the \emph{Idempotent
-  Work-Stealing Deque} there is less contention between
+\ref{tab:queues-performance-idempotent-fifo}). This is especially
+visible in the runtimes of the \emph{SOR} and \emph{MolDyn} benchmarks
+(Figure \ref{fig:queues-performance-idempotent}). In the
+\emph{Idempotent Work-Stealing Deque} there is less contention between
 \lstinline!take()! and \lstinline!steal()! as they work on opposite
 ends of the queue.
 
 \begin{figure}[!htb]
   \centering
-  \subfloat[Intel Core2 Duo: 2 threads, 2 workers]{
+  \subfloat[Results for the Intel Core2 Duo machine]{
     \includegraphics[width=0.89\linewidth]{queues-performance/marvin-idempotent}
     \label{fig:queues-performance-marvin-idempotent}
   }
   \\
-  \subfloat[Intel Nehalem: 8 threads, 8 workers]{
+  \subfloat[Results for the Intel Nehalem machine]{
     \includegraphics[width=0.89\linewidth]{queues-performance/mafushi-idempotent}
     \label{fig:queues-performance-mafushi-idempotent}
   }
-  \caption{Idempotent benchmarks running on Intel Core2 Duo (Appendix
+  \caption[Idempotent work-stealing queues]{Idempotent work-stealing
+    queues benchmarks running on Intel Core2 Duo (Appendix
     \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
     \ref{sec:experimental-setup-mafushi})}
   \label{fig:queues-performance-idempotent}
@@ -230,7 +242,7 @@ ends of the queue.
 
 \begin{table}[!htb]
   \centering
-  \subfloat[Intel Core2 Duo]{
+  \subfloat[Results for the Intel Core2 Duo machine]{
    \begin{tabular}{lrrrr}
      & \multicolumn{2}{c}{\hspace{0.5cm}\emph{SOR} (C)} & \multicolumn{2}{c}{\hspace{0.5cm}\emph{MolDyn} (B)} \\
      & \hspace{0.5cm}Deque & \hspace{0.5cm}Queue & \hspace{1cm}Deque & \hspace{0.5cm}Queue \\
@@ -244,8 +256,8 @@ ends of the queue.
    \end{tabular}
     \label{tab:queues-performance-marvin-idempotent-fifo}
   }
-  \\
-  \subfloat[Intel Nehalem]{
+  \\[5ex]
+  \subfloat[Results for the Intel Nehalem machine]{
     \begin{tabular}{lrrrr}
       & \multicolumn{2}{c}{\hspace{0.5cm}\emph{SOR} (C)} & \multicolumn{2}{c}{\hspace{0.5cm}\emph{MolDyn} (B)} \\
       & \hspace{0.5cm}Deque & \hspace{0.5cm}Queue & \hspace{1cm}Deque & \hspace{0.5cm}Queue \\
@@ -259,23 +271,13 @@ ends of the queue.
     \end{tabular}
     \label{tab:queues-performance-mafushi-idempotent-fifo}
   }
-  \caption[Idempotent Work-Stealing FIFO Queue]{Comparing take and steal attempts and failures of the \emph{Idempotent Work-Stealing Deque} with the \emph{Idempotent Work-Stealing FIFO Queue}}
+  \caption[Idempotent Work-Stealing FIFO Queue: Comparing takes and steals]{Comparing take and steal attempts and failures of the \emph{Idempotent Work-Stealing Deque} with the \emph{Idempotent Work-Stealing FIFO Queue}}
   \label{tab:queues-performance-idempotent-fifo}
 \end{table}
 
-The \emph{Idempotent Work-Stealing LIFO Queue} behaves like a stack:
-\lstinline!put()! puts tasks at the tail, and \lstinline!take()!  and
-\lstinline!steal()! remove tasks at the tail too. As \lstinline!put!,
-\lstinline!take()! and \lstinline!steal()! work on the same end of the
-queue, they have to deal with increased contention. This especially
-shows in the performance of the \emph{Series} and \emph{MonteCarlo}
-benchmarks with an extremely high number of steal attempts and
-failures compared to the \emph{Idempotent Work-Stealing Deque} (Table
-\ref{tab:queues-performance-idempotent-lifo}).
-
 \begin{table}[!htb]
   \centering
-  \subfloat[Intel Core2 Duo]{
+  \subfloat[Results for the Intel Core2 Duo machine]{
     \begin{tabular}{lrrrr}
       & \multicolumn{2}{c}{\hspace{0.5cm}\emph{Series} (C)} & \multicolumn{2}{c}{\hspace{0.5cm}\emph{MonteCarlo} (B)} \\
       & \hspace{0.5cm}Deque & \hspace{0.5cm}Stack & \hspace{1cm}Deque & \hspace{0.5cm}Stack \\
@@ -289,8 +291,8 @@ failures compared to the \emph{Idempotent Work-Stealing Deque} (Table
     \end{tabular}
     \label{tab:queues-performance-marvin-idempotent-lifo}
   }
-  \\
-  \subfloat[Intel Nehalem]{
+  \\[5ex]
+  \subfloat[Results for the Intel Nehalem machine]{
     \begin{tabular}{lrrrr}
       & \multicolumn{2}{c}{\hspace{0.5cm}\emph{Series} (C)} & \multicolumn{2}{c}{\hspace{0.5cm}\emph{MonteCarlo} (B)} \\
       & \hspace{0.5cm}Deque & \hspace{0.5cm}Stack & \hspace{1cm}Deque & \hspace{0.5cm}Stack \\
@@ -304,9 +306,20 @@ failures compared to the \emph{Idempotent Work-Stealing Deque} (Table
     \end{tabular}
     \label{tab:queues-performance-mafushi-idempotent-lifo}
   }
-  \caption[Idempotent Work-Stealing LIFO Queue]{Comparing take and steal attempts and failures of the \emph{Idempotent Work-Stealing Deque} with the \emph{Idempotent Work-Stealing LIFO Queue}}
+  \caption[Idempotent Work-Stealing LIFO Queue: Comparing takes and steals]{Comparing take and steal attempts and failures of the \emph{Idempotent Work-Stealing Deque} with the \emph{Idempotent Work-Stealing LIFO Queue}}
   \label{tab:queues-performance-idempotent-lifo}
 \end{table}
+
+The \emph{Idempotent Work-Stealing LIFO Queue} behaves like a stack:
+\lstinline!put()! puts tasks at the tail, and \lstinline!take()!  and
+\lstinline!steal()! remove tasks at the tail too. As
+\lstinline!put()!, \lstinline!take()! and \lstinline!steal()! work on
+the same end of the queue, they have to deal with increased
+contention. This especially shows in the performance of the
+\emph{Series} and \emph{MonteCarlo} benchmarks with an extremely high
+number of steal attempts and failures compared to the \emph{Idempotent
+  Work-Stealing Deque} (Table
+\ref{tab:queues-performance-idempotent-lifo}).
 
 \subsection{Duplicating Work-Stealing Queue}
 \label{sec:performance-alternative-duplicating}
@@ -324,15 +337,16 @@ performance difference to the idempotent work-stealing deque (Figure
 
 \begin{figure}[!htb]
   \centering
-  \subfloat[Intel Core2 Duo: 2 threads, 2 workers]{
+  \subfloat[Results for the Intel Core2 Duo machine]{
     \includegraphics[width=0.5\linewidth]{queues-performance/marvin-duplicating}
     \label{fig:queues-performance-marvin-duplicating}
   }
-  \subfloat[Intel Nehalem: 8 threads, 8 workers]{
+  \subfloat[Results for the Intel Nehalem machine]{
     \includegraphics[width=0.5\linewidth]{queues-performance/mafushi-duplicating}
     \label{fig:queues-performance-mafushi-duplicating}
   }
-  \caption{Duplicating benchmarks running on Intel Core2 Duo (Appendix
+  \caption[Duplicating work-stealing deques benchmark
+  results]{Duplicating benchmarks running on Intel Core2 Duo (Appendix
     \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
     \ref{sec:experimental-setup-mafushi})}
   \label{fig:queues-performance-duplicating}
@@ -353,12 +367,12 @@ implementations most likely wont have a significant effect either.
 
 To check this hypothesis, we rewrote the intervals scheduler to use a
 single shared work deque. The shared work deque is implemented with
-\lstinline!LinkedBlockingDeque! from \lstinline!java.util.concurrent!
-in a stack-like manner: Items are added with \lstinline!addLast()! at
-the end of the queue and take with \lstinline!pollLast()! from the end
-of the queue. For comparison we added another work-stealing
-implementation changing the original intervals scheduler to use
-\lstinline!LinkedBlockingDeque!.
+\lstinline!LinkedBlockingDeque! from the
+\lstinline!java.util.concurrent! package in a stack-like manner: Items
+are added with \lstinline!addLast()! at the end of the queue and taken
+with \lstinline!pollLast()! from the end of the queue. For comparison
+we added another work-stealing implementation changing the original
+intervals scheduler to use \lstinline!LinkedBlockingDeque!.
 
 Our experiments confirm the hypothesis for the JGF benchmarks. There
 is no significant difference between the runtimes of the different
@@ -370,16 +384,17 @@ almost the same results (Figure
 
 \begin{figure}[!ht]
   \centering
-  \subfloat[Intel Core2 Duo: 2 threads, 2 workers]{
-    \includegraphics[width=0.8\linewidth]{queues-performance/marvin-shared-queue}
+  \subfloat[Results for the Intel Core2 Duo machine]{
+    \includegraphics[width=0.68\linewidth]{queues-performance/marvin-shared-queue}
     \label{fig:queues-performance-marvin-shared-queue}
   }
   \\
-  \subfloat[Intel Nehalem: 8 threads, 8 workers]{
-    \includegraphics[width=0.8\linewidth]{queues-performance/mafushi-shared-queue}
+  \subfloat[Results for the Intel Nehalem machine]{
+    \includegraphics[width=0.68\linewidth]{queues-performance/mafushi-shared-queue}
     \label{fig:queues-performance-mafushi-shared-queue}
   }
-  \caption{Shared-Queue benchmarks running on Intel Core2 Duo (Appendix
+  \caption[Single shared work queue benchmark results]{Shared queue
+    benchmarks running on Intel Core2 Duo (Appendix
     \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
     \ref{sec:experimental-setup-mafushi})}
   \label{fig:queues-performance-shared-queue}

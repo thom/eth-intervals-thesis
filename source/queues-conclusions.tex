@@ -16,17 +16,16 @@ We evaluated the performance of our queue implementations by using the
 intervals implementations of various Java Grande Forum
 benchmarks. None of the work-stealing queues we developed
 significantly improves work-stealing performance on the machines we
-had to test them with: The runtime of the benchmarks using our
-implementations of the work-stealing queue, \emph{Work-Stealing Deque}
-and \emph{Idempotent Work-Stealing Deque}, with the original
-\emph{Work-Stealing Lazy Deque} are almost the same. The alternative
-queue implementations, \emph{Dynamic Work-Stealing Deque},
-\emph{Idempotent FIFO Work-Stealing Queue}, and \emph{Idempotent LIFO
-  Work-Stealing Queue} are often significantly slower then the other
-queues. The \emph{Duplicating Work-Stealing Queue}'s performance is
-comparable to the \emph{Idempotent Work-Stealing Deque}.
+had to test them with: The runtime of the benchmarks using
+\emph{Work-Stealing Deque} and \emph{Idempotent Work-Stealing Deque}
+compared to the original \emph{Work-Stealing Lazy Deque} are almost
+the equal. The \emph{Dynamic Work-Stealing Deque}, \emph{Idempotent
+  FIFO Work-Stealing Queue}, and \emph{Idempotent LIFO Work-Stealing
+  Queue} are often significantly slower then the other queues. The
+\emph{Duplicating Work-Stealing Queue}'s performance is comparable to
+the \emph{Idempotent Work-Stealing Deque}.
 
-Apart from the complexer implementation compared to the original
+Apart from the complexer implementation in comparison to the original
 \emph{Work-Stealing Lazy Deque}, a possible reason for this could be
 the rather small number of cores of our benchmark machines (Appendix
 \ref{chap:experimental-setup}). As \textcite{Saha2007} state, there is

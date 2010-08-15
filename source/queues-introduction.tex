@@ -18,9 +18,6 @@ intervals from which it obtains work. When a worker's pool becomes
 empty, it tries to steal an interval from the pool of a victim worker
 chosen at random.
 
-% The performance of work-stealing algorithms is in a large part
-% determined by the efficiency of their work queue implementations.
-
 To enable efficient and scalable execution, management of the
 intervals must be made as fast as possible. In the non-blocking
 work-stealing algorithm,\footnote{Non-blocking -- in contrast to
@@ -35,7 +32,7 @@ of intervals however uses mutual exclusion when trying to steal.
 
 Our hypothesis is that we can improve the performance of the intervals
 scheduler with non-blocking queues. Thus, as a separate effort, we
-design and explore alternative non-blocking queue implementations.
+design and explore alternative non-blocking queuesx.
 
 \section{Overview}
 \label{sec:queues-intro-overview}

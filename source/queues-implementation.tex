@@ -73,20 +73,20 @@ empty state where \lstinline!bottom == top! and return
 \lstinline!null! (Lines \ref{lst:work-stealing-deque-take-empty-1} --
 \ref{lst:work-stealing-deque-take-empty-2}). If taking a work item
 does not make the deque empty, the owner can take it without using a
-Compare-and-Swap operation (Lines
+Compare-and-Swap (CAS) operation (Lines
 \ref{lst:work-stealing-deque-take-non-empty-1} --
 \ref{lst:work-stealing-deque-take-non-empty-2}). If the owner is
-trying to take the last work item, then it must perform a
-Compare-and-Swap on \lstinline!top! to see if it won or lost any race
-with a concurrent \lstinline!steal()! operation to take the last item
-(Line \ref{lst:work-stealing-deque-take-cas}). Regardless whether the
-Compare-and-Swap operation succeeds, the value of \lstinline!top! is
-incremented by 1 and the deque is empty: If the Compare-and-Swap in
-\lstinline!take()! fails, then some concurrent \lstinline!steal()!
-operation succeeded in stealing the last work item and incremented
-\lstinline!top!. Therefore the operation completes by storing the
-incremented top value in \lstinline!bottom! which resets the deque to
-an empty state (Line \ref{lst:work-stealing-deque-take-update}).
+trying to take the last work item, then it must perform a CAS on
+\lstinline!top! to see if it won or lost any race with a concurrent
+\lstinline!steal()! operation to take the last item (Line
+\ref{lst:work-stealing-deque-take-cas}). Regardless whether the CAS
+operation succeeds, the value of \lstinline!top! is incremented by 1
+and the deque is empty: If the CAS in \lstinline!take()! fails, then
+some concurrent \lstinline!steal()!  operation succeeded in stealing
+the last work item and incremented \lstinline!top!. Therefore the
+operation completes by storing the incremented top value in
+\lstinline!bottom! which resets the deque to an empty state (Line
+\ref{lst:work-stealing-deque-take-update}).
 
 \lstinputlisting[style=FloatNumbers,
   caption={Work-stealing Deque: \lstinline!take()! method},
@@ -105,22 +105,21 @@ If the deque is empty, \lstinline!steal()! returns \lstinline!null!
 (Lines \ref{lst:work-stealing-deque-steal-empty-1} --
 \ref{lst:work-stealing-deque-steal-empty-2}). Else it reads the
 element stored in the \lstinline!top! position of the cyclic array,
-and tries to increment \lstinline!top! using a Compare-and-Swap
-operation. If the Compare-and-Swap fails, it implies that a concurrent
-\lstinline!steal()! successfully removed an element from the deque, so
-the operation tries to steal again. Otherwise it returns the element
-read right before the successful Compare-and-Swap operation.
+and tries to increment \lstinline!top! using a CAS operation. If the
+CAS fails, it implies that a concurrent \lstinline!steal()!
+successfully removed an element from the deque, so the operation tries
+to steal again. Else it returns the element read right before the
+successful CAS operation.
 
 To prevent \lstinline!steal()! from returning the deque's last work
 item if it was already taken by a concurrent \lstinline!take()! after
 \lstinline!bottom! is read (Line
-\ref{lst:work-stealing-deque-steal-bottom}), but before the
-Compare-and-Swap operation is executed (Line
-\ref{lst:work-stealing-deque-steal-cas}), any \lstinline!take()! that
-empties the deque tries to modify \lstinline!top! using a
-Compare-and-Swap operation.
+\ref{lst:work-stealing-deque-steal-bottom}), but before the CAS
+operation is executed (Line \ref{lst:work-stealing-deque-steal-cas}),
+any \lstinline!take()! that empties the deque tries to modify
+\lstinline!top! using a CAS operation.
 
-\lstinputlisting[style=FloatNumbers,
+\lstinputlisting[style=SkipNumbers,
   caption={Work-Stealing Deque: \lstinline!steal()! method}, 
   label=lst:work-stealing-deque-steal]{
     ../listings/queues-implementation/WorkStealingDeque-steal.java
@@ -159,11 +158,11 @@ implementation. Each interval has an associated state
 \lstinline!RunningState! (Line \ref{lst:interval-state}). Upon
 initialization, the state is set to \lstinline!INIT! (Line
 \ref{lst:interval-init}). The internal \lstinline!exec()!  method
-performs an atomic Compare-and-Swap operation to try to switch from
+performs an atomic CAS operation to try to switch from
 \lstinline!INIT! to \lstinline!RUNNING! (Line
-\ref{lst:interval-cas}). If the Compare-and-Swap operation succeeds,
-the associated task is executed and the state is set to
-\lstinline!DONE! afterwards (Line \ref{lst:interval-done}).
+\ref{lst:interval-cas}). If the CAS operation succeeds, the associated
+task is executed and the state is set to \lstinline!DONE! afterwards
+(Line \ref{lst:interval-done}).
 
 \lstinputlisting[style=SkipNumbers, 
   caption={Idempotent interval},
@@ -183,11 +182,9 @@ implementation for locality-aware scheduling \cite{Acar2002}.
 In contrast to the \emph{Work-Stealing Lazy Deque} (Section
 \ref{sec:queues-background-current-implementation}) or the
 \emph{Work-Stealing Deque} (Section
-\ref{sec:queues-implementation-ws-deque}), the owner's methods
-\lstinline!put()! and \lstinline!take()! of the \emph{Idempotent
-  Work-Stealing Deque} do not have to use expensive Compare-and-Swap
-operations. We can optimize the owner's methods by avoiding the high
-overheads of these operations.
+\ref{sec:queues-implementation-ws-deque}), the \lstinline!take()!
+method of the \emph{Idempotent Work-Stealing Deque} does not have to
+use an expensive CAS operation.
 
 The \lstinline!IdempotentWorkStealingDeque! class has an inner class,
 \lstinline!ArrayData!, and two fields, \lstinline!anchor! and
@@ -206,15 +203,15 @@ size encapsulated in an \lstinline!ArrayData! reference. The
 reference \lstinline!anchor! together with an integer stamp. Our
 algorithm needs to guard against the ABA problem\footnote{If a thread
   reads a value $A$ from a shared variable, computes a new value, and
-  then attempts a Compare-and-Swap operation, there is a chance that
-  the Compare-and-Swap succeeds even if it should not, because for
-  example between the read and the Compare-and-Swap some other thread
-  changes the $A$ back to $B$ and then back to $A$ again.} in the
-\lstinline!steal()! operation and uses the stamp as an ABA-prevention
-tag.\footnote{The tag is a specific implementation choice. At the
-  abstract level, the algorithms do not require the use of the tag
-  mechanism but can use any ABA prevention mechanism, like bounded
-  tags \cite{Moir1997} or hazard pointers \cite{Michael2004}}
+  then attempts a CAS operation, there is a chance that the CAS
+  succeeds even if it should not, because for example between the read
+  and the CAS some other thread changes the $A$ back to $B$ and then
+  back to $A$ again.} in the \lstinline!steal()! operation and uses
+the stamp as an ABA-prevention tag.\footnote{The tag is a specific
+  implementation choice. At the abstract level, the algorithm does not
+  require the use of the tag mechanism but can use any ABA prevention
+  mechanism, like bounded tags \cite{Moir1997} or hazard pointers
+  \cite{Michael2004}}
 
 Listing \ref{lst:idempotent-work-stealing-deque-put} shows the
 \lstinline!put()! method. First the owner reads the anchor to get the
@@ -225,11 +222,11 @@ checks whether the array is full of not (Line
 \ref{lst:idempotent-work-stealing-deque-put-full}). If it is full, the
 owner expands the array by calling \lstinline!expand()! and loops
 around (Line
-\ref{lst:idempotent-work-stealing-deque-put-expand}). Otherwise, it
+\ref{lst:idempotent-work-stealing-deque-put-expand}). Otherwise it
 adds the work item at the tail of the queue (Line
 \ref{lst:idempotent-work-stealing-deque-put-insert}). In Line
 \ref{lst:idempotent-work-stealing-deque-put-update-anchor} the owner
-updates the anchor by incrementing the queues size and ABA-prevention
+updates the anchor by incrementing the queue's size and ABA-prevention
 tag.
 
 \lstinputlisting[style=FloatNumbers,
@@ -262,8 +259,8 @@ the head and size of the queue, and also the ABA-prevention tag (Lines
 \ref{lst:idempotent-work-stealing-deque-take-read-anchor-2}). Then it
 checks if the queue is empty (Line
 \ref{lst:idempotent-work-stealing-deque-take-check-size}). If it is
-empty, \lstinline!take()! return \lstinline!null!. Otherwise, it reads
-the work item at the tail of the queue (Lines
+empty, \lstinline!take()! returns \lstinline!null!. Else, it reads the
+work item at the tail of the queue (Lines
 \ref{lst:idempotent-work-stealing-deque-take-get}). In Line
 \ref{lst:idempotent-work-stealing-deque-put-update-anchor} the method
 updates the anchor by decrementing the queues size to indicate the
@@ -284,9 +281,10 @@ ABA-prevention tag (Lines
 \ref{lst:idempotent-work-stealing-deque-steal-check-size} the thread
 checks if the queue is empty. If it is empty, \lstinline!steal()!
 returns \lstinline!null!. Otherwise it gets a pointer to
-\lstinline!workItems!. In Line
-\ref{lst:idempotent-work-stealing-deque-steal-read}, the thread reads
-the work item at the head of the queue.
+\lstinline!workItems! (Line
+\ref{lst:idempotent-work-stealing-deque-steal-work-items}) and reads
+the work item at the head of the queue (Line
+\ref{lst:idempotent-work-stealing-deque-steal-read}).
 
 The \lstinline!compareAndSet()! in Line
 \ref{lst:idempotent-work-stealing-steal-cas} checks that no work item
@@ -331,18 +329,18 @@ each of which is a short array, with \lstinline!top! and
 \lstinline!top! and \lstinline!bottom! are instances of the
 \lstinline!Index! class pointing to a deque's node with an offset into
 that node's array. For the doubly linked list to have a good
-performance, it must only resorts to using a costly Compare-and-Swap
-operation when a potential conflict requires it. The potential
-conflict occurs when a \lstinline!take()!  and \lstinline!steal()!
-concurrently try to remove the last item from the deque.
+performance, it must only resorts to using a costly CAS operation when
+a potential conflict requires it. The potential conflict occurs when a
+\lstinline!take()!  and \lstinline!steal()!  concurrently try to
+remove the last item from the deque.
 
 To do this, we need to have an efficient mechanism to allow detection
 of these boundary situations using the relations between the
 \lstinline!top! and \lstinline!bottom! pointers, even though these
 point to entries that may reside in different nodes. We observe that
-given one pointer ignoring which array it resides in, the distance of
-the other, cannot be more than 1 if the deque is empty -- see
-\cite{Hendler2006} for a detailed description.
+given one pointer -- ignoring which array it resides in -- the
+distance of the other, cannot be more than 1 if the deque is
+empty. \textcite{Hendler2006} describe the method in more detail.
 
 As it turned out, the dynamic work-stealing deque's complexity -- due
 to the extra work required for the list's maintenance -- reflects in
@@ -362,17 +360,17 @@ once. In particular, the \lstinline!put()!  and \lstinline!take()!
 operations behave like normal, but the \lstinline!steal()! operation
 is allowed to either take an element and remove it from the queue, or
 to just duplicate an element in the queue. By allowing duplication we
-can avoid an expensive memory barrier instruction in the
-\lstinline!take()! operation.
+can avoid an expensive CAS instruction in the \lstinline!take()!
+operation.
 
 As we are also using idempotent intervals together with duplicating
 work-stealing queues, this nondeterminism is fine for our usage.
 
 Whereas the idempotent work-stealing deque implementation relies on
-atomic Compare-and-Swap operations and uses a tag to prevent the ABA
-problem, the duplicating work-stealing queue implementation uses a
-lock on all but the critical paths. This simplifies the implementation
-but we could not find any drastic performance difference (Section
+atomic CAS operations and uses a tag to prevent the ABA problem, the
+duplicating work-stealing queue implementation uses a lock on all but
+the critical paths. This simplifies the implementation but we could
+not find any drastic performance difference (Section
 \ref{sec:performance-alternative-duplicating}).
 
 

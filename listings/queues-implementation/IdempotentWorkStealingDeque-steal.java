@@ -4,15 +4,18 @@ public WorkItem steal(Worker thiefWorker) {
 		int head = arrayData.head;
 		int size = arrayData.size; 
 		int tag = anchor.getStamp(); //*\label{lst:idempotent-work-stealing-deque-steal-read-anchor-2}
-		if (size == 0) //*\label{lst:idempotent-work-stealing-deque-steal-check-size}
-			return null;
 
-		WorkItem[] tempWorkItems = workItems;
+		if (size == 0) { //*\label{lst:idempotent-work-stealing-deque-steal-check-size}
+			return null;
+		}
+
+		WorkItem[] tempWorkItems = workItems; //*\label{lst:idempotent-work-stealing-deque-steal-work-items}
 		WorkItem workItem = tempWorkItems[head % tempWorkItems.length]; //*\label{lst:idempotent-work-stealing-deque-steal-read}
 		int newHead = head + 1 % Integer.MAX_VALUE;
 
 		if (anchor.compareAndSet(arrayData,
-				new ArrayData(newHead, size - 1), tag, tag))  //*\label{lst:idempotent-work-stealing-steal-cas}
+				new ArrayData(newHead, size - 1), tag, tag)) { //*\label{lst:idempotent-work-stealing-steal-cas}
 			return workItem;
+		}
 	}
 }

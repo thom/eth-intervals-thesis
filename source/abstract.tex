@@ -27,14 +27,13 @@ affinity for the place.
 
 The performance of work-stealing schedulers is in a large part
 determined by the efficiency of their work queue implementations. In
-the non-blocking work-stealing scheduler \cite{Arora2001}, the deques
+the non-blocking work-stealing scheduler \cite{Arora2001}, the queues
 are implemented with non-blocking synchronization. That is, instead of
-using mutual exclusion, its deques use atomic synchronization
-primitives such as Compare-and-Swap. The current deque implementation
-of intervals however uses mutual exclusion when trying to steal. Thus,
-as a separate effort, we design and explore alternative non-blocking
-queue implementations with the aim to improve work-stealing
-performance.
+using mutual exclusion, it uses atomic synchronization primitives such
+as Compare-and-Swap. The current work-stealing queue of intervals
+however uses mutual exclusion when trying to steal. Thus, as a
+separate effort, we design and explore alternative non-blocking queue
+implementations with the aim to improve work-stealing performance.
 
 
 %%% Local Variables: 

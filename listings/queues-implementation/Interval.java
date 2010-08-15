@@ -13,5 +13,6 @@ public abstract class Interval extends WorkItem {
 			runningState.set(RunningState.DONE); //*\label{lst:interval-done}
 		}
 	}
+
 	// ...
 }

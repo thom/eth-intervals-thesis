@@ -3,7 +3,6 @@ public WorkItem steal(Worker thiefWorker) {
 	WorkItem workItem;
 		
 	while (true) {
-		// important that top read before bottom
 		oldTop = top.get();
 		oldBottom = bottom; //*\label{lst:work-stealing-deque-steal-bottom}
 		WorkItem[] currentWorkItems = workItems;
@@ -13,11 +12,9 @@ public WorkItem steal(Worker thiefWorker) {
 			return null; // empty //*\label{lst:work-stealing-deque-steal-empty-2}
 			
 		workItem = currentWorkItems[oldTop % currentWorkItems.length];
-			
-		 // fetch and increment
+
 		if (top.compareAndSet(oldTop, oldTop + 1)) //*\label{lst:work-stealing-deque-steal-cas}
 			break;
 	}
-		
 	return workItem;
 }

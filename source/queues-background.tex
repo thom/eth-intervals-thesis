@@ -16,8 +16,8 @@ from the pool of a victim worker chosen at random.
 Depending on the desired extraction strategy we can implement the
 work-stealing queues differently. Most work-stealing schedulers use
 work-stealing deques \cite{Arora2001, Acar2002, Blumofe1995,
-  Frigo1998, Danaher2005} but there are also implementations for LIFO
-or FIFO extraction \cite{Michael2009}.
+  Frigo1998, Danaher2005} but there exist also implementations for
+LIFO or FIFO extraction \cite{Michael2009}.
 
 A work-stealing deque is like a traditional deque \cite{Knuth1997}
 except that only the deque's owner thread puts and takes local work to
@@ -31,10 +31,11 @@ interface:
 \begin{itemize}
 \item \lstinline!put(WorkItem workItem)!: Puts \lstinline!workItem!
   into the queue.
-\item \lstinline!WorkItem take()!: Takes an object from the queue if
-  the queue is not empty, otherwise returns \lstinline!null!.
-\item \lstinline!WorkItem steal()!: If the queue is empty, returns
-  \lstinline!null!. Otherwise, returns the element successfully stolen
+\item \lstinline!WorkItem take()!: Takes an object from the queue and
+  returns it if the queue is not empty, otherwise returns
+  \lstinline!null!.
+\item \lstinline!WorkItem steal()!: Returns \lstinline!null! if the
+  queue is empty. Otherwise, returns the element successfully stolen
   from the queue, or \lstinline!null! if this worker loses a race with
   another worker to steal or take a work item.
 \end{itemize}
@@ -71,8 +72,8 @@ The members of the \emph{Work-Stealing Lazy Deque} are defined as:
 }
 
 The \lstinline!workItems! array contains the work items of the
-queue. The \lstinline!ownerHead! and \lstinline!ownerTail! are indices
-in the array and represent the head and tail of the queue for the
+queue. \lstinline!ownerHead! and \lstinline!ownerTail! are indices in
+the array and represent the head and tail of the queue for the
 owner. \lstinline!thief! represents the head for the thief and is also
 the lock object used when a thief tries to steal a work item.
 
@@ -86,42 +87,6 @@ array containing the work items is full (Line
   caption={Work-Stealing Lazy Deque: \lstinline!put()! method}, 
   label=lst:work-stealing-lazy-deque-put]{
     ../listings/queues-background/WorkStealingLazyDeque-put.java
-}
-
-\VerbatimFootnotes Method \lstinline!take()! is defined in Listing
-\ref{lst:work-stealing-lazy-deque-take}. It takes an object from the
-bottom of the deque if the deque is not empty, otherwise it returns
-\lstinline!null!. On Line \ref{lst:work-stealing-lazy-deque-take-cas}
-we use Compare-and-Set\footnote{Also known as Compare-and-Swap
-  \cite{IBM1974}. \verb!compareAndSet(int i, E expect, E update)!
-  atomically sets the element at position \verb!i! to the given object
-  \verb!update! if the current value equals \verb!expect!. The method
-  returns \verb!true! if successful and \verb!false! else.} to check
-if another worker stole the item we wanted to take. If the item is
-gone, we know that all previous items must have been stolen too and we
-can update our notion of the head of the deque (Line
-\ref{lst:work-stealing-lazy-deque-take-update}).
-
-\lstinputlisting[style=FloatNumbers,
-  caption={Work-Stealing Lazy Deque: \lstinline!take()! method}, 
-  label=lst:work-stealing-lazy-deque-take]{
-    ../listings/queues-background/WorkStealingLazyDeque-take.java
-}
-
-Listing \ref{lst:work-stealing-lazy-deque-steal} shows the
-implementation of \lstinline!steal()! using a synchronized block to
-make sure there can only be one thief at any given time. If the deque
-is empty, \lstinline!steal()! returns \lstinline!null!. Otherwise, it
-returns the element successfully stolen from the top of the deque, or
-returns \lstinline!null! if this process loses a race with another
-process to steal the topmost element. \lstinline!null! is also
-returned if a \lstinline!steal()! operation lost a race for the last
-work item caused by a concurrent \lstinline!take()! operation.
-
-\lstinputlisting[style=FloatNumbers,
-  caption={Work-Stealing Lazy Deque: \lstinline!steal()! method}, 
-  label=lst:work-stealing-lazy-deque-steal]{
-    ../listings/queues-background/WorkStealingLazyDeque-steal.java
 }
 
 When the \lstinline!workItems! array is full, \lstinline!put()! calls
@@ -139,6 +104,42 @@ replaces the old array with the new one (Lines
   caption={Work-Stealing Lazy Deque: \lstinline!expand()! method}, 
   label=lst:work-stealing-lazy-deque-expand]{
     ../listings/queues-background/WorkStealingLazyDeque-expand.java
+}
+
+\VerbatimFootnotes Method \lstinline!take()! is defined in Listing
+\ref{lst:work-stealing-lazy-deque-take}. It takes an object from the
+bottom of the deque if the deque is not empty, otherwise it returns
+\lstinline!null!. On Line \ref{lst:work-stealing-lazy-deque-take-cas}
+we use Compare-and-Set\footnote{Also known as Compare-and-Swap
+  \cite{IBM1974}. \verb!compareAndSet(int i, E expect, E update)!
+  atomically sets the element at position \verb!i! to the given object
+  \verb!update! if the current value equals \verb!expect!. The method
+  returns \verb!true! if successful and \verb!false! else.} to check
+if another worker stole the item we wanted to take. If the item is
+gone, we know that all previous items must have been stolen too and we
+can update our notion of the head of the deque (Line
+\ref{lst:work-stealing-lazy-deque-take-update}).
+
+\lstinputlisting[style=SkipNumbers,
+  caption={Work-Stealing Lazy Deque: \lstinline!take()! method}, 
+  label=lst:work-stealing-lazy-deque-take]{
+    ../listings/queues-background/WorkStealingLazyDeque-take.java
+}
+
+Listing \ref{lst:work-stealing-lazy-deque-steal} shows the
+implementation of \lstinline!steal()! using a synchronized block to
+make sure there can only be one thief at any given time. If the deque
+is empty, \lstinline!steal()! returns \lstinline!null!. Otherwise, it
+returns the element successfully stolen from the top of the deque, or
+\lstinline!null! if this process loses a race with another process to
+steal the topmost element. \lstinline!null! is also returned if a
+\lstinline!steal()! operation lost a race for the last work item
+caused by a concurrent \lstinline!take()! operation.
+
+\lstinputlisting[style=FloatNumbers,
+  caption={Work-Stealing Lazy Deque: \lstinline!steal()! method}, 
+  label=lst:work-stealing-lazy-deque-steal]{
+    ../listings/queues-background/WorkStealingLazyDeque-steal.java
 }
 
 
