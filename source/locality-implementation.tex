@@ -5,19 +5,57 @@
 \chapter{Implementation}
 \label{chap:locality-implementation}
 
-\todo[inline]{Finish chapter ``Implementation''}
+In this chapter we describe our new implementation of the intervals
+scheduler. It is designed for locality-aware scheduling using locality
+hints provided by the programmer.
 
-\begin{itemize}
-\item Describe locality-aware thread pool
-\item Locality-aware intervals benchmarks
-\end{itemize}
+INTRODUCTION
+
+
+Instead of using work-stealing workers our design uses work-stealing
+places. Section \ref{sec:locality-implementation-work-stealing-places}
+presents the idea and implementation of work-stealing places. The
+intervals scheduler implements each worker as a separate Java
+thread. For the locality-aware scheduler we need to bind each worker
+thread to a separate core. In Section
+\ref{sec:locality-implementation-core-affinity} we show how we can set
+the core affinity of Java threads. The API to use locality-awareness
+in intervals is introduced in Section
+\ref{sec:locality-implementation-intervals-api}.
+
+
+\section{Work-Stealing Places}
+\label{sec:locality-implementation-work-stealing-places}
+
+A work-stealing scheduler employs a fixed number of threads called
+workers. In traditional work-stealing scheduler designs, each worker
+has a local double-ended queue, or deque, to maintain its own pool of
+ready tasks from which it obtains work. We use so-called
+\emph{Work-Stealing Places} instead. Each work-stealing place has a
+local deque used to maintain ready tasks and a fixed number of
+workers. The workers of a place share its local deque from which they
+obtain work. When a worker finds that its place's pool is empty, it
+becomes a thief and steals a task from the pool of a victim place
+chosen at random.
+
+Figure \ref{fig:locality-implementation-work-stealing-places} shows
+the places used in our Intel Nehalem testing machine (Section
+\ref{sec:experimental-setup-mafushi}).
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\linewidth]{locality-implementation/places}
+  \caption{Work-Stealing Places}
+  \label{fig:locality-implementation-work-stealing-places}
+\end{figure}
+
+Our experiments with work-stealing queues showed that 
+
+\todo{Finish section ``Work-Stealing Places''}
+
 
 \section{Setting Core Affinity of Java Threads}
 \label{sec:locality-implementation-core-affinity}
-
-The intervals scheduler implements each worker as a separate Java
-thread. For the locality-aware scheduler we need to bind each worker
-to a separate core.
 
 In recent Java Virtual Machines, threads are implemented with native
 threads, so a Java program using threads is no different from a native
@@ -27,19 +65,19 @@ and native threads. When using the GNU C library on Linux, native
 threads are implemented with the NPTL (Native POSIX Threads
 Library). NPTL is also an 1-to-1 implementation, meaning that each
 thread maps to a kernel scheduling entity (Figure
-\ref{fig:core-affinity-thread-mapping}).
+\ref{fig:locality-implementation-core-affinity-thread-mapping}).
 
 \begin{figure}[htb]
   \centering
   \begin{tikzpicture}
-    [node distance=0.6cm,
+    [node distance=0.8cm,
     start chain=going below,]
     \node[box, join] {Java Thread};
     \node[box, join] {Native POSIX Thread};
     \node[box, join] {Kernel Scheduling Entity};
   \end{tikzpicture}
   \caption{Linux 1-to-1 thread mapping}
-  \label{fig:core-affinity-thread-mapping}
+  \label{fig:locality-implementation-core-affinity-thread-mapping}
 \end{figure}
 
 Unfortunately the Java Threads API does not expose the ability to set
@@ -50,87 +88,95 @@ network performance or real-time applications \cite{Love2003, Dow2005,
 it got set to the state \emph{``Closed, Will Not Fix''}
 \cite{Oracle1999}.
 
-\subsection{Implementation}
-\label{sec:locality-implementation-core-affinity-implementation}
+\subsection{JNI Library}
+\label{sec:locality-implementation-core-affinity-jni-library}
 
 To bind the workers to a specific core, we wrote a small JNI library
--- see Listing \ref{lst:core-affinity} for the API. The method
-\lstinline!set(int physicalUnit)!  (Line
-\ref{lst:core-affinity-set-unit}) is used to bind the current thread
-to a physical unit. With \lstinline!set(int[] physicalUnits)! the
-current thread can be bound to several physical units, for example to
-a node in a NUMA system (Line \ref{lst:core-affinity-set-node}). For
+-- see Listing \ref{lst:locality-implementation-core-affinity} for the
+API. The method \lstinline!set(int physicalUnit)!  (Line
+\ref{lst:locality-implementation-core-affinity-set-unit}) is used to
+bind the current thread to a physical unit. With
+\lstinline!set(int[] physicalUnits)! the current thread can be bound
+to several physical units, for example to a node in a NUMA system
+(Line \ref{lst:locality-implementation-core-affinity-set-node}). For
 debugging purposes we also implemented the method \lstinline!get()!
 which returns a boolean array whose elements are true if the current
 thread has an affinity set to the corresponding physical unit (Line
-\ref{lst:core-affinity-get}).
+\ref{lst:locality-implementation-core-affinity-get}).
 
 \lstinputlisting[style=FloatNumbers,
   caption={\lstinline{Affinity} class with interface for the native methods}, 
-  label=lst:core-affinity]{
-    ../listings/core-affinity/Affinity.java 
+  label=lst:locality-implementation-core-affinity]{
+    ../listings/locality-implementation/Affinity.java 
 }
 
-Listing \ref{lst:core-affinity-jni-header} contains the native method
-declarations which are implemented in Listing
-\ref{lst:core-affinity-jni-set} and
-\ref{lst:core-affinity-jni-get}. Line
-\ref{lst:core-affinity-jni-h-set-unit} declares
-\lstinline!set(int physicalUnit)!. On Line
-\ref{lst:core-affinity-jni-h-set-node} we declare the method
-\lstinline!set(int[] physicalUnits)! and \lstinline!get()! is declared
-on Line \ref{lst:core-affinity-jni-h-get}.
+Listing \ref{lst:locality-implementation-core-affinity-jni-header}
+contains the native method declarations which are implemented in
+Listing \ref{lst:locality-implementation-core-affinity-jni-set} and
+\ref{lst:locality-implementation-core-affinity-jni-get}. Line
+\ref{lst:locality-implementation-core-affinity-jni-h-set-unit}
+declares \lstinline!set(int physicalUnit)!. On Line
+\ref{lst:locality-implementation-core-affinity-jni-h-set-node} we
+declare the method \lstinline!set(int[] physicalUnits)! and
+\lstinline!get()! is declared on Line
+\ref{lst:locality-implementation-core-affinity-jni-h-get}.
 
 \lstinputlisting[style=FloatNumbersC, 
   caption={\lstinline{Affinity} class: JNI C header}, 
-  label=lst:core-affinity-jni-header]{
-    ../listings/core-affinity/ch_ethz_hwloc_Affinity.h 
+  label=lst:locality-implementation-core-affinity-jni-header]{
+    ../listings/locality-implementation/ch_ethz_hwloc_Affinity.h 
 }
 
 \lstinputlisting[style=FloatNumbersC, 
   caption={\lstinline{Affinity} class: JNI C implementation to set the affinity},
-  label=lst:core-affinity-jni-set]{
-    ../listings/core-affinity/ch_ethz_hwloc_Affinity_set.c 
+  label=lst:locality-implementation-core-affinity-jni-set]{
+    ../listings/locality-implementation/ch_ethz_hwloc_Affinity_set.c 
 }
 
 The implementation for setting the affinity is shown in Listing
-\ref{lst:core-affinity-jni-set}. When setting the affinity, we first
-initialize the CPU set structure (Lines
-\ref{lst:core-affinity-jni-set-unit-init-cpuset} and
-\ref{lst:core-affinity-jni-set-node-init-cpuset}) and then we set it
-to the specified physical units (Lines
-\ref{lst:core-affinity-jni-set-unit-set-cpuset} and
-\ref{lst:core-affinity-jni-set-node-set-cpuset}). The actual setting of
-the affinity is done in function
-\lstinline!set_affinity(JNIEnv *env, const cpu_set_t *cpuset)! on Lines
-\ref{lst:core-affinity-jni-set-impl-start} --
-\ref{lst:core-affinity-jni-set-impl-end}.
+\ref{lst:locality-implementation-core-affinity-jni-set}. When setting
+the affinity, we first initialize the CPU set structure (Lines
+\ref{lst:locality-implementation-core-affinity-jni-set-unit-init-cpuset}
+and
+\ref{lst:locality-implementation-core-affinity-jni-set-node-init-cpuset})
+and then we set it to the specified physical units (Lines
+\ref{lst:locality-implementation-core-affinity-jni-set-unit-set-cpuset}
+and
+\ref{lst:locality-implementation-core-affinity-jni-set-node-set-cpuset}). The
+actual setting of the affinity is done in function
+\lstinline!set_affinity()! on Lines
+\ref{lst:locality-implementation-core-affinity-jni-set-impl-start} --
+\ref{lst:locality-implementation-core-affinity-jni-set-impl-end}.
 
 To get the thread ID, we use the \lstinline!pthread_self()! function
-(line \ref{lst:core-affinity-jni-set-impl-pthread-self}). The function
-\lstinline!pthread_setaffinity_np()! (Line
-\ref{lst:core-affinity-jni-set-impl-set}) sets the CPU affinity mask
-of the thread to the CPU set pointed to by \lstinline!cpuset!.  If the
-call is successful, and the thread is not currently running on one of
-the CPUs in \lstinline!cpuset!, then it is migrated to one of those
-CPUs. If there is an error, \lstinline!pthread_setaffinity_np()!
-returs a nonzero error number and we throw an exception (Line
-\ref{lst:core-affinity-jni-set-impl-set-error}).
+(line
+\ref{lst:locality-implementation-core-affinity-jni-set-impl-pthread-self}). The
+function \lstinline!pthread_setaffinity_np()! (Line
+\ref{lst:locality-implementation-core-affinity-jni-set-impl-set}) sets
+the CPU affinity mask of the thread to the CPU set pointed to by
+\lstinline!cpuset!.  If the call is successful, and the thread is not
+currently running on one of the CPUs in \lstinline!cpuset!, then it is
+migrated to one of those CPUs. If there is an error,
+\lstinline!pthread_setaffinity_np()!  returs a nonzero error number
+and we throw an exception (Line
+\ref{lst:locality-implementation-core-affinity-jni-set-impl-set-error}).
 
-Listing \ref{lst:core-affinity-jni-get} shows the implementation for
-getting the affinity of a thread. This method is mainly used for
-debugging purposes. We use \lstinline!pthread_self()! (Line
-\ref{lst:core-affinity-jni-get-impl-pthread-self}) to get the thread
-ID and then call function \lstinline!pthread_getaffinity_np()!  (Line
-\ref{lst:core-affinity-jni-get-impl-get}). The
+Listing \ref{lst:locality-implementation-core-affinity-jni-get} shows
+the implementation for getting the affinity of a thread. This method
+is mainly used for debugging purposes. We use
+\lstinline!pthread_self()! (Line
+\ref{lst:locality-implementation-core-affinity-jni-get-impl-pthread-self})
+to get the thread ID and then call function
+\lstinline!pthread_getaffinity_np()!  (Line
+\ref{lst:locality-implementation-core-affinity-jni-get-impl-get}). The
 \lstinline!pthread_getaffinity_np()! function returns the CPU affinity
 mask of the thread thread in the buffer pointed to by
 \lstinline!cpuset!.
 
 \lstinputlisting[style=FloatNumbersC, 
   caption={\lstinline{Affinity} class: JNI C implementation to get the affinity},
-  label=lst:core-affinity-jni-get]{
-    ../listings/core-affinity/ch_ethz_hwloc_Affinity_get.c 
+  label=lst:locality-implementation-core-affinity-jni-get]{
+    ../listings/locality-implementation/ch_ethz_hwloc_Affinity_get.c 
 }
 
 \subsection{Restrictions}
@@ -141,8 +187,8 @@ mask of the thread thread in the buffer pointed to by
 As we are directly using functions provided by POSIX threads, our
 implementation is not portable across operating systems that do not
 support the POSIX standard. To make our library portable, it could be
-rewritten using Portable Linux Processor Affinity (PLPA)
-\cite{OpenMPI2010a} or Portable Hardware Locality (hwloc)
+rewritten using \emph{Portable Linux Processor Affinity (PLPA)}
+\cite{OpenMPI2010a} or \emph{Portable Hardware Locality (hwloc)}
 \cite{OpenMPI2010}.
 
 \subsubsection{Data Locality}
@@ -154,24 +200,29 @@ On a NUMA system every processor in the system has a local memory that
 provides low access latency and high bandwidth, and a remote memory
 that is considerably slower to access.
 
-In the Java HotSpot VM, the NUMA-aware
-allocator\footnote{\cite{Oracle2010}: The allocator controls the eden
-  space of the young generation of the heap, where most of the new
-  objects are created. It divides the space into regions each of which
-  is placed in the memory of a specific node. The allocator relies on
-  a hypothesis that a thread that allocates the object will be the
-  most likely to use the object. To ensure the fastest access to the
-  new object, the allocator places it in the region local to the
-  allocating thread. The regions can be dynamically resized to reflect
-  the allocation rate of the application threads running on different
-  nodes.} has been implemented to provide automatic memory placement
-optimisations for Java applications \cite{Masamitsu2008, Oracle2010,
-  Humble2010}. On Linux, the implementation is based on
-\cite{Kleen2004}. It can be enabled by using the option
-\verb!-XX:+UseNUMA!.
+In the Java HotSpot VM, the NUMA-aware allocator has been implemented
+to provide automatic memory placement optimisations for Java
+applications \cite{Masamitsu2008, Oracle2010, Humble2010}: The
+allocator controls the eden space of the young generation of the heap,
+where most of the new objects are created. It divides the space into
+regions each of which is placed in the memory of a specific node. The
+allocator relies on a hypothesis that a thread that allocates the
+object will be the most likely to use the object. To ensure the
+fastest access to the new object, the allocator places it in the
+region local to the allocating thread.
+
+On Linux, the implementation is based on \cite{Kleen2004}. It can be
+enabled by using the option \verb!-XX:+UseNUMA!.
+
+
+\section{Intervals API}
+\label{sec:locality-implementation-intervals-api}
+
+\todo{Finish section ``Intervals API''}
 
 
 \section{References}
+\label{sec:locality-implementation-references}
 
 The affinity of the workers is set such that they execute on different
 cores. While this eliminates interference between the worker threads,
@@ -278,6 +329,8 @@ lock either busy-wait pointlessly or lose the rest of their time
 slice. The effect is called convoying because the threads end up
 ``bumper to bumper'' waiting for the preempted thread in front to resume
 driving.
+
+\todo{Finish chapter ``Implementation''}
 
 
 %%% Local Variables: 
