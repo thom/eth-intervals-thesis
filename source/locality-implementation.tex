@@ -7,20 +7,15 @@
 
 In this chapter we describe our new implementation of the intervals
 scheduler. It is designed for locality-aware scheduling using locality
-hints provided by the programmer.
-
-INTRODUCTION
-
-
-Instead of using work-stealing workers our design uses work-stealing
-places. Section \ref{sec:locality-implementation-work-stealing-places}
-presents the idea and implementation of work-stealing places. The
-intervals scheduler implements each worker as a separate Java
-thread. For the locality-aware scheduler we need to bind each worker
-thread to a separate core. In Section
-\ref{sec:locality-implementation-core-affinity} we show how we can set
-the core affinity of Java threads. The API to use locality-awareness
-in intervals is introduced in Section
+hints provided by the programmer. Instead of using work-stealing
+workers our scheduler design uses \emph{Work-Stealing Places}. Section
+\ref{sec:locality-implementation-work-stealing-places} presents the
+idea and implementation of work-stealing places. Each worker is
+implemented as a separate Java thread. For the locality-aware
+scheduler we need to bind every worker thread to a separate core. In
+Section \ref{sec:locality-implementation-core-affinity} we show how we
+can set the core affinity of Java threads. The API to use
+locality-aware intervals is introduced in Section
 \ref{sec:locality-implementation-intervals-api}.
 
 
@@ -32,15 +27,15 @@ workers. In traditional work-stealing scheduler designs, each worker
 has a local double-ended queue, or deque, to maintain its own pool of
 ready tasks from which it obtains work. We use so-called
 \emph{Work-Stealing Places} instead. Each work-stealing place has a
-local deque used to maintain ready tasks and a fixed number of
-workers. The workers of a place share its local deque from which they
-obtain work. When a worker finds that its place's pool is empty, it
-becomes a thief and steals a task from the pool of a victim place
-chosen at random.
+fixed number of workers and a local deque to maintain ready tasks. The
+workers of a place share its local deque from which they obtain
+work. When a worker finds that its place's pool is empty, it becomes a
+thief and steals a task from the pool of a victim place chosen at
+random.
 
 Figure \ref{fig:locality-implementation-work-stealing-places} shows
-the places used in our Intel Nehalem testing machine (Section
-\ref{sec:experimental-setup-mafushi}).
+the work-stealing places used in our Intel Nehalem testing machine
+(Section \ref{sec:experimental-setup-mafushi}).
 
 \begin{figure}[!ht]
   \centering
@@ -54,7 +49,7 @@ Our experiments with work-stealing queues showed that
 \todo{Finish section ``Work-Stealing Places''}
 
 
-\section{Setting Core Affinity of Java Threads}
+\section{Setting Core Affinity of Worker Threads}
 \label{sec:locality-implementation-core-affinity}
 
 In recent Java Virtual Machines, threads are implemented with native
@@ -217,6 +212,32 @@ enabled by using the option \verb!-XX:+UseNUMA!.
 
 \section{Intervals API}
 \label{sec:locality-implementation-intervals-api}
+
+Listings!!!
+
+\lstinputlisting[style=FloatNumbers, 
+  caption={TODO},
+  label=lst:locality-implementation-places]{
+    ../listings/locality-implementation/Places.java
+}
+
+\lstinputlisting[style=FloatNumbers, 
+  caption={TODO},
+  label=lst:locality-implementation-place-id]{
+    ../listings/locality-implementation/PlaceID.java
+}
+
+\lstinputlisting[style=FloatNumbers, 
+  caption={TODO},
+  label=lst:locality-implementation-marvin-places]{
+    ../listings/locality-implementation/MarvinPlaces.java
+}
+
+\lstinputlisting[style=FloatNumbers, 
+  caption={TODO},
+  label=lst:locality-implementation-mafushi-places]{
+    ../listings/locality-implementation/MafushiPlaces.java
+}
 
 \todo{Finish section ``Intervals API''}
 
