@@ -15,6 +15,58 @@
 
 \subsection{References}
 
+\subsubsection{Caches}
+
+The speed of processors has grown to be much faster than main
+memory. Making all of memory nearly as fast as a processor would
+simply prove too expensive for most computers. Instead, designers make
+small amounts of memory, known as caches, operate nearly as fast as
+the processor. The main memory can then be slower and more
+affordable. The hardware knows how to move information in and out of
+caches as needed, thereby adding to the number of places where data is
+shuffled on its journey between memory and the processor cores. Caches
+are critical in helping overcome the mismatch between memory speed and
+processor speed.
+
+Virtually all computers use caches only for a temporary copy of data
+that should eventually reside in memory. Therefore, the function of a
+memory subsystem is to move data needed as input by each processing
+core to caches near that processor core, and to move data produced by
+the processing cores out to main memory. As data is read from memory
+into the caches, some data needs to be evicted from the cache. Cache
+designers work to make the data evicted be approximately the data
+least likely to be used again.
+
+Once a processor accesses data, it is best to exhaust the program’s
+use of it while it is still in the cache. Continued usage will hold it
+in the cache, whereas prolonged inactivity will likely lead to its
+eviction and future usage will need to do a more expensive (slow)
+access to get the data. Furthermore, every time an additional thread
+runs on a processor core, data is likely to be discarded from the
+cache.
+
+A subtler cost is cache cooling. Processors keep recently accessed
+data in cache memory, which is very fast, but also relatively small
+compared to main memory. When the processor runs out of cache memory,
+it has to evict items from cache and put them back into main
+memory. Typically, it chooses the least recently-used items in the
+cache. (The reality of set-associative caches is a bit more
+complicated, but this is not a cache primer.)
+
+When a logical thread gets its time slice, as it references a piece of
+data for the first time, this data is pulled into cache, taking
+hundreds of cycles. If it is referenced frequently enough not to be
+evicted, each subsequent reference will find it in cache, and take
+only a few cycles. Such data is called hot in cache.
+
+Time slicing undoes this because if Thread A finishes its time slice,
+and subsequently Thread B runs on the same physical thread, B will
+tend to evict data that was hot in cache for A, unless both threads
+need the data. When Thread A gets its next time slice, it will need to
+reload evicted data, at the cost of hundreds of cycles for each cache
+miss. Or worse yet, the next time slice for Thread A may be on a
+different physical thread that has a different cache altogether.
+
 \subsubsection{Brief announcement: parallel depth first vs. work
   stealing schedulers on CMP architectures \cite{Liaskovitis2006}}
 

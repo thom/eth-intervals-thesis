@@ -5,7 +5,9 @@
 \chapter{Approach}
 \label{chap:locality-approach}
 
-\todo[inline]{Finish chapter ``Approach''}
+Before starting with the implementation of the locality-aware
+intervals scheduler, we first check if our hypothesis is true for
+threads.
 
 \begin{itemize}
 \item Implemented locality-aware benchmarks using threads
@@ -14,37 +16,7 @@
 \item Rewrote intervals thread pool supporting locality
 \end{itemize}
 
-\section{Locality-Aware Benchmarks}
-
-We evaluate the locality-aware implementation of \emph{intervals} on a
-variety of benchmarks. To reduce the impact of JVM overheads in the
-evaluation, including JIT compilation and garbage collection, the
-execution time reported is the average of the three best benchmark
-iterations from three separate VM incocations. Each VM invocation
-performs 10 benchmark iterations.
-
-The JVM used on both machines described in appendix
-\ref{chap:experimental-setup} is Sun Hotspot JDK 1.6. In both cases,
-the JVM was invoked with the following parameters:
-
-\begin{verbatim}
-    -server -Xmx4096M -Xms4096M -Xss8m -XX:+UseNUMA
-\end{verbatim}
-
-The following benchmarks were first written to use threads and then
-ported over to use \emph{intervals}.
-
-\subsection*{Cache-Stress Test}
-
-\todo[inline]{Describe benchmark ``Cache-Stress Test''}
-
-\subsection*{Merge Sort}
-
-\todo[inline]{Describe benchmark ``Merge Sort''}
-
-\subsection*{Block Matrix Multiplication}
-
-\todo[inline]{Describe benchmark ``Block Matrix Multiplication''}
+\todo{Finish chapter ``Approach''}
 
 
 %%% Local Variables: 

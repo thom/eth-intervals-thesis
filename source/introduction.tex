@@ -58,17 +58,17 @@ execution itself begins in a child of the root interval.
 
 The conceptual model for intervals consists of points in time ordered
 by a \emph{happens before} relation. In the model, an interval
-\lstinline|i| consists of a pair of points -- \lstinline|i.start| and
-\lstinline|i.end| -- called the start and end point. The start point
+\lstinline!i! consists of a pair of points -- \lstinline!i.start! and
+\lstinline!i.end! -- called the start and end point. The start point
 represents the moment when the interval begins execution. The end
 point represents the moment when the interval's task is
 completed. Programmers may introduce arbitrary ordering constraints by
 adding \emph{happens before} edges between the start or end points of
-different intervals. An edge \lstinline|p1 $\rightarrow$ p2| indicates
-that the point \lstinline|p1| must occur before the point
-\lstinline|p2|. It also indicates that any memory writes which
-\emph{happen before} \lstinline|p1| must be visible to
-\lstinline|p2|. This is in line with the Java Memory Model
+different intervals. An edge \lstinline!p1 $\rightarrow$ p2! indicates
+that the point \lstinline!p1! must occur before the point
+\lstinline!p2!. It also indicates that any memory writes which
+\emph{happen before} \lstinline!p1! must be visible to
+\lstinline!p2!. This is in line with the Java Memory Model
 \cite{Manson2005}, and the semantics of volatile fields and
 synchronized sections.
 
@@ -76,9 +76,9 @@ synchronized sections.
   \centering
   \includegraphics[width=0.96\textwidth]{introduction/interval-graph}
   \caption[Example interval graph]{Example interval graph: Showing an
-    interval and its subintervals \lstinline|a|, \lstinline|b|,
-    \lstinline|c| and \lstinline|d|.}
-  \label{fig:interval-graph}
+    interval and its subintervals \lstinline!a!, \lstinline!b!,
+    \lstinline!c! and \lstinline!d!.}
+  \label{fig:introduction-interval-graph}
 \end{figure}
 
 An interval can be associated with one or more locks. The intervals
@@ -86,37 +86,37 @@ runtime will automatically acquire those locks before the interval's
 start point occurs and release them after its end point has occurred.
 
 When an interval executes, it begins by invoking the sequential
-\lstinline|run()| method. \lstinline|run()| may either perform the
+\lstinline!run()! method. \lstinline!run()! may either perform the
 task directly or create a number of subintervals to achieve the task
 in parallel.
 
 The interval model can be depicted as a graph, as shown in Figure
-\ref{fig:interval-graph}. The graph contains a single interval with
-four subintervals, \lstinline|a|, \lstinline|b|, \lstinline|c| and
-\lstinline|d|. The start and end points of each interval are
+\ref{fig:introduction-interval-graph}. The graph contains a single interval with
+four subintervals, \lstinline!a!, \lstinline!b!, \lstinline!c! and
+\lstinline!d!. The start and end points of each interval are
 represented as opaque circles. The subintervals of an interval are
 enclosed in a dashed box which is omitted for leaf intervals.
 
 The dashed edges connecting different points indicate user-specified
 additions to the \emph{happens before} relation. For example, the end
-of \lstinline|a| \emph{happens before} the start of \lstinline|b| and
-\lstinline|c| and the ends of \lstinline|b| and \lstinline|c| both
-\emph{happen before} the start of \lstinline|d|.
+of \lstinline!a! \emph{happens before} the start of \lstinline!b! and
+\lstinline!c! and the ends of \lstinline!b! and \lstinline!c! both
+\emph{happen before} the start of \lstinline!d!.
 
 \subsection{Java API}
 \label{sec:intro-intervals-java-api}
 
 In the Java API, intervals are represented as instances of the
-abstract class \lstinline|Interval| (Listing
-\ref{lst:interval-class}). \lstinline|Interval| provides final fields
+abstract class \lstinline!Interval! (Listing
+\ref{lst:introduction-interval-class}). \lstinline!Interval! provides final fields
 to access the interval's start point, end point, and parent, along
-with an abstract \lstinline|run()| method which must be redefined in a
+with an abstract \lstinline!run()! method which must be redefined in a
 concrete subtype.
 
 \begin{lstlisting}[
   style=Float, 
   caption={[\lstinline{Interval} class] \lstinline{Interval}: Serves as the base class for all intervals},
-  label=lst:interval-class
+  label=lst:introduction-interval-class
 ]
 public abstract class Interval {
   public final Interval parent;
@@ -127,13 +127,13 @@ public abstract class Interval {
 }
 \end{lstlisting}
 
-Listing \ref{lst:interval-graph} shows the code used to construct the
-graph shown in Figure \ref{fig:interval-graph}.
+Listing \ref{lst:introduction-interval-graph} shows the code used to construct the
+graph shown in Figure \ref{fig:introduction-interval-graph}.
 
 \begin{lstlisting}[
   style=FloatNumbers, 
-  caption={[Intervals Java API example] Code to produce the sample interval graph shown in Figure \ref{fig:interval-graph}},
-  label=lst:interval-graph
+  caption={[Intervals Java API example] Code to produce the sample interval graph shown in Figure \ref{fig:introduction-interval-graph}},
+  label=lst:introduction-interval-graph
 ]
 public class ExampleInterval extends Interval {
   public ExampleInterval(Dependency dep, String name) {
@@ -145,20 +145,20 @@ public class ExampleInterval extends Interval {
   }
   
   public static void main(String[] args) {
-    Intervals.inline(new VoidInlineTask() { //*\label{lst:interval-graph-inline-start}
+    Intervals.inline(new VoidInlineTask() { //*\label{lst:introduction-interval-graph-inline-start}
       public void run(Interval start) {
-        Interval a = new ExampleInterval(start, "a"); //*\label{lst:interval-graph-new-start}
+        Interval a = new ExampleInterval(start, "a"); //*\label{lst:introduction-interval-graph-new-start}
         Interval b = new ExampleInterval(start, "b");
         Interval c = new ExampleInterval(start, "c");
-        Interval d = new ExampleInterval(start, "d"); //*\label{lst:interval-graph-new-end}
+        Interval d = new ExampleInterval(start, "d"); //*\label{lst:introduction-interval-graph-new-end}
         
-        Intervals.addHb(a, b); //*\label{lst:interval-graph-add-hb}
+        Intervals.addHb(a, b); //*\label{lst:introduction-interval-graph-add-hb}
         Intervals.addHb(a, c);
         Intervals.addHb(b, d);
         Intervals.addHb(c, d);
-        Intervals.schedule(); //*\label{lst:interval-graph-schedule}
+        Intervals.schedule(); //*\label{lst:introduction-interval-graph-schedule}
       }
-    }); //*\label{lst:interval-graph-inline-end}
+    }); //*\label{lst:introduction-interval-graph-inline-end}
   }
 }
 \end{lstlisting}
@@ -171,32 +171,32 @@ of the root interval, for example by using an inline interval. Inline
 intervals execute a task during the current interval and do not return
 until the task has completed.
 
-Lines \ref{lst:interval-graph-inline-start} --
-\ref{lst:interval-graph-inline-end} create an inline interval by
-providing an anonymous task class redefining its \lstinline|run()|
-method. The interval has four subintervals, \lstinline|a|,
-\lstinline|b|, \lstinline|c| and \lstinline|d|. They are created on
-Lines \ref{lst:interval-graph-new-start} --
-\ref{lst:interval-graph-new-end} and are normal, non-blocking
+Lines \ref{lst:introduction-interval-graph-inline-start} --
+\ref{lst:introduction-interval-graph-inline-end} create an inline interval by
+providing an anonymous task class redefining its \lstinline!run()!
+method. The interval has four subintervals, \lstinline!a!,
+\lstinline!b!, \lstinline!c! and \lstinline!d!. They are created on
+Lines \ref{lst:introduction-interval-graph-new-start} --
+\ref{lst:introduction-interval-graph-new-end} and are normal, non-blocking
 intervals.
 
 \subsubsection{Scheduling Intervals}
 \label{sec:intro-intervals-scheduling-intervals}
 
 Newly constructed intervals become eligible for execution once the
-\lstinline|schedule()| method is invoked, as shown on Line
-\ref{lst:interval-graph-schedule} in Listing
-\ref{lst:interval-graph}. This gives the user the opportunity to
+\lstinline!schedule()! method is invoked, as shown on Line
+\ref{lst:introduction-interval-graph-schedule} in Listing
+\ref{lst:introduction-interval-graph}. This gives the user the opportunity to
 construct any required dependencies or perform other
 initialization. For example, adding the edge
-\lstinline|a $\rightarrow$ b| on Line \ref{lst:interval-graph-add-hb}
-would be unsafe if \lstinline|b| could begin immediately, as it would
-be possible that \lstinline|b.start| had already occurred before the
-call to \lstinline|addHb()| could add the new dependency.
+\lstinline!a $\rightarrow$ b! on Line \ref{lst:introduction-interval-graph-add-hb}
+would be unsafe if \lstinline!b! could begin immediately, as it would
+be possible that \lstinline!b.start! had already occurred before the
+call to \lstinline!addHb()! could add the new dependency.
 
-Explicit calls to \lstinline|schedule()| are unusual as the runtime
-automatically invokes \lstinline|schedule()| when the
-\lstinline|run()| method of an interval returns.
+Explicit calls to \lstinline!schedule()! are unusual as the runtime
+automatically invokes \lstinline!schedule()! when the
+\lstinline!run()! method of an interval returns.
 
 
 \section{Work-Stealing Scheduler}

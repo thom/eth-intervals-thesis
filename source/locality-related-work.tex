@@ -33,6 +33,13 @@
   \cite{Saraswat2010}
 \end{itemize}
 
+Threading Building Blocks is designed with caches in mind and works to
+limit the unnecessary movement of tasks and data. When a task has to
+be passed to a different processor core for execution, Threading
+Building Blocks moves the task with the least likelihood of having
+data in the cache for the processor core from which the task is
+stolen.
+
 \todo{Finish chapter ``Related Work''}
 
 %%% Local Variables: 

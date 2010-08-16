@@ -8,15 +8,69 @@
 In this chapter we describe our new implementation of the intervals
 scheduler. It is designed for locality-aware scheduling using locality
 hints provided by the programmer. Instead of using work-stealing
-workers our scheduler design uses \emph{Work-Stealing Places}. Section
+workers our scheduler design uses \emph{Work-Stealing Places}. 
+
+The API to use locality-aware intervals is introduced in Section
+\ref{sec:locality-implementation-locality-aware-intervals-api}. Section
 \ref{sec:locality-implementation-work-stealing-places} presents the
 idea and implementation of work-stealing places. Each worker is
 implemented as a separate Java thread. For the locality-aware
 scheduler we need to bind every worker thread to a separate core. In
 Section \ref{sec:locality-implementation-core-affinity} we show how we
-can set the core affinity of Java threads. The API to use
-locality-aware intervals is introduced in Section
-\ref{sec:locality-implementation-intervals-api}.
+can set the core affinity of Java threads.
+
+
+\section{Locality-Aware Intervals API}
+\label{sec:locality-implementation-locality-aware-intervals-api}
+
+Intervals are represented as subtypes of the abstract class
+\lstinline!Interval!. To make an interval locality-aware, the
+programmer has to specify the interval's locality when creating it. We
+extend the abstract \lstinline!Interval! class to support locality
+hints:
+
+\lstinputlisting[style=Skip, 
+  caption={Locality-aware \lstinline!Interval! class},
+  label=lst:locality-implementation-places]{
+    ../listings/locality-implementation/Interval.java
+}
+
+Locality hints are provided in the form of instances of the
+\lstinline!PlaceID! class. This specifies which
+place the interval should be executed on. When \lstinline!null! is
+specified, the scheduler assigns the interval to a place in a
+round-robin fashion.
+
+The \lstinline!PlaceID! class (Listing
+\ref{lst:locality-implementation-place-id}) encapsulates an integer ID
+and name. We could also use an integer for places directly, but
+decided to use a class due to type safety.
+
+\lstinputlisting[style=Float, 
+  caption={\lstinline!PlaceID! class},
+  label=lst:locality-implementation-place-id]{
+    ../listings/locality-implementation/PlaceID.java
+}
+
+Note that the \lstinline!PlaceID! is an abstract class since we do not
+want the programmers to create their own places. To get a
+\lstinline!PlaceID!  instance, the programmer has to use the
+\lstinline!Config! class (Listing
+\ref{lst:locality-implementation-config}).
+
+\lstinputlisting[style=Float, 
+  caption={\lstinline!Config! class},
+  label=lst:locality-implementation-config]{
+    ../listings/locality-implementation/Config.java
+}
+
+We introduce the \lstinline!Config! class to simplify switching to
+another machine as the current scheduler implementation cannot
+discover places automatically. \lstinline!Config! features an instance
+of the \lstinline!Places! class which we describe in Section
+\ref{sec:locality-implementation-work-stealing-places}. Programmers
+can use it to get places,
+e.g. \lstinline!Config.places.getPlaceID(0)!.
 
 
 \section{Work-Stealing Places}
@@ -44,7 +98,76 @@ the work-stealing places used in our Intel Nehalem testing machine
   \label{fig:locality-implementation-work-stealing-places}
 \end{figure}
 
-Our experiments with work-stealing queues showed that 
+Other locality-aware work-stealing schedulers use a more complex
+design. \textcite{Acar2002} for example provide each worker in
+addition to a deque with a mailbox. A mailbox is a FIFO queue of
+pointers to intervals that have affinity for the worker. So when
+creating an interval, a worker will push it onto both the deque, as in
+normal work-stealing, and also onto the tail of the mailbox of the
+worker that the interval has affinity for. Now a worker will first try
+to obtain work from its mailbox before attempting to steal. Because
+intervals can appear twice, once in a mailbox and once on a deque,
+they have to be idempotent (Section
+\ref{sec:queues-implementation-idempotent-ws-deque}).
+
+However, we have decided to simplify our scheduler implementation by
+using a shared deque per \emph{Work-Stealing Place}. We believe that
+this would not impact scalability as long as the places are not too
+large, because we could show in Section
+\ref{sec:queues-performance-single-shared-queue} that up to 8 workers
+there is no significant difference between using a separate deque for
+each worker or a shared deque per place.
+
+\subsection{Places Implementation}
+\label{sec:locality-implementation-work-stealing-places-implementation}
+
+\todo{Finish section}
+
+\lstinputlisting[style=FloatNumbers, 
+  caption={TODO},
+  label=lst:locality-implementation-places]{
+    ../listings/locality-implementation/Places.java
+}
+
+\lstinputlisting[style=FloatNumbers, 
+  caption={TODO},
+  label=lst:locality-implementation-marvin-places]{
+    ../listings/locality-implementation/MarvinPlaces.java
+}
+
+\lstinputlisting[style=FloatNumbers, 
+  caption={TODO},
+  label=lst:locality-implementation-mafushi-places]{
+    ../listings/locality-implementation/MafushiPlaces.java
+}
+
+\subsection{Scheduling}
+\label{sec:locality-implementation-work-stealing-places-scheduling}
+
+\todo{Finish section}
+
+\begin{lstlisting}[style=FloatNumbers,
+  caption={TODO},
+  label=lst:locality-implementation-submit]
+void submit(WorkItem item) {
+  Worker worker;
+  PlaceID placeID = item.getPlaceID();
+    
+  if (placeID == null) {
+    worker = currentWorker.get();
+    if (worker != null) {
+      worker.place.enqueue(item);
+    }
+    else {
+      // Round robin assignment
+      places[nextPlace].enqueue(item);
+      nextPlace = (nextPlace + 1) % numberOfPlaces;
+    }
+  } else {
+    places[placeID.id].enqueue(item);
+  }
+}
+\end{lstlisting}
 
 \todo{Finish section ``Work-Stealing Places''}
 
@@ -174,6 +297,40 @@ mask of the thread thread in the buffer pointed to by
     ../listings/locality-implementation/ch_ethz_hwloc_Affinity_get.c 
 }
 
+\subsection{Worker}
+\label{sec:locality-implementation-core-affinity-worker}
+
+\todo{Finish section}
+
+\begin{lstlisting}[style=FloatNumbers,
+  caption={TODO},
+  label=lst:locality-implementation-worker]
+class Worker extends Thread {
+  final int id;
+  
+  Worker(int id, Place place) {
+    super(place.getName() + "-Worker-" + id);
+    this.id = id;
+  }
+
+  public void run() {
+    try {
+      Affinity.set(id);
+    } catch (SetAffinityException e) {
+      e.printStackTrace();
+    }
+    
+    currentWorker.set(this);
+    
+    while (true) {
+      doWork(true);
+    }
+  }
+
+  // ...
+}
+\end{lstlisting}
+
 \subsection{Restrictions}
 \label{sec:locality-implementation-core-affinity-restrictions}
 
@@ -209,149 +366,12 @@ region local to the allocating thread.
 On Linux, the implementation is based on \cite{Kleen2004}. It can be
 enabled by using the option \verb!-XX:+UseNUMA!.
 
-
-\section{Intervals API}
-\label{sec:locality-implementation-intervals-api}
-
-Listings!!!
-
-\lstinputlisting[style=FloatNumbers, 
-  caption={TODO},
-  label=lst:locality-implementation-places]{
-    ../listings/locality-implementation/Places.java
-}
-
-\lstinputlisting[style=FloatNumbers, 
-  caption={TODO},
-  label=lst:locality-implementation-place-id]{
-    ../listings/locality-implementation/PlaceID.java
-}
-
-\lstinputlisting[style=FloatNumbers, 
-  caption={TODO},
-  label=lst:locality-implementation-marvin-places]{
-    ../listings/locality-implementation/MarvinPlaces.java
-}
-
-\lstinputlisting[style=FloatNumbers, 
-  caption={TODO},
-  label=lst:locality-implementation-mafushi-places]{
-    ../listings/locality-implementation/MafushiPlaces.java
-}
-
-\todo{Finish section ``Intervals API''}
-
-
-\section{References}
-\label{sec:locality-implementation-references}
+\subsubsection{Contention With Other Threads}
 
 The affinity of the workers is set such that they execute on different
 cores. While this eliminates interference between the worker threads,
 they will nevertheless share their assigned core with other processes
 in the system, subject to standard Linux scheduling policy.
-
-\subsection*{Intel threading building blocks: outfitting C++ for
-  multi-core processor parallelism \cite{Reinders2007}}
-
-\subsubsection{Caches}
-
-The speed of processors has grown to be much faster than main
-memory. Making all of memory nearly as fast as a processor would
-simply prove too expensive for most computers. Instead, designers make
-small amounts of memory, known as caches, operate nearly as fast as
-the processor. The main memory can then be slower and more
-affordable. The hardware knows how to move information in and out of
-caches as needed, thereby adding to the number of places where data is
-shuffled on its journey between memory and the processor cores. Caches
-are critical in helping overcome the mismatch between memory speed and
-processor speed.
-
-Virtually all computers use caches only for a temporary copy of data
-that should eventually reside in memory. Therefore, the function of a
-memory subsystem is to move data needed as input by each processing
-core to caches near that processor core, and to move data produced by
-the processing cores out to main memory. As data is read from memory
-into the caches, some data needs to be evicted from the cache. Cache
-designers work to make the data evicted be approximately the data
-least likely to be used again.
-
-Once a processor accesses data, it is best to exhaust the program’s
-use of it while it is still in the cache. Continued usage will hold it
-in the cache, whereas prolonged inactivity will likely lead to its
-eviction and future usage will need to do a more expensive (slow)
-access to get the data. Furthermore, every time an additional thread
-runs on a processor core, data is likely to be discarded from the
-cache.
-
-Threading Building Blocks is designed with caches in mind and works to
-limit the unnecessary movement of tasks and data. When a task has to
-be passed to a different processor core for execution, Threading
-Building Blocks moves the task with the least likelihood of having
-data in the cache for the processor core from which the task is
-stolen.
-
-It is interesting to note that parallel Quicksort (Chapter 11) is an
-example in which caches beat maximum parallelism. Parallel Mergesort
-has more parallelism than parallel Quicksort. But parallel Mergesort
-is not an in-place sort, and thus has twice the cache footprint that
-parallel Quicksort does. Hence, Quicksort usually runs faster in
-practice.
-
-Keep data locality in mind when considering how to structure your
-program. Avoid using data regions sporadically when you can design the
-application to use a single set of data in focused chunks of
-time. This happens most naturally if you use data decomposition,
-especially at the higher levels in a program.
-
-\subsubsection{Costs of Time Slicing}
-
-Time slicing enables there to be more logical threads than physical
-threads. Each logical thread is serviced for a time slice—a short
-period of time defined by the operating system during which a thread
-can run before being preempted—by a physical thread. If a thread runs
-longer than a time slice, as most do, it relinquishes the physical
-thread until it gets another turn. This chapter details the costs
-incurred by time slicing.
-
-The most obvious cost is the time for context switching between
-logical threads. Each context switch requires that the processor save
-all its registers for the previous logical thread that it was
-executing, and load its registers with information for the next
-logical thread it runs.
-
-A subtler cost is cache cooling. Processors keep recently accessed
-data in cache memory, which is very fast, but also relatively small
-compared to main memory. When the processor runs out of cache memory,
-it has to evict items from cache and put them back into main
-memory. Typically, it chooses the least recently-used items in the
-cache. (The reality of set-associative caches is a bit more
-complicated, but this is not a cache primer.)
-
-When a logical thread gets its time slice, as it references a piece of
-data for the first time, this data is pulled into cache, taking
-hundreds of cycles. If it is referenced frequently enough not to be
-evicted, each subsequent reference will find it in cache, and take
-only a few cycles. Such data is called hot in cache.
-
-Time slicing undoes this because if Thread A finishes its time slice,
-and subsequently Thread B runs on the same physical thread, B will
-tend to evict data that was hot in cache for A, unless both threads
-need the data. When Thread A gets its next time slice, it will need to
-reload evicted data, at the cost of hundreds of cycles for each cache
-miss. Or worse yet, the next time slice for Thread A may be on a
-different physical thread that has a different cache altogether.
-
-Another cost is lock preemption. This happens if a thread acquires a
-lock on a resource and its time slice runs out before it releases the
-lock. No matter how short a time the thread intended to hold the lock,
-it is now going to hold it for at least as long as it takes for its
-next turn at a time slice to come up. Any other threads waiting on the
-lock either busy-wait pointlessly or lose the rest of their time
-slice. The effect is called convoying because the threads end up
-``bumper to bumper'' waiting for the preempted thread in front to resume
-driving.
-
-\todo{Finish chapter ``Implementation''}
 
 
 %%% Local Variables: 
