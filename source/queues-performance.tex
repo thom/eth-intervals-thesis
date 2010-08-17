@@ -111,7 +111,7 @@ significant difference in the runtime of the JGF benchmarks (Figure
 \ref{fig:queues-performance-deques}) on both machines we tested them
 on.
 
-The reason for this is, that the \emph{Work-Stealing Lazy Deque}
+The reason for this is that the \emph{Work-Stealing Lazy Deque}
 implementation is very efficient already. Using a lock in the
 \lstinline!steal()! method is of less impact than we thought it would
 be.
@@ -363,7 +363,7 @@ the machines we had to test them with (Appendix
 is no noticeable difference between the speedup of work-stealing and a
 global shared work queue when not using more than 8 cores. If this is
 the case, then the optimizations we did in our work-stealing queue
-implementations most likely wont have a significant effect either.
+implementations most likely will not have a significant effect either.
 
 To check this hypothesis, we rewrote the intervals scheduler to use a
 single shared work deque. The shared work deque is implemented with

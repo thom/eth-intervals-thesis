@@ -23,7 +23,7 @@ intervals must be made as fast as possible. In the non-blocking
 work-stealing algorithm,\footnote{Non-blocking -- in contrast to
   wait-free \cite{Herlihy1991} -- means that it is possible for a
   worker to starve while trying to steal from other
-  workers. Live-locks cannot occur as if one worker starves, then
+  workers. Live-locks cannot occur as if one worker starves then
   others must be making progress.} the deques are implemented with
 non-blocking synchronization \cite{Arora2001}. That is, instead of
 using mutual exclusion, it uses atomic synchronization primitives such
@@ -32,7 +32,7 @@ of intervals however uses mutual exclusion when trying to steal.
 
 Our hypothesis is that we can improve the performance of the intervals
 scheduler with non-blocking queues. Thus, as a separate effort, we
-design and explore alternative non-blocking queuesx.
+design and explore alternative non-blocking queues.
 
 \section{Overview}
 \label{sec:queues-intro-overview}

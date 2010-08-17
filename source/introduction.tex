@@ -63,9 +63,9 @@ by a \emph{happens before} relation. In the model, an interval
 represents the moment when the interval begins execution. The end
 point represents the moment when the interval's task is
 completed. Programmers may introduce arbitrary ordering constraints by
-adding \emph{happens before} edges between the start or end points of
-different intervals. An edge \lstinline!p1 $\rightarrow$ p2! indicates
-that the point \lstinline!p1! must occur before the point
+adding \emph{happens before} edges in between the start or end points
+of different intervals. An edge \lstinline!p1 $\rightarrow$ p2!
+indicates that the point \lstinline!p1! must occur before the point
 \lstinline!p2!. It also indicates that any memory writes which
 \emph{happen before} \lstinline!p1! must be visible to
 \lstinline!p2!. This is in line with the Java Memory Model

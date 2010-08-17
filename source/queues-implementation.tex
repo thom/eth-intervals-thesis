@@ -291,8 +291,8 @@ The \lstinline!compareAndSet()! in Line
 was lost: Checking of the ABA-prevention tag makes sure that since the
 reads in Lines
 \ref{lst:idempotent-work-stealing-deque-steal-read-anchor-1} --
-\ref{lst:idempotent-work-stealing-deque-steal-read-anchor-2} the deque
-owner has not overwritten the work item read in Line
+\ref{lst:idempotent-work-stealing-deque-steal-read-anchor-2} the
+deque's owner has not overwritten the work item read in Line
 \ref{lst:idempotent-work-stealing-deque-steal-read}. If the
 \lstinline!compareAndSet()! is successful, it updates the anchor with
 the incremented head and decremented size to indicate the stealing and
