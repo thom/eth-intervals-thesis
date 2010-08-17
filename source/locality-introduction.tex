@@ -86,7 +86,7 @@ Work Stealing (WS) is a popular greedy thread scheduling
 algorithm\footnote{In a greedy schedule, a ready job remains
   unscheduled only if all processors are already busy.} for programs,
 with proven theoretical properties with regards to memory and cache
-usage \cite{Blumofe1998a, Blumofe1999, Acar2002}. The policy maintains
+usage \cite{Blumofe1998, Blumofe1999, Acar2002}. The policy maintains
 a work queue for each processor (actually a double-ended queue which
 allows elements to be inserted on one end of the queue, the top, but
 taken from either end). When forking a new thread, this new thread is
@@ -103,11 +103,9 @@ by any one processor. However, WS is not designed for constructive
 cache sharing, because the processors tend to have disjoint working
 sets.
 
-\subsubsection{Work stealing: an annotated bibliography
-  \cite{Neill2001}}
+\subsubsection{Work stealing: an annotated bibliography}
 
-Affinity scheduling: \cite{Squillante1993}, \cite{Squillante2001},
-\cite{Acar2002}
+Affinity scheduling: \cite{Squillante1993}, \cite{Acar2002}
 
 In a shared-memory multiprocessor system, it may be more efficient to
 schedule a task on one processor than another. One reason for this is
@@ -133,9 +131,6 @@ possible. This outperforms a simple FIFO queue (good load balancing,
 bad locality) or a ``fixed processor'' model where each processor has
 its own queue and tasks are not shared (good locality, bad load
 balancing). No work stealing since pool of tasks is shared.
-
-\cite{Squillante2001} assumes a generic form of affinity in which the
-service rates are higher for jobs in a processor's own queue.
 
 \cite{Acar2002} presents a work-stealing algorithm that uses locality
 information, and thus outperforms the standard work-stealing algorithm
