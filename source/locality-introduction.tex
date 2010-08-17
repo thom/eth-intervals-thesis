@@ -157,22 +157,18 @@ such as hop count and routing play an important role.
 \section{Overview}
 \label{sec:locality-intro-overview}
 
-Chapter \ref{chap:queues-background} summarizes the properties of
-work-stealing queues and introduces the \emph{Work-Stealing Lazy
-  Deque}, the queue currently used by the intervals scheduler. Chapter
-\ref{chap:queues-implementation} describes the investigated queue
-implementations. None of the approaches we developed as part of this
-research yielded a queue that was improving work-stealing performance
-on the machines we had to test them with (Appendix
-\ref{sec:experimental-setup-marvin} and
-\ref{sec:experimental-setup-mafushi}). Possible reasons for this are
-given in the performance evaluation in Chapter
-\ref{chap:queues-performance}. Chapter
-\ref{chap:queues-conclusions-and-future-work} concludes and summarizes
-our findings and encountered problems in order to preserve this
-research for future reference.
-
-\todo{Finish section ``Overview''}
+Chapter \ref{chap:locality-approach} describes our approach in
+evaluating locality-aware scheduling. Chapter
+\ref{chap:locality-implementation} explains the locality-aware
+implementation of the intervals scheduler which uses locality hints
+provided by the programmer. The chapter presents the locality-aware
+intervals API, introduces \emph{Work-Stealing Places}, and shows how
+worker threads are bound to specific processing units, e.g. cores.  In
+Chapter \ref{chap:locality-evaluation} we describe the locality
+benchmarks and analyze their results. Chapter
+\ref{chap:locality-related-work} puts our research in the context of
+related work. In Chapter \ref{chap:locality-conclusions} we conclude
+and summarize our research, and give some ideas for future work.
 
 \todo{Finish chapter ``Introduction''}
 
