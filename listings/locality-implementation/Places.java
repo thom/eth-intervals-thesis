@@ -1,9 +1,9 @@
 public abstract class Places {
-	protected static class PlaceIDImpl extends PlaceID {
+	protected static class PlaceIDImpl extends PlaceID { //*\label{lst:locality-implementation-places-place-id-start}
 		public PlaceIDImpl(int id, String machine) {
 			super(id, machine);
 		}
-	}
+	} //*\label{lst:locality-implementation-places-place-id-stop}
 
 	public final String name;
 	public final int length;

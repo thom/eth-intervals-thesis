@@ -8,16 +8,18 @@
 In this chapter we describe our new implementation of the intervals
 scheduler. It is designed for locality-aware scheduling using locality
 hints provided by the programmer. Instead of using work-stealing
-workers our scheduler design uses \emph{Work-Stealing Places}. 
+workers, our scheduler groups workers into \emph{Work-Stealing
+  Places}.
 
-The API to use locality-aware intervals is introduced in Section
+The API of locality-aware intervals is introduced in Section
 \ref{sec:locality-implementation-locality-aware-intervals-api}. Section
 \ref{sec:locality-implementation-work-stealing-places} presents the
-idea and implementation of work-stealing places. Each worker is
-implemented as a separate Java thread. For the locality-aware
-scheduler we need to bind every worker thread to a separate core. In
-Section \ref{sec:locality-implementation-core-affinity} we show how we
-can set the core affinity of Java threads.
+idea and implementation of work-stealing places. It also describes the
+locality-aware scheduling policy. Our scheduler implements each worker
+as a separate Java thread. For the locality-aware scheduler we need to
+bind every worker thread to a separate core. In Section
+\ref{sec:locality-implementation-core-affinity} we show how we can set
+the core affinity of Java threads.
 
 
 \section{Locality-Aware Intervals API}
@@ -35,16 +37,25 @@ hints:
     ../listings/locality-implementation/Interval.java
 }
 
-Locality hints are provided in the form of instances of the
-\lstinline!PlaceID! class. This specifies which
-place the interval should be executed on. When \lstinline!null! is
-specified, the scheduler assigns the interval to a place in a
-round-robin fashion.
+Locality hints are provided in the form of \lstinline!PlaceID!
+objects. They specify which place the interval should be executed
+on. If the interval should be ignorant of its place, the programmer
+can provide \lstinline!null! when creating it. This makes the
+scheduler to assign the interval to a place in a round-robin fashion
+(Section \ref{sec:locality-implementation-locality-aware-scheduler}).
 
 The \lstinline!PlaceID! class (Listing
 \ref{lst:locality-implementation-place-id}) encapsulates an integer ID
-and name. We could also use an integer for places directly, but
-decided to use a class due to type safety.
+and name. We are using a class for the place ID instead of an integer
+due to type safety. 
+
+The number of places is fixed at the time an intervals program is
+launched: There is no construct to create a new place and we do not
+want programmers to create their own place IDs. Thus, the
+\lstinline!PlaceID!  class is abstract and programmers have to use the
+\lstinline!Config! class (Listing
+\ref{lst:locality-implementation-config}) to get a \lstinline!PlaceID!
+object.
 
 \lstinputlisting[style=Float, 
   caption={\lstinline!PlaceID! class},
@@ -52,25 +63,19 @@ decided to use a class due to type safety.
     ../listings/locality-implementation/PlaceID.java
 }
 
-Note that the \lstinline!PlaceID! is an abstract class since we do not
-want the programmers to create their own places. To get a
-\lstinline!PlaceID!  instance, the programmer has to use the
-\lstinline!Config! class (Listing
-\ref{lst:locality-implementation-config}).
+We introduce the \lstinline!Config! class to simplify switching to
+another machine as the current scheduler implementation cannot
+discover places automatically. \lstinline!Config! features an instance
+of the \lstinline!Places! class which is described in Section
+\ref{sec:locality-implementation-work-stealing-places}. Programmers
+can use it to get places,
+e.g. \lstinline!Config.places.getPlaceID(0)!.
 
 \lstinputlisting[style=Float, 
   caption={\lstinline!Config! class},
   label=lst:locality-implementation-config]{
     ../listings/locality-implementation/Config.java
 }
-
-We introduce the \lstinline!Config! class to simplify switching to
-another machine as the current scheduler implementation cannot
-discover places automatically. \lstinline!Config! features an instance
-of the \lstinline!Places! class which we describe in Section
-\ref{sec:locality-implementation-work-stealing-places}. Programmers
-can use it to get places,
-e.g. \lstinline!Config.places.getPlaceID(0)!.
 
 
 \section{Work-Stealing Places}
@@ -79,13 +84,12 @@ e.g. \lstinline!Config.places.getPlaceID(0)!.
 A work-stealing scheduler employs a fixed number of threads called
 workers. In traditional work-stealing scheduler designs, each worker
 has a local double-ended queue, or deque, to maintain its own pool of
-ready tasks from which it obtains work. We use so-called
-\emph{Work-Stealing Places} instead. Each work-stealing place has a
-fixed number of workers and a local deque to maintain ready tasks. The
-workers of a place share its local deque from which they obtain
-work. When a worker finds that its place's pool is empty, it becomes a
-thief and steals a task from the pool of a victim place chosen at
-random.
+ready tasks from which it obtains work. We use \emph{Work-Stealing
+  Places} instead. Each work-stealing place has a fixed number of
+workers and a local deque to maintain ready tasks. The workers of a
+place share its local deque from which they obtain work. When a worker
+finds that its place's pool is empty, it becomes a thief and steals a
+task from the pool of a victim place chosen at random.
 
 Figure \ref{fig:locality-implementation-work-stealing-places} shows
 the work-stealing places used in our Intel Nehalem testing machine
@@ -121,55 +125,73 @@ each worker or a shared deque per place.
 \subsection{Places Implementation}
 \label{sec:locality-implementation-work-stealing-places-implementation}
 
-\todo{Finish section}
+Places are virtual: The mapping of physical units to places is
+performed by a concrete implementation of the abstract
+\lstinline!Places! class (Listing
+\ref{lst:locality-implementation-places}).
 
 \lstinputlisting[style=FloatNumbers, 
-  caption={TODO},
+  caption={Abstract \lstinline!Places! class},
   label=lst:locality-implementation-places]{
     ../listings/locality-implementation/Places.java
 }
 
-\lstinputlisting[style=FloatNumbers, 
-  caption={TODO},
-  label=lst:locality-implementation-marvin-places]{
-    ../listings/locality-implementation/MarvinPlaces.java
-}
+The abstract \lstinline!Places! class provides a concrete
+implementation of the \lstinline!PlaceID! class (Lines
+\ref{lst:locality-implementation-places-place-id-start} --
+\ref{lst:locality-implementation-places-place-id-stop}) to its
+subclasses. 
+
+\emph{Work-Stealing Places} have a couple of public fields and
+methods. \lstinline!name! is the name of the place, \lstinline!length!
+contains the number of places and \lstinline!unitsLength! saves the
+number of overall processing units the machine has. With
+\lstinline!getPlaceID()!  we can get a certain place
+ID. \lstinline!get()! returns the IDs of the physical units belonging
+to a certain place. By calling \lstinline!getUnit()! with the logical
+unit ID, we get the physical unit ID.
+
+An example of a concrete place mapping is given in Listing
+\ref{lst:locality-implementation-mafushi-places}. The class
+\lstinline!NehalemPlaces! defines the places for our Intel Nehalem
+test machine according to its memory hierarchy. As Figure
+\ref{fig:locality-implemenation-work-stealing-places-mafushi} depicts
+this system includes two processors with four cores each. While every
+core has its separate level 1 and level 2 caches, the per-processor 8
+MB level 3 cache is shared between all cores of the same processor.
 
 \lstinputlisting[style=FloatNumbers, 
-  caption={TODO},
+  caption={Places configuration for Intel Nehalem in a two-processor configuration},
   label=lst:locality-implementation-mafushi-places]{
-    ../listings/locality-implementation/MafushiPlaces.java
+    ../listings/locality-implementation/NehalemPlaces.java
 }
 
-\subsection{Scheduling}
+We define a place for each processor (Lines
+\ref{lst:locality-implementation-mafushi-place-ids-start} --
+\ref{lst:locality-implementation-mafushi-place-ids-stop}). Place 0
+consists of the physical units 0, 2, 4, and 6 (Line
+\ref{lst:locality-implementation-mafushi-place-0}) and the physical
+units 1, 3, 5, 7 belong to place 1 (Line
+\ref{lst:locality-implementation-mafushi-place-1}). Line
+\ref{lst:locality-implementation-mafushi-places-units} defines the
+mapping of the virtual units to the physical processing units.
+
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=0.5\textwidth]{experimental-setup/mafushi}
+  \caption[Intel Nehalem in a two-processor configuration]{Intel
+    Nehalem in a two-processor configuration}
+  \label{fig:locality-implemenation-work-stealing-places-mafushi}
+\end{figure}
+
+\subsection{Scheduling Policy}
 \label{sec:locality-implementation-work-stealing-places-scheduling}
 
-\todo{Finish section}
-
-\begin{lstlisting}[style=FloatNumbers,
-  caption={TODO},
-  label=lst:locality-implementation-submit]
-void submit(WorkItem item) {
-  Worker worker;
-  PlaceID placeID = item.getPlaceID();
-    
-  if (placeID == null) {
-    worker = currentWorker.get();
-    if (worker != null) {
-      worker.place.enqueue(item);
-    }
-    else {
-      // Round robin assignment
-      places[nextPlace].enqueue(item);
-      nextPlace = (nextPlace + 1) % numberOfPlaces;
-    }
-  } else {
-    places[placeID.id].enqueue(item);
-  }
-}
-\end{lstlisting}
-
-\todo{Finish section ``Work-Stealing Places''}
+When an interval is ready to run, we first get its place ID. If the place ID is
+\lstinline!null!, i.e. the interval is locality-ignorant, we either
+enqueue it at the place of the currently active worker or add
+it at a place in a round-robin fashion. If the interval is
+locality-aware, we enqueue it at the specified place.
 
 
 \section{Setting Core Affinity of Worker Threads}
@@ -214,13 +236,12 @@ To bind the workers to a specific core, we wrote a small JNI library
 API. The method \lstinline!set(int physicalUnit)!  (Line
 \ref{lst:locality-implementation-core-affinity-set-unit}) is used to
 bind the current thread to a physical unit. With
-\lstinline!set(int[] physicalUnits)! the current thread can be bound
-to several physical units, for example to a node in a NUMA system
-(Line \ref{lst:locality-implementation-core-affinity-set-node}). For
-debugging purposes we also implemented the method \lstinline!get()!
-which returns a boolean array whose elements are true if the current
-thread has an affinity set to the corresponding physical unit (Line
-\ref{lst:locality-implementation-core-affinity-get}).
+\lstinline!set(int[]physicalUnits)! the current thread can be bound to
+several physical units, for example to a node in a NUMA system (Line
+\ref{lst:locality-implementation-core-affinity-set-node}). The workers
+of the intervals scheduler use \lstinline!set(int physicalUnit)! in
+their \lstinline!run()! method to set the affinity for a specific
+physical unit.
 
 \lstinputlisting[style=FloatNumbers,
   caption={\lstinline{Affinity} class with interface for the native methods}, 
@@ -230,14 +251,11 @@ thread has an affinity set to the corresponding physical unit (Line
 
 Listing \ref{lst:locality-implementation-core-affinity-jni-header}
 contains the native method declarations which are implemented in
-Listing \ref{lst:locality-implementation-core-affinity-jni-set} and
-\ref{lst:locality-implementation-core-affinity-jni-get}. Line
+Listing \ref{lst:locality-implementation-core-affinity-jni-set}. Line
 \ref{lst:locality-implementation-core-affinity-jni-h-set-unit}
-declares \lstinline!set(int physicalUnit)!. On Line
+declares \lstinline!set(int physicalUnit)! and on Line
 \ref{lst:locality-implementation-core-affinity-jni-h-set-node} we
-declare the method \lstinline!set(int[] physicalUnits)! and
-\lstinline!get()! is declared on Line
-\ref{lst:locality-implementation-core-affinity-jni-h-get}.
+declare the method \lstinline!set(int[] physicalUnits)!.
 
 \lstinputlisting[style=FloatNumbersC, 
   caption={\lstinline{Affinity} class: JNI C header}, 
@@ -279,58 +297,6 @@ migrated to one of those CPUs. If there is an error,
 and we throw an exception (Line
 \ref{lst:locality-implementation-core-affinity-jni-set-impl-set-error}).
 
-Listing \ref{lst:locality-implementation-core-affinity-jni-get} shows
-the implementation for getting the affinity of a thread. This method
-is mainly used for debugging purposes. We use
-\lstinline!pthread_self()! (Line
-\ref{lst:locality-implementation-core-affinity-jni-get-impl-pthread-self})
-to get the thread ID and then call function
-\lstinline!pthread_getaffinity_np()!  (Line
-\ref{lst:locality-implementation-core-affinity-jni-get-impl-get}). The
-\lstinline!pthread_getaffinity_np()! function returns the CPU affinity
-mask of the thread thread in the buffer pointed to by
-\lstinline!cpuset!.
-
-\lstinputlisting[style=FloatNumbersC, 
-  caption={\lstinline{Affinity} class: JNI C implementation to get the affinity},
-  label=lst:locality-implementation-core-affinity-jni-get]{
-    ../listings/locality-implementation/ch_ethz_hwloc_Affinity_get.c 
-}
-
-\subsection{Worker}
-\label{sec:locality-implementation-core-affinity-worker}
-
-\todo{Finish section}
-
-\begin{lstlisting}[style=FloatNumbers,
-  caption={TODO},
-  label=lst:locality-implementation-worker]
-class Worker extends Thread {
-  final int id;
-  
-  Worker(int id, Place place) {
-    super(place.getName() + "-Worker-" + id);
-    this.id = id;
-  }
-
-  public void run() {
-    try {
-      Affinity.set(id);
-    } catch (SetAffinityException e) {
-      e.printStackTrace();
-    }
-    
-    currentWorker.set(this);
-    
-    while (true) {
-      doWork(true);
-    }
-  }
-
-  // ...
-}
-\end{lstlisting}
-
 \subsection{Restrictions}
 \label{sec:locality-implementation-core-affinity-restrictions}
 
@@ -365,13 +331,6 @@ region local to the allocating thread.
 
 On Linux, the implementation is based on \cite{Kleen2004}. It can be
 enabled by using the option \verb!-XX:+UseNUMA!.
-
-\subsubsection{Contention With Other Threads}
-
-The affinity of the workers is set such that they execute on different
-cores. While this eliminates interference between the worker threads,
-they will nevertheless share their assigned core with other processes
-in the system, subject to standard Linux scheduling policy.
 
 
 %%% Local Variables: 

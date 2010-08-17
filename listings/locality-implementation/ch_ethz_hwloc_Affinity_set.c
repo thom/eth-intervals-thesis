@@ -41,6 +41,7 @@ void set_affinity(JNIEnv *env, const cpu_set_t *cpuset) {  //*\label{lst:localit
 
 	s = pthread_setaffinity_np(thread, sizeof(cpu_set_t), //*\label{lst:locality-implementation-core-affinity-jni-set-impl-set}
 			cpuset);
+
 	if (s != 0) { //*\label{lst:locality-implementation-core-affinity-jni-set-impl-set-error}
 		(*env)->ThrowNew(env, (*env)->FindClass(env,
 				"ch/ethz/hwloc/SetAffinityException"), 
