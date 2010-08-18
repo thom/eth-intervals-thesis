@@ -28,49 +28,45 @@ conditions.
 Intervals are a higher-level alternative that make parallel
 programming safer while maintaining the flexibility and efficiency of
 threads. When using intervals, programmers create lightweight tasks
-and order them using explicit \emph{happens before} relations
-\cite{Lamport1978}. Programmers need not specify when a thread should
-block or acquire a lock. Instead they specify when a task should
-execute relative to other tasks, and what locks it should hold when it
-executes. The details of making this schedule pass are left to the
-runtime system.
+and order them using \emph{happens before} relations
+\cite{Lamport1978}. Programmers need not specify when tasks should
+block or acquire a lock. Instead they define when a task should
+execute in relation to other tasks, and what locks it should hold
+during execution. It is the duty of the runtime system to make this
+schedule pass.
 
 The intervals API supports arbitrary \emph{happens before} relations
 making the model very flexible. Intervals can be used to emulate
 existing thread primitives \cite{Matsakis2009a}, but they can also be
-used to easily create program schedules for which no standard thread
+used to create program schedules for which no standard thread
 primitives exist, such as peer-to-peer synchronization.
 
-Intervals are first-class objects in the programming language which
-represent the slice of program time used to execute a parallel
-task. The presence of a first-class, queryable program schedule allows
-us to support both static and dynamic checks such as data race
-protection \cite{Matsakis2010b} and checking for deadlocks
-\cite{Matsakis2009}. An error in one task prevents other, dependent
-tasks from executing \cite{Matsakis2010a}.
+Intervals can be extended to support both dynamic and static checks
+such as data race protection \cite{Matsakis2010b} and checking for
+deadlocks \cite{Matsakis2009}. An error in one task prevents other,
+dependent tasks from executing \cite{Matsakis2010a}.
 
 \subsection{Model}
 \label{sec:intro-intervals-model}
 
-Intervals are structured hierarchically in a tree. The root of the
-interval tree represents the entire program execution. Program
-execution itself begins in a child of the root interval.
+Intervals are first-class objects in the programming language which
+stand for the slice of program time used to execute a parallel task.
+They are structured in a tree with the root representing the entire
+program execution.
 
 The conceptual model for intervals consists of points in time ordered
 by a \emph{happens before} relation. In the model, an interval
 \lstinline!i! consists of a pair of points -- \lstinline!i.start! and
-\lstinline!i.end! -- called the start and end point. The start point
-represents the moment when the interval begins execution. The end
-point represents the moment when the interval's task is
-completed. Programmers may introduce arbitrary ordering constraints by
-adding \emph{happens before} edges in between the start or end points
-of different intervals. An edge \lstinline!p1 $\rightarrow$ p2!
-indicates that the point \lstinline!p1! must occur before the point
-\lstinline!p2!. It also indicates that any memory writes which
-\emph{happen before} \lstinline!p1! must be visible to
-\lstinline!p2!. This is in line with the Java Memory Model
-\cite{Manson2005}, and the semantics of volatile fields and
-synchronized sections.
+\lstinline!i.end! -- called the start and end point. They the start
+and end of the interval's execution. Programmers may define arbitrary
+ordering constraints by adding \emph{happens before} edges in between
+the start or end points of different intervals. An edge
+\lstinline!p1 $\rightarrow$ p2! indicates that the point
+\lstinline!p1! must occur before the point \lstinline!p2!. It also
+guarantees that any memory writes which \emph{happen before}
+\lstinline!p1! must be visible to \lstinline!p2!. This is in line with
+the Java Memory Model \cite{Manson2005}, and the semantics of volatile
+fields and synchronized sections.
 
 \begin{figure}[htb]
   \centering
@@ -81,41 +77,41 @@ synchronized sections.
   \label{fig:introduction-interval-graph}
 \end{figure}
 
-An interval can be associated with one or more locks. The intervals
-runtime will automatically acquire those locks before the interval's
-start point occurs and release them after its end point has occurred.
+An interval can have one or more locks. The intervals runtime
+automatically acquires those locks before the interval's start point
+occurs. When the task is completed and the end point of the interval
+has occurred, the acquired locks are released again.
 
-When an interval executes, it begins by invoking the sequential
-\lstinline!run()! method. \lstinline!run()! may either perform the
-task directly or create a number of subintervals to achieve the task
-in parallel.
+When an interval executes, it begins by calling the sequential
+\lstinline!run()! method. \lstinline!run()! can either execute the
+task directly or create a number of subintervals to solve the task in
+parallel.
 
 The interval model can be depicted as a graph, as shown in Figure
-\ref{fig:introduction-interval-graph}. The graph contains a single interval with
-four subintervals, \lstinline!a!, \lstinline!b!, \lstinline!c! and
-\lstinline!d!. The start and end points of each interval are
-represented as opaque circles. The subintervals of an interval are
-enclosed in a dashed box which is omitted for leaf intervals.
+\ref{fig:introduction-interval-graph}. The graph contains a single
+interval with four subintervals, \lstinline!a!, \lstinline!b!,
+\lstinline!c! and \lstinline!d!. The start and end points of each
+interval are drawn as opaque circles. The subintervals of an interval
+are enclosed in a dashed box which is left out for leaf intervals.
 
-The dashed edges connecting different points indicate user-specified
-additions to the \emph{happens before} relation. For example, the end
-of \lstinline!a! \emph{happens before} the start of \lstinline!b! and
+The dashed edges connecting different points indicate \emph{happens
+  before} relations added by the programmer. For example, the end of
+\lstinline!a! \emph{happens before} the start of \lstinline!b! and
 \lstinline!c! and the ends of \lstinline!b! and \lstinline!c! both
 \emph{happen before} the start of \lstinline!d!.
 
 \subsection{Java API}
 \label{sec:intro-intervals-java-api}
 
-In the Java API, intervals are represented as instances of the
-abstract class \lstinline!Interval! (Listing
-\ref{lst:introduction-interval-class}). \lstinline!Interval! provides final fields
-to access the interval's start point, end point, and parent, along
-with an abstract \lstinline!run()! method which must be redefined in a
-concrete subtype.
+To create an interval programmers have to subclass the abstract class
+\lstinline!Interval! (Listing \ref{lst:introduction-interval-class})
+and redefine the \lstinline!run()! method. Besides the abstract
+\lstinline!run()! methods, \lstinline!Interval! features final fields
+to access the start and end point as well as the parent interval.
 
 \begin{lstlisting}[
   style=Float, 
-  caption={[\lstinline{Interval} class] \lstinline{Interval}: Serves as the base class for all intervals},
+  caption={[\lstinline{Interval} class] \lstinline{Interval}: Base class for all intervals},
   label=lst:introduction-interval-class
 ]
 public abstract class Interval {
@@ -132,7 +128,7 @@ graph shown in Figure \ref{fig:introduction-interval-graph}.
 
 \begin{lstlisting}[
   style=FloatNumbers, 
-  caption={[Intervals Java API example] Code to produce the sample interval graph shown in Figure \ref{fig:introduction-interval-graph}},
+  caption={[Intervals Java API example] Code to construct the sample interval graph shown in Figure \ref{fig:introduction-interval-graph}},
   label=lst:introduction-interval-graph
 ]
 public class ExampleInterval extends Interval {
@@ -186,13 +182,14 @@ intervals.
 Newly constructed intervals become eligible for execution once the
 \lstinline!schedule()! method is invoked, as shown on Line
 \ref{lst:introduction-interval-graph-schedule} in Listing
-\ref{lst:introduction-interval-graph}. This gives the user the opportunity to
-construct any required dependencies or perform other
-initialization. For example, adding the edge
-\lstinline!a $\rightarrow$ b! on Line \ref{lst:introduction-interval-graph-add-hb}
-would be unsafe if \lstinline!b! could begin immediately, as it would
-be possible that \lstinline!b.start! had already occurred before the
-call to \lstinline!addHb()! could add the new dependency.
+\ref{lst:introduction-interval-graph}. This gives the user the
+opportunity to construct any required dependencies or perform other
+initialization. For example, adding the edge \\
+\lstinline!a $\rightarrow$ b! on Line
+\ref{lst:introduction-interval-graph-add-hb} would be unsafe if
+\lstinline!b! could begin immediately, as it would be possible that
+\lstinline!b.start! had already occurred before the call to
+\lstinline!addHb()! could add the new dependency.
 
 Explicit calls to \lstinline!schedule()! are unusual as the runtime
 automatically invokes \lstinline!schedule()! when the
@@ -205,7 +202,7 @@ automatically invokes \lstinline!schedule()! when the
 The implementation of intervals for Java makes use of a work-stealing
 scheduler similar to those found in Cilk \cite{Blumofe1995,
   Frigo1998}, Java 7 \cite{Lea2000, Lea2000a, Lea2004, Lea2006}, Intel
-Threading Building Blocks (TBB) \cite{Reinders2007, Contreras2008}, or
+Threading Building Blocks \cite{Reinders2007, Contreras2008}, or
 Microsoft Task Parallel Library \cite{Leijen2009} but extended to
 support locks and happens before edges.
 
@@ -215,34 +212,34 @@ maintain its own pool of ready tasks from which it obtains work. When
 a worker finds that its pool is empty, it becomes a thief and steals a
 task from the pool of a victim worker chosen at random.
 
-To obtain work, a worker takes the ready task from the bottom of its
+To obtain work, a worker takes the ready task from the tail of its
 deque and executes it. If the task terminates, the worker goes back to
-the bottom of its deque to take off another task upon which it can
+the tail of its deque to take off another task upon which it can
 work. When assigning a new task to a worker, the worker puts the newly
-ready task onto the bottom of its deque. Thus, so long as a worker's
+ready task onto the tail of its deque. Thus, so long as a worker's
 deque is not empty, the worker manipulates its deque in a LIFO
 (stack-like) manner.
 
-When a worker tries to obtain work by taking a task off the bottom of
+When a worker tries to obtain work by taking a task off the tail of
 its deque and it finds that it is empty, then the worker becomes a
 thief. It picks a victim worker at random and attempts to obtain work
-by removing the task at the top of the victim worker's deque. If the
+by removing the task at the head of the victim worker's deque. If the
 victim worker's deque is empty, then the thief picks another victim
 worker and tries again until it finds a victim whose deque it
 non-empty. At which point the thief continues to work on the stolen
-task as described above. Since steals take place at the top of the
+task as described above. Since steals take place at the head of the
 victim's deque, stealing operates in a FIFO manner.
 
 Accessing the run queues at different ends offers several advantages
 \cite{Frigo1998}:
 
 \begin{itemize}
-\item It reduces contention by having stealers operate on the opposite
-  side of the deque as owners.
-\item It exploits the property of recursive divide-and-conquer
-  algorithms of generating ``large'' tasks early. Thus, an older
-  stolen task is likely to provide a larger unit of work, leading to
-  further recursive decompositions by the stealing worker.
+\item It reduces contention by having owner and thieves working on
+  opposite sides of the deque.
+\item Recursive divide-and-conquer algorithms generate ``large'' tasks
+  early.. Because of this, an older stolen task is likely to provide a
+  larger unit of work, which leads to further recursive decompositions
+  by the stealing worker.
 \item Stealing a task also migrates its future workload, which helps
   to increase locality.
 \end{itemize}
