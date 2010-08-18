@@ -104,7 +104,7 @@ the work-stealing places used in our Intel Nehalem testing machine
 
 Other locality-aware work-stealing schedulers use a more complex
 design. \textcite{Acar2002} for example provide each worker with a
-mailbox in addition to the work-stealing deque. A mailbox is a FIFO
+mailbox in addition to the work-stealing deque: A mailbox is a FIFO
 queue of pointers to work items that have affinity for the worker. So
 when creating a work item, a worker will push it onto both the deque,
 as in normal work-stealing, and also onto the tail of the mailbox of
@@ -156,9 +156,11 @@ An example of a concrete place mapping is given in Listing
 \lstinline!NehalemPlaces! defines the places for our Intel Nehalem
 test machine according to its memory hierarchy. As Figure
 \ref{fig:locality-implemenation-work-stealing-places-mafushi} depicts
-this system includes two processors with four cores each. While every
-core has its separate level 1 and level 2 caches, the per-processor 8
-MB level 3 cache is shared between all cores of the same processor.
+this system includes two processors with four cores each. The machine
+has 12 GB RAM and each processor has a direct connection to half of
+the memory space. While every core has its separate level 1 and level
+2 caches, the per-processor 8 MB level 3 cache is shared between all
+cores of the same processor.
 
 \lstinputlisting[style=FloatNumbers, 
   caption={Places configuration for Intel Nehalem in a two-processor configuration},
@@ -178,13 +180,11 @@ mapping of the virtual units to the physical processing units.
 
 \begin{figure}[!htb]
   \centering
-  \includegraphics[width=0.5\textwidth]{experimental-setup/mafushi}
+  \includegraphics[width=0.92\textwidth]{locality-implementation/mafushi}
   \caption[Intel Nehalem in a two-processor configuration]{Intel
     Nehalem in a two-processor configuration}
   \label{fig:locality-implemenation-work-stealing-places-mafushi}
 \end{figure}
-
-\todo{Create new picture for Nehalem configuration}
 
 \subsection{Scheduling Policy}
 \label{sec:locality-implementation-work-stealing-places-scheduling}
