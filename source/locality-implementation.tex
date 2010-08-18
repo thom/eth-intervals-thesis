@@ -68,7 +68,7 @@ another machine as the current scheduler implementation cannot
 discover places automatically. \lstinline!Config! features an instance
 of the \lstinline!Places! class which is described in Section
 \ref{sec:locality-implementation-work-stealing-places}. Programmers
-can use it to get places,
+can use it to get place IDs,
 e.g. \lstinline!Config.places.getPlaceID(0)!.
 
 \lstinputlisting[style=Float, 
@@ -103,21 +103,21 @@ the work-stealing places used in our Intel Nehalem testing machine
 \end{figure}
 
 Other locality-aware work-stealing schedulers use a more complex
-design. \textcite{Acar2002} for example provide each worker in
-addition to a deque with a mailbox. A mailbox is a FIFO queue of
-pointers to intervals that have affinity for the worker. So when
-creating an interval, a worker will push it onto both the deque, as in
-normal work-stealing, and also onto the tail of the mailbox of the
-worker that the interval has affinity for. Now a worker will first try
-to obtain work from its mailbox before attempting to steal. Because
-intervals can appear twice, once in a mailbox and once on a deque,
-they have to be idempotent (Section
+design. \textcite{Acar2002} for example provide each worker with a
+mailbox in addition to the work-stealing deque. A mailbox is a FIFO
+queue of pointers to work items that have affinity for the worker. So
+when creating a work item, a worker will push it onto both the deque,
+as in normal work-stealing, and also onto the tail of the mailbox of
+the worker that the interval has affinity for. Now a worker will first
+try to obtain work from its mailbox before attempting to
+steal. Because work items can appear twice, once in a mailbox and once
+in a deque, they have to be idempotent (Section
 \ref{sec:queues-implementation-idempotent-ws-deque}).
 
 However, we have decided to simplify our scheduler implementation by
 using a shared deque per \emph{Work-Stealing Place}. We believe that
 this would not impact scalability as long as the places are not too
-large, because we could show in Section
+large. We could show in Section
 \ref{sec:queues-performance-single-shared-queue} that up to 8 workers
 there is no significant difference between using a separate deque for
 each worker or a shared deque per place.
@@ -127,8 +127,8 @@ each worker or a shared deque per place.
 
 Places are virtual: The mapping of physical units to places is
 performed by a concrete implementation of the abstract
-\lstinline!Places! class (Listing
-\ref{lst:locality-implementation-places}).
+\lstinline!Places! class shown in Listing
+\ref{lst:locality-implementation-places}.
 
 \lstinputlisting[style=FloatNumbers, 
   caption={Abstract \lstinline!Places! class},
@@ -187,10 +187,10 @@ mapping of the virtual units to the physical processing units.
 \subsection{Scheduling Policy}
 \label{sec:locality-implementation-work-stealing-places-scheduling}
 
-When an interval is ready to run, we first get its place ID. If the place ID is
-\lstinline!null!, i.e. the interval is locality-ignorant, we either
-enqueue it at the place of the currently active worker or add
-it at a place in a round-robin fashion. If the interval is
+When an interval is ready to run, we first get its place ID. If the
+place ID is \lstinline!null!, i.e. the interval is locality-ignorant,
+we either enqueue it at the place of the currently active worker or
+add it at a place in a round-robin fashion. If the interval is
 locality-aware, we enqueue it at the specified place.
 
 
@@ -198,14 +198,15 @@ locality-aware, we enqueue it at the specified place.
 \label{sec:locality-implementation-core-affinity}
 
 In recent Java Virtual Machines, threads are implemented with native
-threads, so a Java program using threads is no different from a native
-program using threads: A Java thread is just a thread belonging to a
-JVM process. This means there is a 1-to-1 correspondence between Java
-and native threads. When using the GNU C library on Linux, native
-threads are implemented with the NPTL (Native POSIX Threads
-Library). NPTL is also an 1-to-1 implementation, meaning that each
-thread maps to a kernel scheduling entity (Figure
-\ref{fig:locality-implementation-core-affinity-thread-mapping}).
+threads. A Java program using threads is no different from a native
+program using threads, i.e. a Java thread is just a native thread
+belonging to a JVM process. This means there is a 1-to-1
+correspondence between Java and native threads. When using the GNU C
+library on Linux, native threads are implemented with the NPTL (Native
+POSIX Threads Library). NPTL is also an 1-to-1 implementation, meaning
+that each thread maps to a kernel scheduling entity. Figure
+\ref{fig:locality-implementation-core-affinity-thread-mapping}
+illustrates this 1-to-1 thread mapping.
 
 \begin{figure}[htb]
   \centering
@@ -225,7 +226,7 @@ the CPU or core affinity despite numerous use cases where setting the
 affinity of threads would be beneficial -- such as improving cache and
 network performance or real-time applications \cite{Love2003, Dow2005,
   Foong2008}. There exists a request for enhancement on this issue but
-it got set to the state \emph{``Closed, Will Not Fix''}
+it was set to the state \emph{``Closed, Will Not Fix''}
 \cite{Oracle1999}.
 
 \subsection{JNI Library}
@@ -240,8 +241,8 @@ bind the current thread to a physical unit. With
 several physical units, for example to a node in a NUMA system (Line
 \ref{lst:locality-implementation-core-affinity-set-node}). The workers
 of the intervals scheduler use \lstinline!set(int physicalUnit)! in
-their \lstinline!run()! method to set the affinity for a specific
-physical unit.
+their \lstinline!run()! method to set the affinity to a separate
+physical unit each.
 
 \lstinputlisting[style=FloatNumbers,
   caption={\lstinline{Affinity} class with interface for the native methods}, 
@@ -279,13 +280,14 @@ and then we set it to the specified physical units (Lines
 \ref{lst:locality-implementation-core-affinity-jni-set-unit-set-cpuset}
 and
 \ref{lst:locality-implementation-core-affinity-jni-set-node-set-cpuset}). The
-actual setting of the affinity is done in function
+actual affinity change is carried out in function
 \lstinline!set_affinity()! on Lines
 \ref{lst:locality-implementation-core-affinity-jni-set-impl-start} --
 \ref{lst:locality-implementation-core-affinity-jni-set-impl-end}.
 
-To get the thread ID, we use the \lstinline!pthread_self()! function
-(line
+Before we can set the affinity of a Java thread, we need to get its
+native thread ID. To get the native thread ID, we use the
+\lstinline!pthread_self()! function (Line
 \ref{lst:locality-implementation-core-affinity-jni-set-impl-pthread-self}). The
 function \lstinline!pthread_setaffinity_np()! (Line
 \ref{lst:locality-implementation-core-affinity-jni-set-impl-set}) sets
@@ -329,8 +331,9 @@ object will be the most likely to use the object. To ensure the
 fastest access to the new object, the allocator places it in the
 region local to the allocating thread.
 
-On Linux, the implementation is based on \cite{Kleen2004}. It can be
-enabled by using the option \verb!-XX:+UseNUMA!.
+On Linux, the implementation is based on work by
+\textcite{Kleen2004}. To enable the NUMA-aware allocator, we have to
+invoke the JVM with the parameter \verb!-XX:+UseNUMA!.
 
 
 %%% Local Variables: 

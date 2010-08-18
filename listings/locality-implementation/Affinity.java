@@ -5,7 +5,5 @@ public class Affinity {
 	public static native void set(int[] physicalUnits) //*\label{lst:locality-implementation-core-affinity-set-node}
 			throws SetAffinityException;
 
-	static { 
-		System.loadLibrary("Affinity"); 
-	}
+	static { System.loadLibrary("Affinity"); }
 }
