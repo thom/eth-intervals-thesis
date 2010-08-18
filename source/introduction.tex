@@ -83,9 +83,9 @@ occurs. When the task is completed and the end point of the interval
 has occurred, the acquired locks are released again.
 
 When an interval executes, it begins by calling the sequential
-\lstinline!run()! method. \lstinline!run()! can either execute the
-task directly or create a number of subintervals to solve the task in
-parallel.
+\lstinline!run()! method. The \lstinline!run()! method can either
+execute the task directly or create a number of subintervals to solve
+the task in parallel.
 
 The interval model can be depicted as a graph, as shown in Figure
 \ref{fig:introduction-interval-graph}. The graph contains a single
@@ -106,7 +106,7 @@ The dashed edges connecting different points indicate \emph{happens
 To create an interval programmers have to subclass the abstract class
 \lstinline!Interval! (Listing \ref{lst:introduction-interval-class})
 and redefine the \lstinline!run()! method. Besides the abstract
-\lstinline!run()! methods, \lstinline!Interval! features final fields
+\lstinline!run()! method, \lstinline!Interval! features final fields
 to access the start and end point as well as the parent interval.
 
 \begin{lstlisting}[
@@ -237,9 +237,9 @@ Accessing the run queues at different ends offers several advantages
 \item It reduces contention by having owner and thieves working on
   opposite sides of the deque.
 \item Recursive divide-and-conquer algorithms generate ``large'' tasks
-  early.. Because of this, an older stolen task is likely to provide a
-  larger unit of work, which leads to further recursive decompositions
-  by the stealing worker.
+  early. Thus, an older stolen task is likely to provide a larger unit
+  of work, which leads to further recursive decompositions by the
+  stealing worker.
 \item Stealing a task also migrates its future workload, which helps
   to increase locality.
 \end{itemize}
