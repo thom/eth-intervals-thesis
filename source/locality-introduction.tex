@@ -8,6 +8,18 @@
 \chapter{Introduction}
 \label{chap:locality-introduction}
 
+In a shared-memory multiprocessor system, it may be more efficient to
+schedule a task on one processor than another. One reason for this is
+that the processors, or their associated resources, may be
+heterogeneous; we consider this case in more detail below. Another
+reason is processor-cache affinity: when a task returns for execution
+and is scheduled on a processor, it experiences an initial burst of
+cache misses. However, if a significant portion of the task's working
+set is already in the cache, this penalty is reduced. Thus we have a
+tradeoff between load balancing (assigning tasks to less loaded
+processors) and using locality (assigning tasks to processors with
+high affinity).
+
 \section{Problem and Motivation}
 \label{sec:locality-intro-problem-and-motivation}
 
@@ -102,42 +114,6 @@ queue are related, there is good affinity among the threads executed
 by any one processor. However, WS is not designed for constructive
 cache sharing, because the processors tend to have disjoint working
 sets.
-
-\subsubsection{Work stealing: an annotated bibliography}
-
-Affinity scheduling: \cite{Squillante1993}, \cite{Acar2002}
-
-In a shared-memory multiprocessor system, it may be more efficient to
-schedule a task on one processor than another. One reason for this is
-that the processors, or their associated resources, may be
-heterogeneous; we consider this case in more detail below. Another
-reason is processor-cache affinity: when a task returns for execution
-and is scheduled on a processor, it experiences an initial burst of
-cache misses. However, if a significant portion of the task's working
-set is already in the cache, this penalty is reduced. Thus we have a
-tradeoff between load balancing (assigning tasks to less loaded
-processors) and using locality (assigning tasks to processors with
-high affinity).
-
-\cite{Squillante1993} proposes and compares various scheduling
-algorithms which trade off load balancing and processor-cache
-affinity. They use the detailed cache model to examine cache reload
-time, as well as examining the effects of increased bus
-traffic. Analysis techniques: a combination of mean value analysis
-(for fixed-processor scheduling), bounding approximations, and
-simulation. A shared pool of tasks is assumed: idle processors search
-this pool and choose a task associated with that processor if
-possible. This outperforms a simple FIFO queue (good load balancing,
-bad locality) or a ``fixed processor'' model where each processor has
-its own queue and tasks are not shared (good locality, bad load
-balancing). No work stealing since pool of tasks is shared.
-
-\cite{Acar2002} presents a work-stealing algorithm that uses locality
-information, and thus outperforms the standard work-stealing algorithm
-on benchmarks. Each process maintains a queue of pointers to threads
-that have affinity for it, and attempts to steal these first. They
-also bound the number of cache misses for the work stealing algorithm,
-using a ``potential function'' argument.
 
 \subsubsection{Trivendi}
 

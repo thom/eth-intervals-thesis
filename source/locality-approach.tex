@@ -5,18 +5,68 @@
 \chapter{Approach}
 \label{chap:locality-approach}
 
-Before starting with the implementation of the locality-aware
-intervals scheduler, we first check if our hypothesis is true for
-threads.
+As a motivating example we implement a synthetic multi-threaded
+locality-aware benchmark called \emph{Cache Stress Test}. 
 
-\begin{itemize}
-\item Implemented locality-aware benchmarks using threads
-\item Could show that locality matters so implemented benchmarks with
-  intervals
-\item Rewrote intervals thread pool supporting locality
-\end{itemize}
+If a multi-threaded benchmark with best possible locality has better
+performance and fewer last-level cache misses than the same benchmark
+with no specific locality, we should be able to see the same effect
+when porting the benchmark to intervals. Hence, we know whether it
+makes sense to design a locality-aware intervals scheduler.
+
+\section{Benchmark}
+
+We wrote our benchmark for the Intel Nehalem system with two
+processors and eight cores. While every core has its separate level 1
+and level 2 caches, the per-processor 8 MB level 3 cache is shared
+between all cores of the same processor (Appendix
+\ref{sec:experimental-setup-mafushi}).
+
+\emph{Cache Stress Test} first randomly initializes two integer arrays
+of size \numprint{2097144}. The size of each array is about 8 MB,
+which is the same as the size of the last level cache per
+processor. Then we create 64 threads with their affinity set to a
+specific processor: 32 are run on the first processor and 32 on the
+second processor. One half of the threads operates on the elements of
+the first array and the other half operates on the elements of the
+second array. Each thread adds and multiplies all the elements of its
+respective array 100 times.
+
+We implemented several different variants of the \emph{Cache Stress
+  Test}:
+
+\begin{description}
+\item[Best Locality:] All the threads working on the first array
+  have affinity to the first processor and all threads working on the
+  second array have affinity to the second processor.
+\item[Ignorant Locality:] The threads are not bound to any
+  specific processor, i.e. they are \emph{ignorant} of their locality.
+\item[Random Locality:] The affinity of the threads is set to a
+  \emph{random} processor.
+\item[Worst Locality:] Half the threads with affinity to the first
+  processor work on the first array, and the other half works on the
+  second array and vice versa.
+\end{description}
+
+
+\section{Performance Evaluation}
+
+
+This warms up the cache and if all the threads working on the same
+array are also running on the same processor, minimizes last level
+cache misses. We call this the \emph{best locality}. The \emph{worst
+  locality} would be if half the threads with affinity to cores on the
+first processor work on the first array and the other half works on
+the second array and vice versa. When using \emph{random locality} we
+set the affinity of the threads randomly. Threads without any locality
+set are said to be of \emph{ignorant} of their locality.
 
 \todo{Finish chapter ``Approach''}
+
+Could show that locality matters so implemented benchmarks with
+interval.
+
+Rewrote intervals thread pool supporting locality.
 
 
 %%% Local Variables: 

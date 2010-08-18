@@ -5,38 +5,54 @@
 \chapter{Related Work}
 \label{chap:locality-related-work}
 
-\begin{itemize}
-\item[\textbullet] The data locality of work stealing \cite{Acar2002}
-\item[\textbullet] Static Detection of Place Locality and Elimination
-  of Runtime Checks \cite{Agarwal2008}
-\item[\textbullet] Efficient Optimization of Memory Accesses in
-  Parallel Programs \cite{Barik2009}
-\item[\textbullet] Scalable Work Stealing \cite{Dinan2009}
-\item[\textbullet] Thread scheduling for cache locality \cite{Philbin1996}
-\item[\textbullet] Using processor-cache affinity information in
-  shared-memory multiprocessor scheduling \cite{Squillante1993}
-\item[\textbullet] Thread clustering: sharing-aware scheduling on
-  SMP-CMP-SMT multiprocessors \cite{Tam2007}
-\item[\textbullet] Hierarchical Place Trees: A Portable Abstraction
-  for Task Parallelism and Data Movement \cite{Yan2009}
-\item[\textbullet] Mely: Efficient Workstealing for Multicore
-  Event-Driven Systems \cite{Gaud2010}
-\item[\textbullet] SLAW: a Scalable Locality-aware Adaptive
-  Work-stealing Scheduler \cite{Guo2010}
-\item[\textbullet] X10: an object-oriented approach to non-uniform
-  cluster computing \cite{Charles2005}
-\item[\textbullet] Report on the programming language X10
-  \cite{Saraswat2010}
-\end{itemize}
+\textcite{Acar2002} present a work-stealing algorithm that uses
+locality information, and thus outperforms the standard work-stealing
+algorithm on benchmarks. Each process maintains a queue of pointers to
+threads that have affinity for it, and attempts to steal these
+first. They also bound the number of cache misses for the
+work-stealing algorithm, using a ``potential function'' argument.
 
-Threading Building Blocks is designed with caches in mind and works to
-limit the unnecessary movement of tasks and data. When a task has to
-be passed to a different processor core for execution, Threading
-Building Blocks moves the task with the least likelihood of having
-data in the cache for the processor core from which the task is
-stolen.
+\textcite{Squillante1993} proposes and compares various scheduling
+algorithms which trade off load balancing and processor-cache
+affinity. They use the detailed cache model to examine cache reload
+time, as well as examining the effects of increased bus traffic. No
+work-stealing is used since pool of tasks is shared.
+
+\textcite{Philbin1996}: Thread scheduling for cache locality
+
+Threading Building Blocks \cite{Contreras2008, Reinders2007} is
+designed with caches in mind and works to limit the unnecessary
+movement of tasks and data. When a task has to be passed to a
+different processor core for execution, Threading Building Blocks
+moves the task with the least likelihood of having data in the cache
+for the processor core from which the task is stolen.
+
+X10: \textcite{Charles2005} ``X10: an object-oriented approach to
+non-uniform cluster computing'', \textcite{Saraswat2010} ``Report on
+the programming language X10''
+
+\textcite{Agarwal2008}: Static Detection of Place Locality and
+Elimination of Runtime Checks
+
+\textcite{Barik2009}: Efficient Optimization of Memory Accesses in
+Parallel Programs
+
+\textcite{Dinan2009}: Scalable Work Stealing
+
+\textcite{Tam2007}: Thread clustering: sharing-aware scheduling on
+SMP-CMP-SMT multiprocessors
+
+\textcite{Yan2009}: Hierarchical Place Trees: A Portable Abstraction
+for Task Parallelism and Data Movement
+
+\textcite{Gaud2010}: Mely: Efficient Workstealing for Multicore
+Event-Driven Systems \cite{Gaud2010}
+
+\textcite{Guo2010}: SLAW: a Scalable Locality-aware Adaptive
+Work-stealing Scheduler
 
 \todo{Finish chapter ``Related Work''}
+
 
 %%% Local Variables: 
 %%% mode: latex
