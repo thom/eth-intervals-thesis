@@ -72,29 +72,29 @@ iterations.
   \begin{tabular}{ln{4}{0}n{4}{0}}
     \toprule
     & {L3 Cache Read Misses} & {L3 Cache Read Hits} \\\midrule
-    \emph{Best Locality}\hspace{1cm} & 220 & 260 \\
-    \emph{Ignorant Locality} & 800 & 170 \\
-    \emph{Random Locality} & 900 & 165 \\
-    \emph{Worst Locality} & 1000 & 140 \\\bottomrule
+    \emph{Best Locality}\hspace{1cm} & 275 & 2335 \\
+    \emph{Ignorant Locality} & 837 & 1568 \\
+    \emph{Random Locality} & 854 & 1570 \\
+    \emph{Worst Locality} & 837 & 1539 \\\bottomrule
   \end{tabular}
-  \caption[Multi-threaded \emph{Cache Stress Test} L3 cache read misses and hits]
-  {Multi-threaded \emph{Cache Stress Test} L3 cache read misses and hits (rounded to the nearest million)}
-  \label{tab:locality-approach-cache-stress-test}
+  \caption[\emph{Cache Stress Test} L3 cache read misses and hits]
+  {\emph{Cache Stress Test} L3 cache read misses and hits (rounded to the nearest million)}
+  \label{tab:locality-performance-cache-stress-test}
 \end{table}
 
 \begin{figure}[!ht]
   \centering
   \subfloat[L3 Cache Read Misses]{
-    \includegraphics[width=0.5\linewidth]{locality-approach/cache-stress-test-cache-misses}
-    \label{fig:locality-approach-cache-stress-test-cache-misses}
+    \includegraphics[width=0.5\linewidth]{locality-performance/cache-stress-test-cache-misses}
+    \label{fig:locality-performance-cache-stress-test-cache-misses}
   }
   \subfloat[L3 Cache Read Hits]{
-    \includegraphics[width=0.5\linewidth]{locality-approach/cache-stress-test-cache-hits}
-    \label{fig:locality-approach-cache-stress-test-cache-hits}
+    \includegraphics[width=0.5\linewidth]{locality-performance/cache-stress-test-cache-hits}
+    \label{fig:locality-performance-cache-stress-test-cache-hits}
   }
-  \caption{Multi-threaded \emph{Cache Stress Test} with L3 cache read
-    misses and hits normalized to \emph{best locality}}
-  \label{fig:locality-approach-cache-stress-test-cache}
+  \caption{\emph{Cache Stress Test} with L3 cache read misses and hits
+    normalized to \emph{best locality}}
+  \label{fig:locality-performance-cache-stress-test-cache}
 \end{figure}
 
 \section{Merge Sort}
