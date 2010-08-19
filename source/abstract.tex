@@ -6,9 +6,9 @@
 \label{chap:abstract}
 
 Intervals are a new, higher-level primitive for parallel programming
-which permits programmers to directly construct the program
-schedule. They are under active development at ETH Zürich as part of
-the PhD research of Nicholas D. Matsakis.
+allowing programmers to directly construct the program schedule. They
+are under active development at ETH Zürich as part of the PhD research
+of Nicholas D. Matsakis.
 
 The intervals implementation in Java uses a work-stealing scheduler
 where a worker running out of work tries to ``steal'' work from
@@ -17,7 +17,7 @@ intervals scheduler.
 
 We implement and analyze an advanced scheduler for intervals. It is
 designed for locality-aware scheduling using locality hints provided
-by the programmer. Instead of using work-stealing workers, our
+by the programmer. Instead of employing work-stealing workers, our
 scheduler groups workers into \emph{Work-Stealing Places}.  Each
 work-stealing place has a fixed number of workers and a local deque to
 maintain ready tasks. The workers of a place share its local deque
