@@ -174,7 +174,7 @@ This ensures that each interval is only executed once, or stated
 differently: running an interval is an idempotent operation.
 
 Idempotent intervals would also simplify the mailbox style
-implementation for locality-aware scheduling \cite{Acar2002}.
+implementation for locality-aware scheduling \cite{Acar2000}.
 
 \subsection{Implementation}
 \label{sec:queues-implementation-idempotent-ws-deque-implementation}
@@ -313,7 +313,7 @@ returns the stolen work item. Else, the thread tries to steal again.
 
 The \emph{Dynamic Work-Stealing Deque} uses a list of small arrays to
 manage work items. It is based on the work-stealing deque algorithm
-presented by \textcite{Hendler2006}.
+presented by \textcite{Hendler2005}.
 
 The algorithm implements each deque as a doubly linked list of nodes,
 each of which is a short array, with \lstinline!top! and
@@ -340,7 +340,7 @@ of these boundary situations using the relations between the
 point to entries that may reside in different nodes. We observe that
 given one pointer -- ignoring which array it resides in -- the
 distance of the other, cannot be more than 1 if the deque is
-empty. \textcite{Hendler2006} describe the method in more detail.
+empty. \textcite{Hendler2005} describe the method in more detail.
 
 As it turned out, the dynamic work-stealing deque's complexity -- due
 to the extra work required for the list's maintenance -- reflects in

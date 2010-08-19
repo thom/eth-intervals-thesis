@@ -25,7 +25,7 @@ work-stealing algorithm,\footnote{Non-blocking -- in contrast to
   worker to starve while trying to steal from other
   workers. Live-locks cannot occur as if one worker starves then
   others must be making progress.} the deques are implemented with
-non-blocking synchronization \cite{Arora2001}. That is, instead of
+non-blocking synchronization \cite{Arora1998}. That is, instead of
 using mutual exclusion, it uses atomic synchronization primitives such
 as Compare-and-Swap \cite{Moir1997}. The current deque implementation
 of intervals however uses mutual exclusion when trying to steal.

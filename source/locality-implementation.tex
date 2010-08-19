@@ -103,7 +103,7 @@ the work-stealing places used in our Intel Nehalem testing machine
 \end{figure}
 
 Other locality-aware work-stealing schedulers use a more complex
-design. \textcite{Acar2002} for example provide each worker with a
+design. \textcite{Acar2000} for example provide each worker with a
 mailbox in addition to the work-stealing deque: A mailbox is a FIFO
 queue of pointers to work items that have affinity for the worker. So
 when creating a work item, a worker will push it onto both the deque,

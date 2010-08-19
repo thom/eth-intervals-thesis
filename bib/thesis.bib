@@ -1,952 +1,1154 @@
-@article{Acar2002,
-author = {Acar, U.A. and Blelloch, G.E. and Blumofe, R.D.},
-journal = {Theory of Computing Systems},
-number = {3},
-pages = {321--347},
-publisher = {Springer},
-title = {{The Data Locality of Work Stealing}},
-volume = {35},
-year = {2002}
-}
-@article{Agarwal2008,
-author = {Agarwal, S and Barik, R.K. and Nandivada, V. and Shyamasundar, R. and Varma, P},
-journal = {Programming Languages and Systems},
-pages = {53--74},
-publisher = {Springer},
-title = {{Static Detection of Place Locality and Elimination of Runtime Checks}},
-year = {2008}
-}
+@inproceedings{Acar2000,
+ author = {Acar, Umut A. and Blelloch, Guy E. and Blumofe, Robert D.},
+ title = {The data locality of work stealing},
+ booktitle = {SPAA '00: Proceedings of the twelfth annual ACM symposium on Parallel algorithms and architectures},
+ year = {2000},
+ isbn = {1-58113-185-2},
+ pages = {1--12},
+ location = {Bar Harbor, Maine, United States},
+ doi = {http://doi.acm.org/10.1145/341800.341801},
+ publisher = {ACM},
+ }
+
+@inproceedings{Agarwal2008,
+ author = {Agarwal, Shivali and Barik, Rajkishore and Nandivada, V. Krishna and Shyamasundar, Rudrapatna K. and Varma, Pradeep},
+ title = {Static Detection of Place Locality and Elimination of Runtime Checks},
+ booktitle = {APLAS '08: Proceedings of the 6th Asian Symposium on Programming Languages and Systems},
+ year = {2008},
+ isbn = {978-3-540-89329-5},
+ pages = {53--74},
+ location = {Bangalore, India},
+ doi = {http://dx.doi.org/10.1007/978-3-540-89330-1_5},
+ publisher = {Springer-Verlag},
+ }
+
 @inproceedings{Agrawal2006,
-author = {Agrawal, Kunal and He, Yuxiong and Leiserson, C.E.},
-booktitle = {26th IEEE International Conference on Distributed Computing Systems},
-pages = {19--19},
-publisher = {IEEE},
-title = {{An Empirical Evaluation of Work Stealing with Parallelism Feedback}},
-year = {2006}
-}
-@article{Agrawal2008,
-author = {Agrawal, Kunal and Leiserson, C.E. and He, Yuxiong and Hsu, W.J.},
-journal = {ACM Transactions on Computer Systems},
-number = {3},
-pages = {1--32},
-publisher = {ACM},
-title = {{Adaptive Work-Stealing with Parallelism Feedback}},
-volume = {26},
-year = {2008}
-}
-@article{Agrawal2008a,
-author = {Agrawal, Kunal and Leiserson, C.E. and He, Yuxiong and Hsu, W.J.},
-journal = {ACM Transactions on Computer Systems},
-number = {3},
-pages = {1--32},
-publisher = {ACM},
-title = {{Adaptive Work-Stealing with Parallelism Feedback}},
-volume = {26},
-year = {2008}
-}
-@inproceedings{Agrawal2010,
-author = {Agrawal, Kunal and Leiserson, C.E. and Sukha, Jim},
-booktitle = {Proceedings of the 15th ACM SIGPLAN symposium on Principles and practice of parallel programming},
-pages = {245--256},
-publisher = {ACM},
-title = {{Helper Locks for Fork-Join Parallel Programming}},
-year = {2010}
-}
-@article{Arora2001,
-author = {Arora, NS and Blumofe, R.D. and Plaxton, CG},
-journal = {Theory of Computing Systems},
-number = {2},
-pages = {115--144},
-publisher = {Springer},
-title = {{Thread Scheduling for Multiprogrammed Multiprocessors}},
-volume = {34},
-year = {2001}
-}
+ author = {Agrawal, Kunal and He, Yuxiong and Leiserson, Charles E.},
+ title = {An Empirical Evaluation ofWork Stealing with Parallelism Feedback},
+ booktitle = {ICDCS '06: Proceedings of the 26th IEEE International Conference on Distributed Computing Systems},
+ year = {2006},
+ isbn = {0-7695-2540-7},
+ pages = {19},
+ doi = {http://dx.doi.org/10.1109/ICDCS.2006.14},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+ }
+
+@inproceedings{Agrawal2007,
+ author = {Agrawal, Kunal and He, Yuxiong and Leiserson, Charles E.},
+ title = {Adaptive work stealing with parallelism feedback},
+ booktitle = {PPoPP '07: Proceedings of the 12th ACM SIGPLAN symposium on Principles and practice of parallel programming},
+ year = {2007},
+ isbn = {978-1-59593-602-8},
+ pages = {112--120},
+ location = {San Jose, California, USA},
+ doi = {http://doi.acm.org/10.1145/1229428.1229448},
+ publisher = {ACM},
+ }
+
+@inproceedings{Arora1998,
+ author = {Arora, Nimar S. and Blumofe, Robert D. and Plaxton, C. Greg},
+ title = {Thread scheduling for multiprogrammed multiprocessors},
+ booktitle = {SPAA '98: Proceedings of the tenth annual ACM symposium on Parallel algorithms and architectures},
+ year = {1998},
+ isbn = {0-89791-989-0},
+ pages = {119--129},
+ location = {Puerto Vallarta, Mexico},
+ doi = {http://doi.acm.org/10.1145/277651.277678},
+ publisher = {ACM},
+ }
+
 @phdthesis{Barik2009,
-author = {Barik, R.K.},
-booktitle = {Memory},
-publisher = {Rice University},
-title = {{Efficient Optimization of Memory Accesses in Parallel Programs}},
-year = {2009}
-}
+ author = {Barik, R.K.},
+ booktitle = {Memory},
+ publisher = {Rice University},
+ title = {{Efficient Optimization of Memory Accesses in Parallel Programs}},
+ year = {2009}
+ }
+
 @article{Barker2009,
-author = {Barker, D.P.},
-title = {{Realities of Multi-Core CPU Chips and Memory Contention}},
-journal = {Euromicro Conference on Parallel, Distributed, and Network-Based Processing},
-year = {2009},
-pages = {446--453},
-publisher = {IEEE Computer Society},
-}
+ author = {David P. Barker},
+ title = {Realities of Multi-Core CPU Chips and Memory Contention},
+ journal ={Parallel, Distributed, and Network-Based Processing, Euromicro Conference on},
+ volume = {0},
+ issn = {1066-6192},
+ year = {2009},
+ pages = {446-453},
+ doi = {http://doi.ieeecomputersociety.org/10.1109/PDP.2009.65},
+ publisher = {IEEE Computer Society},
+ address = {Los Alamitos, CA, USA},
+ }
+
 @article{Barker2004,
-author = {Barker, Kevin and Chernikov, Andrey and Chrisochoides, Nikos and Pingali, Keshav},
-journal = {IEEE Transactions on Parallel and Distributed Systems},
-number = {2},
-pages = {183--192},
-title = {{A Load Balancing Framework for Adaptive and Asynchronous Applications}},
-volume = {15},
-year = {2004}
-}
+ author = {Barker, Kevin and Chernikov, Andrey N. and Chrisochoides, Nikos and Pingali, Keshav},
+ title = {A Load Balancing Framework for Adaptive and Asynchronous Applications},
+ journal = {IEEE Trans. Parallel Distrib. Syst.},
+ volume = {15},
+ number = {2},
+ year = {2004},
+ issn = {1045-9219},
+ pages = {183--192},
+ doi = {http://dx.doi.org/10.1109/TPDS.2004.1264800},
+ publisher = {IEEE Press},
+ address = {Piscataway, NJ, USA},
+ }
+
 @inproceedings{Bhattacharjee2009,
-author = {Bhattacharjee, Abhishek and Martonosi, Margaret},
-booktitle = {Intl. Conf. on Parallel Architectures and Compilation Techniques},
-month = sep,
-pages = {29--40},
-publisher = {IEEE},
-title = {{Characterizing the TLB Behavior of Emerging Parallel Workloads on Chip Multiprocessors}},
-year = {2009}
-}
+ author = {Bhattacharjee, Abhishek and Martonosi, Margaret},
+ title = {Characterizing the TLB Behavior of Emerging Parallel Workloads on Chip Multiprocessors},
+ booktitle = {PACT '09: Proceedings of the 2009 18th International Conference on Parallel Architectures and Compilation Techniques},
+ year = {2009},
+ isbn = {978-0-7695-3771-9},
+ pages = {29--40},
+ doi = {http://dx.doi.org/10.1109/PACT.2009.26},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+ }
+
 @inproceedings{Bird2007,
-author = {Bird, Sarah and Phansalkar, Aashish and John, Lizy K and Mericas, Alex and Indukuru, Rajeev},
-booktitle = {2007 SPEC Benchmark Workshop},
-title = {{Performance Characterization of SPEC CPU Benchmarks on Intel's Core Microarchitecture based processor}},
-year = {2007}
+ author = {Bird, Sarah and Phansalkar, Aashish and John, Lizy K and Mericas, Alex and Indukuru, Rajeev},
+ booktitle = {2007 SPEC Benchmark Workshop},
+ title = {{Performance Characterization of SPEC CPU Benchmarks on Intel's Core Microarchitecture based processor}},
+ year = {2007}
 }
-@inproceedings{Blelloch2008,
-author = {Blelloch, G.E. and Chowdhury, R.A. and Gibbons, P.B. and Ramachandran, Vijaya and Chen, Shimin and Kozuch, Michael},
-booktitle = {Proceedings of the nineteenth annual ACM-SIAM symposium on Discrete algorithms},
-number = {1},
-pages = {501--510},
-publisher = {Society for Industrial and Applied Mathematics},
-title = {{Provably Good Multicore Cache Performance for Divide-and-Conquer Algorithms}},
-year = {2008}
-}
+
 @inproceedings{Blelloch2004,
-author = {Blelloch, G.E. and Gibbons, P.B.},
-booktitle = {Proceedings of the sixteenth annual ACM symposium on Parallelism in algorithms and architectures},
-pages = {235--244},
-publisher = {ACM},
-title = {{Effectively Sharing a Cache Among Threads}},
-year = {2004}
-}
+ author = {Blelloch, Guy E. and Gibbons, Phillip B.},
+ title = {Effectively sharing a cache among threads},
+ booktitle = {SPAA '04: Proceedings of the sixteenth annual ACM symposium on Parallelism in algorithms and architectures},
+ year = {2004},
+ isbn = {1-58113-840-7},
+ pages = {235--244},
+ location = {Barcelona, Spain},
+ doi = {http://doi.acm.org/10.1145/1007912.1007948},
+ publisher = {ACM},
+ }
+
+@inproceedings{Blelloch2008,
+ author = {Blelloch, Guy E. and Chowdhury, Rezaul A. and Gibbons, Phillip B. and Ramachandran, Vijaya and Chen, Shimin and Kozuch, Michael},
+ title = {Provably good multicore cache performance for divide-and-conquer algorithms},
+ booktitle = {SODA '08: Proceedings of the nineteenth annual ACM-SIAM symposium on Discrete algorithms},
+ year = {2008},
+ pages = {501--510},
+ location = {San Francisco, California},
+ publisher = {Society for Industrial and Applied Mathematics},
+ }
+
 @article{Blumofe1995,
-author = {Blumofe, R.D. and Joerg, C.F. and Kuszmaul, B.C. and Leiserson, C.E. and Randall, K.H. and Zhou, Yuli},
-journal = {ACM SigPlan Notices},
-number = {8},
-publisher = {ACM},
-title = {{Cilk: An Efficient Multithreaded Runtime System}},
-volume = {30},
-year = {1995}
-}
+ author = {Blumofe, Robert D. and Joerg, Christopher F. and Kuszmaul, Bradley C. and Leiserson, Charles E. and Randall, Keith H. and Zhou, Yuli},
+ title = {Cilk: an efficient multithreaded runtime system},
+ journal = {SIGPLAN Not.},
+ volume = {30},
+ number = {8},
+ year = {1995},
+ issn = {0362-1340},
+ pages = {207--216},
+ doi = {http://doi.acm.org/10.1145/209937.209958},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
+@inproceedings{Blumofe1998,
+ author = {Blumofe, Robert D. and Papadopoulos, Dionisios},
+ title = {The performance of work stealing in multiprogrammed environments},
+ booktitle = {SIGMETRICS},
+ year = {1998},
+ isbn = {0-89791-982-3},
+ pages = {266--267},
+ location = {Madison, Wisconsin, United States},
+ doi = {http://doi.acm.org/10.1145/277851.277939},
+ publisher = {ACM},
+ }
+
 @article{Blumofe1999,
-author = {Blumofe, R.D. and Leiserson, C.E.},
-journal = {Journal of the ACM (JACM)},
-number = {5},
-pages = {720--748},
-publisher = {ACM},
-title = {{Scheduling Multithreaded Computations by Work Stealing}},
-volume = {46},
-year = {1999}
-}
-@article{Blumofe1998,
-author = {Blumofe, R.D. and Papadopoulos, D.},
-title = {{The Performance of Work Stealing in Multiprogrammed Environment}},
-year = {1998}
-}
+ author = {Blumofe, Robert D. and Leiserson, Charles E.},
+ title = {Scheduling multithreaded computations by work stealing},
+ journal = {J. ACM},
+ volume = {46},
+ number = {5},
+ year = {1999},
+ issn = {0004-5411},
+ pages = {720--748},
+ doi = {http://doi.acm.org/10.1145/324133.324234},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
 @inproceedings{Charles2005,
-author = {Charles, P and Grothoff, C and Saraswat, V.A. and Donawa, C and Kielstra, A and Ebcioglu, K and {Von Praun}, C. and Sarkar, Vivek},
-booktitle = {Proceedings of the 20th annual ACM SIGPLAN conference on Object-oriented programming, systems, languages, and applications},
-publisher = {ACM},
-title = {{X10: An Object-Oriented Approach to Non-Uniform Cluster Computing}},
-year = {2005}
-}
+ author = {Charles, Philippe and Grothoff, Christian and Saraswat, Vijay and Donawa, Christopher and Kielstra, Allan and Ebcioglu, Kemal and von Praun, Christoph and Sarkar, Vivek},
+ title = {X10: an object-oriented approach to non-uniform cluster computing},
+ booktitle = {OOPSLA '05: Proceedings of the 20th annual ACM SIGPLAN conference on Object-oriented programming, systems, languages, and applications},
+ year = {2005},
+ isbn = {1-59593-031-0},
+ pages = {519--538},
+ location = {San Diego, CA, USA},
+ doi = {http://doi.acm.org/10.1145/1094811.1094852},
+ publisher = {ACM},
+ }
+
 @inproceedings{Chase2005,
-author = {Chase, D.R. and Lev, Yossi},
-booktitle = {Proceedings of the seventeenth annual ACM symposium on Parallelism in algorithms and architectures},
-month = mar,
-number = {c},
-title = {{Dynamic Circular Work-Stealing Deque}},
-year = {2005}
-}
+ author = {Chase, David and Lev, Yossi},
+ title = {Dynamic circular work-stealing deque},
+ booktitle = {SPAA '05: Proceedings of the seventeenth annual ACM symposium on Parallelism in algorithms and architectures},
+ year = {2005},
+ isbn = {1-58113-986-1},
+ pages = {21--28},
+ location = {Las Vegas, Nevada, USA},
+ doi = {http://doi.acm.org/10.1145/1073970.1073974},
+ publisher = {ACM},
+ }
+
 @inproceedings{Chen2007,
-author = {Chen, Shimin and Gibbons, P.B. and Kozuch, Michael and Liaskovitis, Vasileios and Ailamaki, Anastassia and Blelloch, G.E. and Falsafi, Babak and Fix, Limor and Hardavellas, Nikos and Mowry, T.C.},
-booktitle = {Proceedings of the nineteenth annual ACM symposium on Parallel algorithms and architectures},
-publisher = {ACM},
-title = {{Scheduling Threads for Constructive Cache Sharing on CMPs}},
-year = {2007}
-}
+ author = {Chen, Shimin and Gibbons, Phillip B. and Kozuch, Michael and Liaskovitis, Vasileios and Ailamaki, Anastassia and Blelloch, Guy E. and Falsafi, Babak and Fix, Limor and Hardavellas, Nikos and Mowry, Todd C. and Wilkerson, Chris},
+ title = {Scheduling threads for constructive cache sharing on CMPs},
+ booktitle = {SPAA '07: Proceedings of the nineteenth annual ACM symposium on Parallel algorithms and architectures},
+ year = {2007},
+ isbn = {978-1-59593-667-7},
+ pages = {105--115},
+ location = {San Diego, California, USA},
+ doi = {http://doi.acm.org/10.1145/1248377.1248396},
+ publisher = {ACM},
+ }
+
 @article{Cohen2004,
-author = {Cohen, W.E.},
-journal = {Wide Open Magazine},
-pages = {53--62},
-title = {{Tuning Programs with OProfile}},
-volume = {1},
-year = {2004}
-}
+ author = {Cohen, W.E.},
+ journal = {Wide Open Magazine},
+ pages = {53--62},
+ title = {{Tuning Programs with OProfile}},
+ volume = {1},
+ year = {2004}
+ }
+
 @article{Contreras2008,
-author = {Contreras, Gilberto and Martonosi, Margaret},
-journal = {Electrical Engineering},
-pages = {1--10},
-title = {{Characterizing and Improving the Performance of Intel Threading Building Blocks}},
-year = {2008}
-}
-@article{Danaher2005,
-author = {Danaher, J.S. and Lee, I.T.A. and Leiserson, C.E.},
-journal = {Synchronization and Concurrency in Object-Oriented Languages (SCOOL)},
-publisher = {Citeseer},
-title = {{The JCilk Language for Multithreaded Computing}},
-year = {2005}
-}
+ author = {Contreras, Gilberto and Martonosi, Margaret},
+ journal = {Electrical Engineering},
+ pages = {1--10},
+ title = {{Characterizing and Improving the Performance of Intel Threading Building Blocks}},
+ year = {2008}
+ }
+
+@inproceedings{Danaher2005,
+ author = {John S. Danaher and I-Ting Angelina Lee and Charles E. Leiserson},
+ title = {The JCilk Language for Multithreaded Computing},
+ booktitle = {Synchronization and Concurrency in Object-Oriented Languages (SCOOL)},
+ year = {2005},
+ month = oct,
+ address = {San Diego, California},
+ } 
+
 @article{Demaine2002,
-author = {Demaine, Erik D},
-journal = {Lecture Notes from the EEF Summer School on Massive Data Sets},
-title = {{Cache-Oblivious Algorithms and Data Structures}},
-year = {2002}
-}
+ author = {Erik D. Demaine and D. Demaine},
+ journal = {Lecture Notes from the EEF Summer School on Massive Data Sets},
+ title = {{Cache-Oblivious Algorithms and Data Structures}},
+ year = {2002}
+ }
+
 @inproceedings{Dinan2009,
-author = {Dinan, James and Larkins, D.B. and Sadayappan, P and Krishnamoorthy, S. and Nieplocha, J.},
-booktitle = {Proceedings of the Conference on High Performance Computing Networking, Storage and Analysis},
-pages = {1--11},
-publisher = {ACM},
-title = {{Scalable Work Stealing}},
-year = {2009}
-}
+ author = {Dinan, James and Larkins, D. Brian and Sadayappan, P. and Krishnamoorthy, Sriram and Nieplocha, Jarek},
+ title = {Scalable work stealing},
+ booktitle = {SC '09: Proceedings of the Conference on High Performance Computing Networking, Storage and Analysis},
+ year = {2009},
+ isbn = {978-1-60558-744-8},
+ pages = {1--11},
+ location = {Portland, Oregon},
+ doi = {http://doi.acm.org/10.1145/1654059.1654113},
+ publisher = {ACM},
+ }
+
+
 @unpublished{Dinkins2007,
-author = {Dinkins, Stephanie},
-title = {{Performance and Scalability Analysis of Parallelized Matrix Multiplication Using Shared Memory}},
-year = {2007}
-}
+ author = {Dinkins, Stephanie},
+ title = {{Performance and Scalability Analysis of Parallelized Matrix Multiplication Using Shared Memory}},
+ year = {2007}
+ }
+
 @online{Dow2005,
-author = {Dow, Eli},
-booktitle = {IBM},
-title = {{Take charge of processor affinity}},
-url = {http://www.ibm.com/developerworks/linux/library/l-affinity.html},
-year = {2005},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Dow, Eli},
+ booktitle = {IBM},
+ title = {{Take charge of processor affinity}},
+ url = {http://www.ibm.com/developerworks/linux/library/l-affinity.html},
+ year = {2005},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @online{Drepper2008,
-author = {Drepper, Ulrich},
-booktitle = {Memory},
-title = {{Understanding Application Memory Performance}},
-url = {http://people.redhat.com/drepper/summit08-memperf.pdf},
-year = {2008},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Drepper, Ulrich},
+ booktitle = {Memory},
+ title = {{Understanding Application Memory Performance}},
+ url = {http://people.redhat.com/drepper/summit08-memperf.pdf},
+ year = {2008},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @online{Drepper2007,
-author = {Drepper, Ulrich},
-url = {http://people.redhat.com/drepper/cpumemory.pdf},
-publisher = {Citeseer},
-title = {{What Every Programmer Should Know About Memory}},
-year = {2007},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Drepper, Ulrich},
+ url = {http://people.redhat.com/drepper/cpumemory.pdf},
+ publisher = {Citeseer},
+ title = {{What Every Programmer Should Know About Memory}},
+ year = {2007},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @inproceedings{Eranian2008,
-author = {Eranian, St\'{e}phane},
-booktitle = {Proceedings of the 2008 ACM SIGPLAN workshop on Memory systems performance and correctness},
-number = {March},
-pages = {26--30},
-publisher = {ACM},
-title = {{What can performance counters do for memory subsystem analysis?}},
-year = {2008}
-}
-@article{Fatourou2001,
-author = {Fatourou, Panagiota},
-journal = {Proceedings of the thirteenth annual ACM symposium on Parallel algorithms and architectures},
-pages = {189--198},
-publisher = {ACM Press},
-title = {{Low-Contention Depth-First Scheduling of Parallel Computations with Write-Once Synchronization Variables}},
-year = {2001}
-}
+ author = {Eranian, St\'{e}phane},
+ title = {What can performance counters do for memory subsystem analysis?},
+ booktitle = {MSPC '08: Proceedings of the 2008 ACM SIGPLAN workshop on Memory systems performance and correctness},
+ year = {2008},
+ isbn = {978-1-60558-049-4},
+ pages = {26--30},
+ location = {Seattle, Washington},
+ doi = {http://doi.acm.org/10.1145/1353522.1353531},
+ publisher = {ACM},
+ }
+
+@inproceedings{Fatourou2001,
+ author = {Fatourou, Panagiota},
+ title = {Low-contention depth-first scheduling of parallel computations with write-once synchronization variables},
+ booktitle = {SPAA '01: Proceedings of the thirteenth annual ACM symposium on Parallel algorithms and architectures},
+ year = {2001},
+ isbn = {1-58113-409-6},
+ pages = {189--198},
+ location = {Crete Island, Greece},
+ doi = {http://doi.acm.org/10.1145/378580.378639},
+ publisher = {ACM},
+ }
+
 @article{Fedorova2010,
-author = {Fedorova, Alexandra and Blagodurov, Sergey and Zhuravlev, Sergey},
-journal = {Communications of the ACM},
-month = feb,
-number = {2},
-pages = {49--57},
-publisher = {ACM},
-title = {{Managing Contention for Shared Resources on Multicore Processors}},
-volume = {53},
-year = {2010}
-}
+ author = {Fedorova, Alexandra and Blagodurov, Sergey and Zhuravlev, Sergey},
+ title = {Managing contention for shared resources on multicore processors},
+ journal = {Commun. ACM},
+ volume = {53},
+ number = {2},
+ year = {2010},
+ issn = {0001-0782},
+ pages = {49--57},
+ doi = {http://doi.acm.org/10.1145/1646353.1646371},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
 @inproceedings{Flood2001,
-author = {Flood, CH and Detlefs, David and Shavit, N and Zhang, Xiolan},
-booktitle = {JVM'01: Proceedings of the 2001 Symposium on Java Virtual Machine Research and Technology Symposium},
-title = {{Parallel Garbage Collection for Shared Memory Multiprocessors}},
-year = {2001},
-pages = {21--21},
-location = {Monterey, California},
-publisher = {USENIX Association},
-}
+ author = {Flood, Christine H. and Detlefs, David and Shavit, Nir and Zhang, Xiaolan},
+ title = {Parallel garbage collection for shared memory multiprocessors},
+ booktitle = {JVM'01: Proceedings of the 2001 Symposium on JavaTM Virtual Machine Research and Technology Symposium},
+ year = {2001},
+ pages = {21--21},
+ location = {Monterey, California},
+ publisher = {USENIX Association},
+ }
+
 @online{Foong2008,
-author = {Foong, Annie and Fung, Jason and Newell, Don},
-booktitle = {Intel},
-title = {{Improved Linux SMP Scaling: User-directed Processor Affinity}},
-url = {http://software.intel.com/en-us/articles/improved-linux-smp-scaling-user-directed-processor-affinity/},
-year = {2008},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
-@article{Frigo1999,
-author = {Frigo, M. and Leiserson, C.E. and Prokop, H. and Ramachandran, S.},
-journal = {40th Annual Symposium on Foundations of Computer Science},
-pages = {285--297},
-publisher = {IEEE Comput. Soc},
-title = {{Cache-Oblivious Algorithms}},
-year = {1999}
-}
+ author = {Foong, Annie and Fung, Jason and Newell, Don},
+ booktitle = {Intel},
+ title = {{Improved Linux SMP Scaling: User-directed Processor Affinity}},
+ url = {http://software.intel.com/en-us/articles/improved-linux-smp-scaling-user-directed-processor-affinity/},
+ year = {2008},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @article{Frigo1998,
-author = {Frigo, Matteo and Leiserson, C.E. and Randall, K.H.},
-journal = {ACM SIGPLAN Notices},
-number = {5},
-pages = {212--223},
-publisher = {ACM},
-title = {{The Implementation of the Cilk-5 Multithreaded Language}},
-volume = {33},
-year = {1998}
-}
+ author = {Frigo, Matteo and Leiserson, Charles E. and Randall, Keith H.},
+ title = {The implementation of the Cilk-5 multithreaded language},
+ journal = {SIGPLAN Not.},
+ volume = {33},
+ number = {5},
+ year = {1998},
+ issn = {0362-1340},
+ pages = {212--223},
+ doi = {http://doi.acm.org/10.1145/277652.277725},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
+@inproceedings{Frigo1999,
+ author = {Frigo, Matteo and Leiserson, Charles E. and Prokop, Harald and Ramachandran, Sridhar},
+ title = {Cache-Oblivious Algorithms},
+ booktitle = {FOCS '99: Proceedings of the 40th Annual Symposium on Foundations of Computer Science},
+ year = {1999},
+ isbn = {0-7695-0409-4},
+ pages = {285},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+ }
+
 @article{Frigo2009,
-author = {Frigo, Matteo and Strumpen, Volker},
-journal = {Theory of Computing Systems},
-pages = {1--39},
-title = {{The Cache Complexity of Multithreaded Cache Oblivious Algorithms}},
-year = {2009}
+ author = {Frigo, Matteo and Strumpen, Volker},
+ title = {The Cache Complexity of Multithreaded Cache Oblivious Algorithms},
+ journal = {Theor. Comp. Sys.},
+ volume = {45},
+ number = {2},
+ year = {2009},
+ issn = {1432-4350},
+ pages = {203--233},
+ doi = {http://dx.doi.org/10.1007/s00224-007-9098-2},
+ publisher = {Springer-Verlag New York, Inc.},
+ address = {Secaucus, NJ, USA},
+ }
+
+@techreport{Gaud2010,
+ title = { {M}ely: {E}fficient {W}orkstealing for {M}ulticore {E}vent-{D}riven {S}ystems},
+ author = {{G}aud, {F}abien and {G}enev{\`e}s, {S}ylvain and {L}achaize, {R}enaud and {L}epers, {B}aptiste and {M}ottet, {F}abien and {M}uller, {G}illes and {Q}u{\'e}ma, {V}ivien},
+ pages = {23 },
+ type = {{R}esearch {R}eport},
+ institution = {INRIA},
+ day = {21},
+ month = {01},
+ year = {2010},
+ url = {http://hal.inria.fr/inria-00449530/PDF/RR-7169.pdf},
 }
-@inproceedings{Gaud2010,
-author = {Fabien Gaud and Sylvain Geneves and Renaud Lachaize and Baptiste Lepers and Fabien Mottet and Gilles Muller and Vivien Quema},
-title = {Efficient Workstealing for Multicore Event-Driven Systems},
-booktitle = {International Conference on Distributed Computing Systems},
-year = {2010},
-pages = {516--525},
-publisher = {IEEE Computer Society},
-address = {Los Alamitos, CA, USA},
-}
-@article{Gregg2003,
-author = {Gregg, David and Power, James and Waldron, John},
-journal = {Concurrency and Computation},
-title = {{Platform Independent Dynamic Java Virtual Machine Analysis: the Java Grande Forum Benchmark Suite}},
-year = {2003}
-}
-@article{Guo2009,
-author = {Guo, Yi and Barik, R.K. and Raman, R. and Sarkar, Vivek},
-journal = {IPDPS},
-publisher = {IEEE},
-title = {{Work-First and Help-First Scheduling Policies for Async-Finish Task Parallelism}},
-year = {2009}
-}
+
+@inproceedings{Gregg2003,
+ author = {Daly, Charles and Horgan, Jane and Power, James and Waldron, John},
+ title = {Platform independent dynamic Java virtual machine analysis: the Java Grande Forum Benchmark suite},
+ booktitle = {JGI '01: Proceedings of the 2001 joint ACM-ISCOPE conference on Java Grande},
+ year = {2001},
+ isbn = {1-58113-359-6},
+ pages = {106--115},
+ location = {Palo Alto, California, United States},
+ doi = {http://doi.acm.org/10.1145/376656.376826},
+ publisher = {ACM},
+ }
+
+@inproceedings{Guo2009,
+ author = {Yi Guo and Rajkishore Barik and Raghavan Raman and Vivek Sarkar},
+ title = {Work-first and help-first scheduling policies for async-finish task parallelism},
+ booktitle = {IPDPS '09: Proceedings of the 2009 IEEE International Symposium on Parallel\&Distributed Processing},
+ year = {2009},
+ isbn = {978-1-4244-3751-1},
+ pages = {1--12},
+ doi = {http://dx.doi.org/10.1109/IPDPS.2009.5161079},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+ }
+
 @article{Guo2010,
-author = {Guo, Yi and Zhao, Jisheng and Cave, Vincent and Sarkar, Vivek},
-journal = {24th IEEE International Parallel and Distributed Processing Symposium (IPDPS)},
-title = {{SLAW: a Scalable Locality-aware Adaptive Work-stealing Scheduler}},
-year = {2010}
-}
+ author = {Guo, Yi and Zhao, Jisheng and Cave, Vincent and Sarkar, Vivek},
+ title = {SLAW: a scalable locality-aware adaptive work-stealing scheduler for multi-core systems},
+ journal = {SIGPLAN Not.},
+ volume = {45},
+ number = {5},
+ year = {2010},
+ issn = {0362-1340},
+ pages = {341--342},
+ doi = {http://doi.acm.org/10.1145/1837853.1693504},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
 @online{Gurari2010,
-author = {Gurari, Eitan M.},
-title = {{Divide-and-Conquer Algorithms}},
-url = {http://www.cse.ohio-state.edu/~gurari/course/cis680/cis680Ch18.html},
-year = {2010},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
-@inproceedings{Hamidzadeh1996,
-author = {Hamidzadeh, B. and Lilja, D.J.},
-booktitle = {ICDCS},
-publisher = {Published by the IEEE Computer Society},
-title = {{Dynamic Scheduling Strategies for Shared-Memory Multiprocessors}},
-year = {1996}
-}
-@article{Hendler2006,
-author = {Hendler, Danny and Lev, Yossi and Moir, Mark and Shavit, Nir},
-journal = {Distributed Computing},
-number = {3},
-pages = {189--207},
-publisher = {Springer},
-title = {{A Dynamic-Sized Nonblocking Work Stealing Deque}},
-volume = {18},
-year = {2006}
-}
+ author = {Gurari, Eitan M.},
+ title = {{Divide-and-Conquer Algorithms}},
+ url = {http://www.cse.ohio-state.edu/~gurari/course/cis680/cis680Ch18.html},
+ year = {2010},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
+@article{Hamidzadeh1996,
+ author = {B. Hamidzadeh and D.J. Lilja},
+ title = {Dynamic scheduling strategies for shared-memory multiprocessors},
+ journal ={Distributed Computing Systems, International Conference on},
+ volume = {0},
+ issn = {1063-6927},
+ year = {1996},
+ pages = {208},
+ doi = {http://doi.ieeecomputersociety.org/10.1109/ICDCS.1996.507918},
+ publisher = {IEEE Computer Society},
+ address = {Los Alamitos, CA, USA},
+ }
+
 @inproceedings{Hendler2002,
-author = {Hendler, Danny and Shavit, Nir},
-booktitle = {Proceedings of the twenty-first annual symposium on Principles of distributed computing},
-publisher = {ACM},
-title = {{Non-Blocking Steal-Half Work Queues}},
-year = {2002}
-}
+ author = {Hendler, Danny and Shavit, Nir},
+ title = {Non-blocking steal-half work queues},
+ booktitle = {PODC '02: Proceedings of the twenty-first annual symposium on Principles of distributed computing},
+ year = {2002},
+ isbn = {1-58113-485-1},
+ pages = {280--289},
+ location = {Monterey, California},
+ doi = {http://doi.acm.org/10.1145/571825.571876},
+ publisher = {ACM},
+ }
+
+@techreport{Hendler2005,
+ author = {Hendler, Danny and Lev, Yossi and Moir, Mark and Shavit, Nir},
+ title = {A dynamic-sized nonblocking work stealing deque},
+ year = {2005},
+ source = {SMLI TR-2005-144},
+ type = {{R}esearch {R}eport},
+ publisher = {Sun Microsystems, Inc.},
+ institution = {Sun Microsystems, Inc.},
+ address = {Mountain View, CA, USA},
+ url = {http://labs.oracle.com/techrep/2005/abstract-144.html},
+ }
+
 @article{Herlihy1991,
-author = {Herlihy, Maurice},
-journal = {ACM Transactions on Programming Languages and Systems},
-month = jan,
-number = {1},
-pages = {124--149},
-title = {{Wait-Free Synchronization}},
-volume = {13},
-year = {1991}
-}
+ author = {Herlihy, Maurice},
+ title = {Wait-free synchronization},
+ journal = {ACM Trans. Program. Lang. Syst.},
+ volume = {13},
+ number = {1},
+ year = {1991},
+ issn = {0164-0925},
+ pages = {124--149},
+ doi = {http://doi.acm.org/10.1145/114005.102808},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
 @online{Humble2010,
-author = {Humble, Charles},
-booktitle = {InfoQ},
-title = {{Sun Releases Java 6 Update 18 With Significant Performance Improvements and Windows 7 Support}},
-url = {http://www.infoq.com/news/2010/01/java6u18},
-year = {2010},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Humble, Charles},
+ booktitle = {InfoQ},
+ title = {{Sun Releases Java 6 Update 18 With Significant Performance Improvements and Windows 7 Support}},
+ url = {http://www.infoq.com/news/2010/01/java6u18},
+ year = {2010},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @book{IBM1974,
-author = {IBM},
-edition = {4th},
-title = {{IBM System/370 Principles of Operation}},
-year = {1974}
-}
+ author = {IBM},
+ edition = {4th},
+ title = {{IBM System/370 Principles of Operation}},
+ year = {1974}
+ }
+
 @book{Intel2009,
-author = {Intel},
-number = {November},
-publisher = {Intel Corporation},
-title = {{Intel 64 and IA-32 Architectures Optimization Reference Manual}},
-year = {2009}
-}
-@book{Intel2010,
-author = {Intel},
-number = {253666},
-publisher = {Intel Corporation},
-title = {{Intel 64 and IA-32 Architectures Software Developer’s Manual Volume 3B: System Programming Guide, Part 2}},
-volume = {3},
-year = {2010}
-}
+ author = {Intel},
+ number = {November},
+ publisher = {Intel Corporation},
+ title = {{Intel 64 and IA-32 Architectures Optimization Reference Manual}},
+ year = {2009}
+ }
+
 @online{Intel2009a,
-author = {Intel},
-title = {{Using Intel VTune Performance Analyzer to Optimize Software on Intel Core i7 Processors}},
-url = {http://software.intel.com/file/15529},
-year = {2009},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Intel},
+ title = {{Using Intel VTune Performance Analyzer to Optimize Software on Intel Core i7 Processors}},
+ url = {http://software.intel.com/file/15529},
+ year = {2009},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
+@book{Intel2010,
+ author = {Intel},
+ number = {253666},
+ publisher = {Intel Corporation},
+ title = {{Intel 64 and IA-32 Architectures Software Developer’s Manual Volume 3B: System Programming Guide, Part 2}},
+ volume = {3},
+ year = {2010}
+ }
+
 @article{Kleen2004,
-author = {Kleen, Andi},
-journal = {SUSE Labs},
-title = {{An NUMA API for Linux}},
-year = {2004}
-}
+ author = {Kleen, Andi},
+ journal = {SUSE Labs},
+ title = {{An NUMA API for Linux}},
+ year = {2004}
+ }
+
 @inbook{Knuth1997,
-author = {Knuth, Donald},
-edition = {3rd},
-pages = {238--243},
-publisher = {Addison-Wesley},
-title = {{Double-Ended Queue}},
-booktitle = {{The Art of Computer Programming: Volume 1 - Fundamental Algorithms}},
-year = {1997}
-}
+ author = {Knuth, Donald},
+ edition = {3rd},
+ pages = {238--243},
+ publisher = {Addison-Wesley},
+ title = {{Double-Ended Queue}},
+ booktitle = {{The Art of Computer Programming: Volume 1 - Fundamental Algorithms}},
+ year = {1997}
+ }
+
 @article{Kumar2003,
-author = {Kumar, Piyush},
-journal = {Algorithms for Memory Hierarchies},
-title = {{Cache Oblivious Algorithms}},
-year = {2003}
-}
+ author = {Kumar, Piyush},
+ journal = {Algorithms for Memory Hierarchies},
+ title = {{Cache Oblivious Algorithms}},
+ year = {2003}
+ }
+
 @article{Lamport1978,
-author = {Lamport, Leslie},
-journal = {Communications of the ACM},
-number = {7},
-publisher = {ACM},
-title = {{Time, Clocks, and the Ordering of Events in a Distributed System}},
-volume = {21},
-year = {1978}
-}
+ author = {Lamport, Leslie},
+ title = {Time, clocks, and the ordering of events in a distributed system},
+ journal = {Commun. ACM},
+ volume = {21},
+ number = {7},
+ year = {1978},
+ issn = {0001-0782},
+ pages = {558--565},
+ doi = {http://doi.acm.org/10.1145/359545.359563},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
 @inproceedings{Lea2000,
-author = {Lea, Doug},
-booktitle = {Proceedings of the ACM 2000 conference on Java Grande},
-pages = {36--43},
-publisher = {ACM},
-title = {{A Java Fork/Join Framework}},
-year = {2000}
-}
-@online{Lea2006,
-author = {Lea, Doug},
-title = {{Concurrency JSR-166 Interest Site}},
-url = {http://gee.cs.oswego.edu/dl/concurrency-interest/index.html},
-year = {2006},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Lea, Doug},
+ title = {A Java fork/join framework},
+ booktitle = {JAVA '00: Proceedings of the ACM 2000 conference on Java Grande},
+ year = {2000},
+ isbn = {1-58113-288-3},
+ pages = {36--43},
+ location = {San Francisco, California, United States},
+ doi = {http://doi.acm.org/10.1145/337449.337465},
+ publisher = {ACM},
+ }
+
 @online{Lea2000a,
-author = {Lea, Doug},
-title = {{Fork/Join Parallelism in Java}},
-url = {http://gee.cs.oswego.edu/dl/cpjslides/fj.pdf},
-year = {2000},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Lea, Doug},
+ title = {{Fork/Join Parallelism in Java}},
+ url = {http://gee.cs.oswego.edu/dl/cpjslides/fj.pdf},
+ year = {2000},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @online{Lea2004,
-author = {Lea, Doug and Bloch, Joshua and Midkiff, Sam and Holmes, David and Bowbeer, Joseph and Peierls, Tim},
-title = {{JSR 166: Concurrency Utilities}},
-url = {http://jcp.org/en/jsr/detail?id=166},
-year = {2004},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Lea, Doug and Bloch, Joshua and Midkiff, Sam and Holmes, David and Bowbeer, Joseph and Peierls, Tim},
+ title = {{JSR 166: Concurrency Utilities}},
+ url = {http://jcp.org/en/jsr/detail?id=166},
+ year = {2004},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
+@online{Lea2006,
+ author = {Lea, Doug},
+ title = {{Concurrency JSR-166 Interest Site}},
+ url = {http://gee.cs.oswego.edu/dl/concurrency-interest/index.html},
+ year = {2006},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @article{Leijen2009,
-author = {Leijen, D and Schulte, W and Burckhardt, Sebastian},
-journal = {ACM SIGPLAN Notices},
-number = {10},
-pages = {227--242},
-publisher = {ACM},
-title = {{The Design of a Task Parallel Library}},
-volume = {44},
-year = {2009}
-}
+ author = {Leijen, Daan and Schulte, Wolfram and Burckhardt, Sebastian},
+ title = {The design of a task parallel library},
+ journal = {SIGPLAN Not.},
+ volume = {44},
+ number = {10},
+ year = {2009},
+ issn = {0362-1340},
+ pages = {227--242},
+ doi = {http://doi.acm.org/10.1145/1639949.1640106},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
 @online{Leiserson1998,
-author = {Leiserson, C.E. and Prokop, Harald},
-pages = {1--13},
-publisher = {Citeseer},
-title = {{A Minicourse on Multithreaded Programming}},
-url = {http://supertech.csail.mit.edu/papers/minicourse.pdf},
-volume = {42},
-year = {1998},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Leiserson, C.E. and Prokop, Harald},
+ pages = {1--13},
+ publisher = {Citeseer},
+ title = {{A Minicourse on Multithreaded Programming}},
+ url = {http://supertech.csail.mit.edu/papers/minicourse.pdf},
+ volume = {42},
+ year = {1998},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @online{Lev2005,
-author = {Lev, Yossi and Chase, D.R.},
-title = {{Nonblocking Cyclic Extendable Deque for the ABP work stealing algorithm}},
-url = {http://www.cs.brown.edu/~levyossi/Pubs/MyTalks/ExtendebleCircularDeque.ppt},
-year = {2005},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Lev, Yossi and Chase, D.R.},
+ title = {{Nonblocking Cyclic Extendable Deque for the ABP work stealing algorithm}},
+ url = {http://www.cs.brown.edu/~levyossi/Pubs/MyTalks/ExtendebleCircularDeque.ppt},
+ year = {2005},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @online{Levinthal2007,
-author = {Levinthal, David},
-title = {{Analyzing and Resolving multi-core non scaling on Intel Core 2 processors}},
-url = {http://www. devx. com/go-parallel/Link/34762},
-year = {2007},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
-@article{Levinthal2009,
-author = {Levinthal, David},
-journal = {Analysis},
-pages = {1--72},
-title = {{Performance Analysis Guide for Intel Core i7 Processor and Intel Xeon 5500 processors}},
-url = {http://software.intel.com/sites/products/collateral/hpc/vtune/performance_analysis_guide.pdf},
-year = {2009},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Levinthal, David},
+ title = {{Analyzing and Resolving multi-core non scaling on Intel Core 2 processors}},
+ url = {http://www. devx. com/go-parallel/Link/34762},
+ year = {2007},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
+@online{Levinthal2009,
+ author = {Levinthal, David},
+ journal = {Analysis},
+ pages = {1--72},
+ title = {{Performance Analysis Guide for Intel Core i7 Processor and Intel Xeon 5500 processors}},
+ url = {http://software.intel.com/sites/products/collateral/hpc/vtune/performance_analysis_guide.pdf},
+ year = {2009},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @unpublished{Liaskovitis2006,
-author = {Liaskovitis, Vasileios and Chen, Shimin and Gibbons, P.B. and Ailamaki, Anastassia and Blelloch, G.E. and Falsafi, Babak and Fix, Limor and Hardavellas, Nikos and Kozuch, Michael and Mowry, T.C.},
-booktitle = {Work},
-number = {June},
-publisher = {Citeseer},
-title = {{Brief Announcement: Parallel Depth First vs. Work Stealing Schedulers on CMP Architectures}},
-volume = {46},
-year = {2006}
-}
+ author = {Liaskovitis, Vasileios and Chen, Shimin and Gibbons, P.B. and Ailamaki, Anastassia and Blelloch, G.E. and Falsafi, Babak and Fix, Limor and Hardavellas, Nikos and Kozuch, Michael and Mowry, T.C.},
+ title = {{Brief Announcement: Parallel Depth First vs. Work Stealing Schedulers on CMP Architectures}},
+ volume = {46},
+ year = {2006}
+ }
+
 @online{Love2003,
-author = {Love, Robert},
-booktitle = {Linux Journal},
-title = {{CPU Affinity}},
-url = {http://www.linuxjournal.com/article/6799},
-year = {2003},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
-@article{Lowenthal1998,
-author = {Lowenthal, D.K. and Freeh, V.W. and Andrews, G.R.},
-journal = {Concurrency Practice and Experience},
-number = {3},
-pages = {157--173},
-publisher = {Citeseer},
-title = {{Efficient Support for Fine-Grain Parallelism on Shared-Memory Machines}},
-volume = {10},
-year = {1998}
-}
+ author = {Love, Robert},
+ booktitle = {Linux Journal},
+ title = {{CPU Affinity}},
+ url = {http://www.linuxjournal.com/article/6799},
+ year = {2003},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @online{Maddox2009,
-author = {Maddox, R. A. and Singh, G. and Safranek, R. J.},
-title = {{A First Look at the Intel QuickPath Interconnect}},
-url = {http://www.intel.com/intelpress/files/A_First_Look_at_the_Intel(r)_QuickPath_Interconnect.pdf},
-year = {2009},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Maddox, R. A. and Singh, G. and Safranek, R. J.},
+ title = {{A First Look at the Intel QuickPath Interconnect}},
+ url = {http://www.intel.com/intelpress/files/A_First_Look_at_the_Intel(r)_QuickPath_Interconnect.pdf},
+ year = {2009},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @unpublished{Majo2010,
-author = {Majo, Zoltan and Gross, Thomas R},
-title = {{Memory-Conscious Scheduling for Multicore Systems}},
-year = {2010}
-}
-@inproceedings{Manson2005,
-author = {Manson, Jeremy and Pugh, William and Adve, S.V.},
-booktitle = {Proceedings of the 32nd ACM SIGPLAN-SIGACT symposium on Principles of programming languages},
-month = jan,
-number = {1},
-pages = {378--391},
-publisher = {ACM},
-title = {{The Java Memory Model}},
-volume = {40},
-year = {2005}
-}
+ author = {Majo, Zoltan and Gross, Thomas R},
+ title = {{Memory-Conscious Scheduling for Multicore Systems}},
+ year = {2010}
+ }
+
+@article{Manson2005,
+ author = {Manson, Jeremy and Pugh, William and Adve, Sarita V.},
+ title = {The Java memory model},
+ journal = {SIGPLAN Not.},
+ volume = {40},
+ number = {1},
+ year = {2005},
+ issn = {0362-1340},
+ pages = {378--391},
+ doi = {http://doi.acm.org/10.1145/1047659.1040336},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
+@inproceedings{Mars2010,
+ author = {Mars, Jason and Vachharajani, Neil and Hundt, Robert and Soffa, Mary Lou},
+ title = {Contention aware execution: online contention detection and response},
+ booktitle = {CGO '10: Proceedings of the 8th annual IEEE/ACM international symposium on Code generation and optimization},
+ year = {2010},
+ isbn = {978-1-60558-635-9},
+ pages = {257--265},
+ location = {Toronto, Ontario, Canada},
+ doi = {http://doi.acm.org/10.1145/1772954.1772991},
+ publisher = {ACM},
+ }
+
 @online{Masamitsu2008,
-author = {Masamitsu, Jon},
-booktitle = {Sun Microsystems},
-title = {{Help for the NUMA Weary}},
-url = {http://blogs.sun.com/jonthecollector/entry/help_for_the_numa_weary},
-year = {2008},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Masamitsu, Jon},
+ booktitle = {Sun Microsystems},
+ title = {{Help for the NUMA Weary}},
+ url = {http://blogs.sun.com/jonthecollector/entry/help_for_the_numa_weary},
+ year = {2008},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @inproceedings{Mathew1999,
-author = {Mathew, JA and Coddington, PD and Hawick, KA},
-booktitle = {Proceedings of the ACM 1999 conference on Java Grande},
-publisher = {ACM},
-title = {{Analysis and Development of Java Grande Benchmarks}},
-year = {1999}
-}
+ author = {Mathew, J. A. and Coddington, P. D. and Hawick, K. A.},
+ title = {Analysis and development of Java Grande benchmarks},
+ booktitle = {JAVA '99: Proceedings of the ACM 1999 conference on Java Grande},
+ year = {1999},
+ isbn = {1-58113-161-5},
+ pages = {72--80},
+ location = {San Francisco, California, United States},
+ doi = {http://doi.acm.org/10.1145/304065.304101},
+ publisher = {ACM},
+ }
+
 @unpublished{Matsakis2009,
-author = {Nicholas D. Matsakis},
-title = {{Formal Definition and Safety Proof for the Interval and Effect Analysis}},
-year = {2009}
-}
+ author = {Nicholas D. Matsakis},
+ title = {{Formal Definition and Safety Proof for the Interval and Effect Analysis}},
+ year = {2009}
+ }
+
 @inproceedings{Matsakis2009a,
-author = {Nicholas D. Matsakis and Thomas R. Gross },
-title = {{Programming with Intervals}},
-booktitle = {{Proceedings of the International Workshop on Languages and Compilers for Parallel Computing (LCPC 2009)}},
-year = 2009,
-}
+ author = {Nicholas D. Matsakis and Thomas R. Gross },
+ title = {{Programming with Intervals}},
+ booktitle = {{Proceedings of the International Workshop on Languages and Compilers for Parallel Computing (LCPC 2009)}},
+ year = 2009,
+ }
+
 @online{Matsakis2010,
-author = {Nicholas D. Matsakis},
-title = {{Intervals}},
-url = {http://intervals.inf.ethz.ch/},
-year = {2010},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Nicholas D. Matsakis},
+ title = {{Intervals}},
+ url = {http://intervals.inf.ethz.ch/},
+ year = {2010},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @inproceedings{Matsakis2010a,
-author = {Nicholas D. Matsakis and Thomas R. Gross },
-title = {{Handling Errors in Parallel Programs Based on Happens Before Relations}},
-booktitle = {{15th International Workshop on High-Level Parallel Programming Models and Supportive Environments (HIPS 2010)}},
-year = 2010,
-}
+ author = {Nicholas D. Matsakis and Thomas R. Gross },
+ title = {{Handling Errors in Parallel Programs Based on Happens Before Relations}},
+ booktitle = {{15th International Workshop on High-Level Parallel Programming Models and Supportive Environments (HIPS 2010)}},
+ year = 2010,
+ }
+
 @inproceedings{Matsakis2010b,
-author = {Nicholas D. Matsakis and Thomas R. Gross },
-title = {{Reflective Parallel Programming}},
-booktitle = {{HotPar '10: 2nd USENIX Workshop on Hot Topics in Parallelism}},
-year = 2010,
-}
+ author = {Nicholas D. Matsakis and Thomas R. Gross },
+ title = {{Reflective Parallel Programming}},
+ booktitle = {{HotPar '10: 2nd USENIX Workshop on Hot Topics in Parallelism}},
+ year = 2010,
+ }
+
 @online{Melo2009,
-author = {Melo, Arnaldo Carvalho De},
-title = {{Performance Counters on Linux}},
-url = {http://linuxplumbersconf.org/ocw/proposals/108},
-year = {2009},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Melo, Arnaldo Carvalho De},
+ title = {{Performance Counters on Linux}},
+ url = {http://linuxplumbersconf.org/ocw/proposals/108},
+ year = {2009},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @article{Michael2004,
-author = {Michael, M.M.},
-journal = {IEEE Transactions on Parallel and Distributed Systems},
-month = jun,
-number = {6},
-pages = {491--504},
-title = {{Hazard Pointers: Safe Memory Reclamation for Lock-Free Objects}},
-volume = {15},
-year = {2004}
-}
-@article{Michael2009,
-author = {Michael, M.M. and Vechev, M.T. and Saraswat, V.A.},
-journal = {ACM SIGPLAN Notices},
-month = feb,
-number = {4},
-pages = {45--54},
-publisher = {ACM},
-title = {{IdempotentWork Stealing}},
-volume = {44},
-year = {2009}
-}
+ author = {Michael, Maged M.},
+ title = {Hazard Pointers: Safe Memory Reclamation for Lock-Free Objects},
+ journal = {IEEE Trans. Parallel Distrib. Syst.},
+ volume = {15},
+ number = {6},
+ year = {2004},
+ issn = {1045-9219},
+ pages = {491--504},
+ doi = {http://dx.doi.org/10.1109/TPDS.2004.8},
+ publisher = {IEEE Press},
+ }
+
+@inproceedings{Michael2009,
+ author = {Michael, Maged M. and Vechev, Martin T. and Saraswat, Vijay A.},
+ title = {Idempotent work stealing},
+ booktitle = {PPoPP '09: Proceedings of the 14th ACM SIGPLAN symposium on Principles and practice of parallel programming},
+ year = {2009},
+ isbn = {978-1-60558-397-6},
+ pages = {45--54},
+ location = {Raleigh, NC, USA},
+ doi = {http://doi.acm.org/10.1145/1504176.1504186},
+ publisher = {ACM},
+ }
+
 @inproceedings{Moir1997,
-author = {Moir, Mark},
-booktitle = {Proceedings of the sixteenth annual ACM symposium on Principles of distributed computing},
-pages = {219--228},
-publisher = {ACM},
-title = {{Practical Implementations of Non-Blocking Synchronization Primitives}},
-year = {1997}
-}
+ author = {Moir, Mark},
+ title = {Practical implementations of non-blocking synchronization primitives},
+ booktitle = {PODC '97: Proceedings of the sixteenth annual ACM symposium on Principles of distributed computing},
+ year = {1997},
+ isbn = {0-89791-952-1},
+ pages = {219--228},
+ location = {Santa Barbara, California, United States},
+ doi = {http://doi.acm.org/10.1145/259380.259442},
+ publisher = {ACM},
+ }
+
 @online{MPI2009,
-author = {MPI},
-title = {{MPI: A Message-Passing Interface Standard, Version 2.2}},
-url = {http://www.mpi-forum.org/docs/mpi-2.2/mpi22-report.pdf},
-year = {2009},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {MPI},
+ title = {{MPI: A Message-Passing Interface Standard, Version 2.2}},
+ url = {http://www.mpi-forum.org/docs/mpi-2.2/mpi22-report.pdf},
+ year = {2009},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @online{Muller2009,
-author = {M\"{u}ller, Ren\'{e}},
-booktitle = {Data Processing},
-pages = {1--10},
-title = {{Discussion of Exercise 2: Caches in DBMSs}},
-url = {http://www.systems.ethz.ch/education/courses/hs09/mmdbms/ex04.pdf/at_download/file},
-year = {2009},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {M\"{u}ller, Ren\'{e}},
+ booktitle = {Data Processing},
+ pages = {1--10},
+ title = {{Discussion of Exercise 2: Caches in DBMSs}},
+ url = {http://www.systems.ethz.ch/education/courses/hs09/mmdbms/ex04.pdf/at_download/file},
+ year = {2009},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @online{Nielsen2008,
-author = {Nielsen, Kristian},
-title = {{Profiling with OProfile and Intel Core 2 performance counters}},
-url = {http://knielsen-hq.org/presentations/oprofile-perfcount/oprofile-perfcount.pdf},
-year = {2008},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Nielsen, Kristian},
+ title = {{Profiling with OProfile and Intel Core 2 performance counters}},
+ url = {http://knielsen-hq.org/presentations/oprofile-perfcount/oprofile-perfcount.pdf},
+ year = {2008},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @online{OpenMPI2010a,
-author = {OpenMPI},
-booktitle = {OpenMPI},
-title = {{Portable Linux Processor Affinity (PLPA)}},
-url = {http://www.open-mpi.org/projects/plpa/},
-year = {2010},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {OpenMPI},
+ booktitle = {OpenMPI},
+ title = {{Portable Linux Processor Affinity (PLPA)}},
+ url = {http://www.open-mpi.org/projects/plpa/},
+ year = {2010},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @online{OpenMPI2010,
-author = {OpenMPI},
-booktitle = {OpenMPI},
-title = {{Portable Hardware Locality (hwloc)}},
-url = {http://www.open-mpi.org/projects/hwloc/},
-year = {2010},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {OpenMPI},
+ booktitle = {OpenMPI},
+ title = {{Portable Hardware Locality (hwloc)}},
+ url = {http://www.open-mpi.org/projects/hwloc/},
+ year = {2010},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @online{Oracle2010,
-author = {Oracle},
-title = {{Java HotSpot Virtual Machine Performance Enhancements - JDK 7}},
-url = {http://download.oracle.com/docs/cd/E17409_01/javase/7/docs/technotes/guides/vm/performance-enhancements-7.html},
-year = {2010},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Oracle},
+ title = {{Java HotSpot Virtual Machine Performance Enhancements - JDK 7}},
+ url = {http://download.oracle.com/docs/cd/E17409_01/javase/7/docs/technotes/guides/vm/performance-enhancements-7.html},
+ year = {2010},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @online{Oracle1999,
-author = {Oracle},
-title = {{Bug ID: 4234402 (Thread.setCPUAffinity)}},
-url = {http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4234402},
-year = {1999},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Oracle},
+ title = {{Bug ID: 4234402 (Thread.setCPUAffinity)}},
+ url = {http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4234402},
+ year = {1999},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @inproceedings{Philbin1996,
-author = {Philbin, James and Edler, Jan and Anshus, O.J. and Douglas, C.C. and Li, Kai},
-booktitle = {Proceedings of the seventh international conference on Architectural support for programming languages and operating systems},
-pages = {60--71},
-publisher = {ACM},
-title = {{Thread Scheduling for Cache Locality}},
-year = {1996}
-}
+ author = {Philbin, James and Edler, Jan and Anshus, Otto J. and Douglas, Craig C. and Li, Kai},
+ title = {Thread scheduling for cache locality},
+ booktitle = {ASPLOS-VII: Proceedings of the seventh international conference on Architectural support for programming languages and operating systems},
+ year = {1996},
+ isbn = {0-89791-767-7},
+ pages = {60--71},
+ location = {Cambridge, Massachusetts, United States},
+ doi = {http://doi.acm.org/10.1145/237090.237151},
+ publisher = {ACM},
+ }
+
 @online{Ramachandran2008,
-author = {Ramachandran, Vijaya},
-booktitle = {Sciences-New York},
-title = {{Algorithms for Multicore Computing}},
-url = {www.cs.utexas.edu/~vlr},
-year = {2008},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
-@mastersthesis{Raman2009,
-author = {Raman, R.},
-number = {May},
-publisher = {Rice University},
-title = {{Compiler Support for Work-Stealing Parallel Runtime Systems}},
-year = {2009}
-}
+ author = {Ramachandran, Vijaya},
+ booktitle = {Sciences-New York},
+ title = {{Algorithms for Multicore Computing}},
+ url = {www.cs.utexas.edu/~vlr},
+ year = {2008},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @book{Reinders2007,
-author = {Reinders, J.},
-publisher = {O'Reilly Media, Inc.},
-title = {{Intel Threading Building Blocks: Outfitting C++ for Multi-core Processor Parallelism}},
-year = {2007},
-isbn = {0596514808}
-}
+ author = {Reinders, J.},
+ publisher = {O'Reilly Media, Inc.},
+ title = {{Intel Threading Building Blocks: Outfitting C++ for Multi-core Processor Parallelism}},
+ year = {2007},
+ isbn = {0596514808}
+ }
+
 @online{Rowand2009,
-author = {Rowand, Frank},
-booktitle = {October},
-title = {{A Survey of Linux Measurement and Diagnostic Tools}},
-url = {http://tree.celinuxforum.org/CelfPubWiki/ELCEurope2009Presentations?action=AttachFile&do=get&target=survey_of_linux_measurement_and_diagnostic_tools.pdf},
-year = {2009},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Rowand, Frank},
+ booktitle = {October},
+ title = {{A Survey of Linux Measurement and Diagnostic Tools}},
+ url = {http://tree.celinuxforum.org/CelfPubWiki/ELCEurope2009Presentations?action=AttachFile&do=get&target=survey_of_linux_measurement_and_diagnostic_tools.pdf},
+ year = {2009},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @article{Runger2010,
-author = {R\"{u}nger, G. and Schwind, Michael},
-journal = {Procedia Computer Science},
-month = may,
-number = {1},
-pages = {67--76},
-publisher = {Elsevier},
-title = {{Fast recursive matrix multiplication for multi-core architectures}},
-volume = {1},
-year = {2010}
-}
+ title = "Fast recursive matrix multiplication for multi-core architectures",
+ journal = "Procedia Computer Science",
+ volume = "1",
+ number = "1",
+ pages = "67 - 76",
+ year = "2010",
+ note = "ICCS 2010",
+ issn = "1877-0509",
+ doi = "DOI: 10.1016/j.procs.2010.04.009",
+ url = "http://www.sciencedirect.com/science/article/B9865-506HM1Y-8/2/765a531f461b88d9b0002edf39d68c95",
+ author = "Gudula Rünger and Michael Schwind"
+ }
+
 @article{Saha2007,
-author = {Saha, Bratin and Adl-Tabatabai, AR and Ghuloum, Anwar and M},
-journal = {ACM SIGOPS},
-month = jun,
-number = {3},
-title = {{Enabling Scalability and Performance in a Large Scale CMP Environment}},
-volume = {41},
-year = {2007}
+ author = {Saha, Bratin and Adl-Tabatabai, Ali-Reza and Ghuloum, Anwar and Rajagopalan, Mohan and Hudson, Richard L. and Petersen, Leaf and Menon, Vijay and Murphy, Brian and Shpeisman, Tatiana and Sprangle, Eric and Rohillah, Anwar and Carmean, Doug and Fang, Jesse},
+ title = {Enabling scalability and performance in a large scale CMP environment},
+ journal = {SIGOPS Oper. Syst. Rev.},
+ volume = {41},
+ number = {3},
+ year = {2007},
+ issn = {0163-5980},
+ pages = {73--86},
+ doi = {http://doi.acm.org/10.1145/1272998.1273006},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
+@techreport{Saraswat2010,
+ author = {Vijay Saraswat},
+ day = 13,
+ edition = {2.01},
+ institution = {IBM},
+ interhash = {7d9b935c2434ef98314e967faa1c48f5},
+ intrahash = {ee50c289403c5ccc660cc789a042af11},
+ title = {Report on the Programming Language X10},
+ type = {Language Specification},
+ url = {http://dist.codehaus.org/x10/documentation/languagespec/x10-latest.pdf},
+ year = 2010,
+ added-at = {2010-01-18T14:43:26.000+0100},
+ biburl = {http://www.bibsonomy.org/bibtex/2ee50c289403c5ccc660cc789a042af11/gron},
+ month = jan
 }
-@report{Saraswat2010,
-author = {Saraswat, Vijay and Bloom, Bard and Tardieu, Olivier},
-journal = {Technical report, IBM TJ Watson},
-title = {{Report on the Programming Language X10}},
-year = {2010}
-}
-@article{Satish2009,
-author = {Satish, Nadathur and Harris, Mark and Garland, Michael},
-journal = {Parallel Computing},
-title = {{Designing Efficient Sorting Algorithms for Manycore GPUs}},
-year = {2009}
-}
+
+@inproceedings{Satish2009,
+ author = {Satish, Nadathur and Harris, Mark and Garland, Michael},
+ title = {Designing efficient sorting algorithms for manycore GPUs},
+ booktitle = {IPDPS '09: Proceedings of the 2009 IEEE International Symposium on Parallel \& Distributed Processing},
+ year = {2009},
+ isbn = {978-1-4244-3751-1},
+ pages = {1--10},
+ doi = {http://dx.doi.org/10.1109/IPDPS.2009.5161005},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+ }
+
 @online{Shemer2007,
-author = {Shemer, Anat},
-booktitle = {Agenda},
-title = {{Efficient Data Sharing in Intel Core Microarchitecture Based Systems}},
-url = {http://software.intel.com/file/952},
-year = {2007},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
-@article{Shirako2008,
-author = {Shirako, Jun and Peixotto, D M and Sarkar, Vivek and Scherer, W N},
-journal = {In ICS. ACM},
-title = {{Phasers: a Unified Deadlock-Free Construct for Collective and Point-to-point Synchronization}},
-year = {2008}
-}
-@article{Shirako2010,
-author = {Shirako, Jun and Sarkar, Vivek},
-journal = {Science},
-title = {{Hierarchical Phasers for Scalable Synchronization and Reductions in Dynamic Parallelism}},
-year = {2010}
-}
-@article{Simpson1999,
-author = {Simpson, D.J. and Burton, F.W.},
-journal = {IEEE Transactions on Software Engineering},
-number = {6},
-pages = {870--882},
-title = {{Space Efficient Execution of Deterministic Parallel Programs}},
-volume = {25},
-year = {1999}
-}
+ author = {Shemer, Anat},
+ booktitle = {Agenda},
+ title = {{Efficient Data Sharing in Intel Core Microarchitecture Based Systems}},
+ url = {http://software.intel.com/file/952},
+ year = {2007},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @inproceedings{Smith2001,
-author = {Smith, LA and Bull, JM and Obdrizalek, J.},
-booktitle = {Supercomputing, ACM/IEEE 2001 Conference},
-number = {November},
-publisher = {ACM Press},
-title = {{A Parallel Java Grande Benchmark Suite}},
-year = {2001}
-}
-@article{Soffa2010,
-author = {Soffa, J.M.M.L. and Hundt, N.V.R.},
-journal = {Design},
-title = {{Contention Aware Execution: Online Contention Detection and Response}},
-year = {2010}
-}
+ author = {Smith, L. A. and Bull, J. M. and Obdrz\'{a}lek, J.},
+ title = {A parallel java grande benchmark suite},
+ booktitle = {Supercomputing '01: Proceedings of the 2001 ACM/IEEE conference on Supercomputing (CDROM)},
+ year = {2001},
+ isbn = {1-58113-293-X},
+ pages = {8--8},
+ location = {Denver, Colorado},
+ doi = {http://doi.acm.org/10.1145/582034.582042},
+ publisher = {ACM},
+ }
+
 @article{Squillante1993,
-author = {Squillante, Mark S. and Lazowska, Edward D.},
-journal = {IEEE Trans. Parallel and Dist. Systems},
-pages = {131--143},
-title = {{Using Processor-Cache Affinity Information in Shared-Memory Multiprocessor Scheduling}},
-volume = {4},
-year = {1993}
-}
+ author = {Squiillante, M. S. and Lazowska, E. D.},
+ title = {Using Processor-Cache Affinity Information in Shared-Memory Multiprocessor Scheduling},
+ journal = {IEEE Trans. Parallel Distrib. Syst.},
+ volume = {4},
+ number = {2},
+ year = {1993},
+ issn = {1045-9219},
+ pages = {131--143},
+ doi = {http://dx.doi.org/10.1109/71.207589},
+ publisher = {IEEE Press},
+ address = {Piscataway, NJ, USA},
+ }
+
 @online{Steele2010,
-author = {Steele, Matthew},
-pages = {2--7},
-title = {{A Tale of Two Algorithms: Multithreading Matrix Multiplication Overhead in Parallelism Choosing an Algorithm}},
-url = {http://software.intel.com/en-us/articles/a-tale-of-two-algorithms-multithreading-matrix-multiplication/},
-year = {2010},
-urlday = {21},
-urlmonth = {8},
-urlyear = {2010}
-}
+ author = {Steele, Matthew},
+ pages = {2--7},
+ title = {{A Tale of Two Algorithms: Multithreading Matrix Multiplication Overhead in Parallelism Choosing an Algorithm}},
+ url = {http://software.intel.com/en-us/articles/a-tale-of-two-algorithms-multithreading-matrix-multiplication/},
+ year = {2010},
+ urlday = {21},
+ urlmonth = {8},
+ urlyear = {2010}
+ }
+
 @article{Suleman2008,
-author = {Suleman, M Aater and Qureshi, Moinuddin K. and Patt, Yale N},
-journal = {ACM SIGARCH Computer Architecture News},
-number = {1},
-title = {{Feedback-Driven Threading: Power-Efficient and High-Performance Execution of Multi-threaded Workloads on CMPs}},
-volume = {36},
-year = {2008}
-}
+ author = {Suleman, M. Aater and Qureshi, Moinuddin K. and Patt, Yale N.},
+ title = {Feedback-driven threading: power-efficient and high-performance execution of multi-threaded workloads on CMPs},
+ journal = {SIGARCH Comput. Archit. News},
+ volume = {36},
+ number = {1},
+ year = {2008},
+ issn = {0163-5964},
+ pages = {277--286},
+ doi = {http://doi.acm.org/10.1145/1353534.1346317},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
 @inproceedings{Tam2007,
-author = {Tam, David and Azimi, R. and Stumm, Michael},
-booktitle = {Proceedings of the 2nd ACM SIGOPS/EuroSys European Conference on Computer Systems 2007},
-publisher = {ACM},
-title = {{Thread Clustering: Sharing-Aware Scheduling on SMP-CMP-SMT Multiprocessors}},
-year = {2007}
-}
-@article{Taura1999,
-author = {Taura, Kenjiro and Tabata, Kunio and Yonezawa, Akinori},
-journal = {ACM SIGPLAN Notices},
-number = {8},
-publisher = {ACM},
-title = {{StackThreads/MP: Integrating Futures into Calling Standards}},
-volume = {34},
-year = {1999}
-}
-@inproceedings{Tzannes2010,
-author = {Tzannes, Alexandros and Caragea, G.C. and Barua, R. and Vishkin, U.},
-booktitle = {Proceedings of the 15th ACM SIGPLAN symposium on Principles and practice of parallel computing},
-pages = {179--190},
-publisher = {ACM},
-title = {{Lazy Binary-Splitting: A Run-Time Adaptive Work-Stealing Scheduler}},
-year = {2010}
-}
+ author = {Tam, David and Azimi, Reza and Stumm, Michael},
+ title = {Thread clustering: sharing-aware scheduling on SMP-CMP-SMT multiprocessors},
+ booktitle = {EuroSys '07: Proceedings of the 2nd ACM SIGOPS/EuroSys European Conference on Computer Systems 2007},
+ year = {2007},
+ isbn = {978-1-59593-636-3},
+ pages = {47--58},
+ location = {Lisbon, Portugal},
+ doi = {http://doi.acm.org/10.1145/1272996.1273004},
+ publisher = {ACM},
+ }
+
 @article{Weaver2008,
-author = {Weaver, V.M. and McKee, S.A.},
-journal = {IEEE International Symposium on Workload Characterization},
-month = oct,
-pages = {141--150},
-publisher = {IEEE},
-title = {{Can Hardware Performance Counters be Trusted?}},
-year = {2008}
-}
+ author = {Weaver, V.M. and McKee, S.A.},
+ journal = {IEEE International Symposium on Workload Characterization},
+ month = oct,
+ pages = {141--150},
+ publisher = {IEEE},
+ title = {{Can Hardware Performance Counters be Trusted?}},
+ year = {2008}
+ }
+
 @inproceedings{Yan2009,
-author = {Yan, Yonghong and Zhao, Jisheng and Guo, Yi and Sarkar, Vivek},
-booktitle = {22nd International Workshop on Languages and Compilers for Parallel Computing},
-title = {{Hierarchical Place Trees: A Portable Abstraction for Task Parallelism and Data Movement}},
-year = {2009}
+ author = {Yonghong Yan and Jisheng Zhao and Yi Guo and Vivek Sarkar},
+ title = {Hierarchical Place Trees: A Portable Abstraction for Task Parallelism and Data Movement},
+ booktitle = {LCPC},
+ year = {2009},
+ pages = {172--187},
+ }
+
+@inproceedings{Zaparanuks2008,
+ author = {Dmitrijs Zaparanuks and Milan Jovic and Matthias Hauswirth},
+ title = {Accuracy of performance counter measurements},
+ booktitle = {IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS 2009)},
+ year = {2009},
+ pages = {23--32},
 }
-@report{Zaparanuks2008,
-author = {Zaparanuks, Dmitrijs and Jovic, Milan and Hauswirth, Matthias},
-booktitle = {2009 IEEE International Symposium on Performance Analysis of Systems and Software},
-institution = {Technical Report 2008/05, University of Lugano},
-month = apr,
-pages = {23--32},
-publisher = {IEEE},
-title = {{Accuracy of Performance Counter Measurements}},
-year = {2008}
-}
-@article{Zhang2010,
-author = {Zhang, Eddy Z. and Jiang, Yunlian and Shen, Xipeng},
-journal = {Proceedings of the 15th ACM SIGPLAN symposium on Principles and practice of parallel programming},
-title = {{Does Cache Sharing on Modern CMP Matter to the Performance of Contemporary Multithreaded Programs?}},
-year = {2010}
-}
-@inproceedings{Zhuravlev2010,
-author = {Zhuravlev, Sergey and Blagodurov, Sergey and Fedorova, Alexandra},
-booktitle = {Proceedings of the fifteenth edition of ASPLOS on Architectural support for programming languages and operating systems},
-pages = {129--142},
-publisher = {ACM},
-title = {{Addressing Shared Resource Contention in Multicore Processors via Scheduling}},
-year = {2010}
-}
+
+@inproceedings{Zhang2010,
+ author = {Zhang, Eddy Z. and Jiang, Yunlian and Shen, Xipeng},
+ title = {Does cache sharing on modern CMP matter to the performance of contemporary multithreaded programs?},
+ booktitle = {PPoPP '10: Proceedings of the 15th ACM SIGPLAN symposium on Principles and practice of parallel programming},
+ year = {2010},
+ isbn = {978-1-60558-877-3},
+ pages = {203--212},
+ location = {Bangalore, India},
+ doi = {http://doi.acm.org/10.1145/1693453.1693482},
+ publisher = {ACM},
+ }
+
+@article{Zhuravlev2010,
+ author = {Zhuravlev, Sergey and Blagodurov, Sergey and Fedorova, Alexandra},
+ title = {Addressing shared resource contention in multicore processors via scheduling},
+ journal = {SIGPLAN Not.},
+ volume = {45},
+ number = {3},
+ year = {2010},
+ issn = {0362-1340},
+ pages = {129--142},
+ doi = {http://doi.acm.org/10.1145/1735971.1736036},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }

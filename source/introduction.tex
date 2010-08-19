@@ -266,7 +266,7 @@ random. When an interval with affinity for a place is ready for
 scheduling, it gets added to the place it has affinity for.
 
 In the non-blocking work-stealing algorithm, the deques are
-implemented with non-blocking synchronization \cite{Arora2001}. The
+implemented with non-blocking synchronization \cite{Arora1998}. The
 current deque implementation of intervals however uses mutual
 exclusion when trying to steal. As a separate effort, we design and
 explore alternative non-blocking queue implementations with the aim to
