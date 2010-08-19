@@ -22,10 +22,12 @@ intervals scheduler.
 
 Traditional primitives for synchronizing multi-threaded programs, such
 as semaphores and barriers, are low-level and dangerous to use. They
+are prone to errors, especially deadlocks and race conditions, and
 require careful attention to implementation details to achieve good
-performance, and are prone to errors, especially deadlocks and race
-conditions.\footnote{Section \ref{sec:intro-intervals} summarizes the
-  introduction to intervals written by \textcite{Matsakis2010a}.}
+performance.
+
+%\footnote{Section \ref{sec:intro-intervals} summarizes the
+%  introduction to intervals written by \textcite{Matsakis2010a}.}
 
 Intervals are a higher-level alternative that make parallel
 programming more secure while maintaining the flexibility and
@@ -41,10 +43,10 @@ The intervals API supports arbitrary \emph{happens before} relations
 making the model very flexible. Intervals can be used to emulate
 existing thread primitives \cite{Matsakis2009a}, but they can also be
 used to create program schedules for which no standard thread
-primitives exist, such as peer-to-peer synchronization.
+primitives exist, for example peer-to-peer synchronization.
 
-Intervals can be extended to support both dynamic and static checks
-such as data race protection \cite{Matsakis2010b} and checking for
+Intervals can be extended to support both runtime and static checks
+for errors like data race protection \cite{Matsakis2010b} and
 deadlocks \cite{Matsakis2009}. An error in one task prevents other,
 dependent tasks from executing \cite{Matsakis2010a}.
 
@@ -59,10 +61,9 @@ program execution.
 The conceptual model for intervals consists of points in time ordered
 by a \emph{happens before} relation. In the model, an interval
 \lstinline!i! consists of a pair of points -- \lstinline!i.start! and
-\lstinline!i.end! -- called the start and end point. They the start
-and end of the interval's execution. Programmers may define arbitrary
-ordering constraints by adding \emph{happens before} edges in between
-the start or end points of different intervals. An edge
+\lstinline!i.end! -- called the start and end point. Programmers may
+define ordering constraints by adding \emph{happens before} edges in
+between the start or end points of different intervals. An edge
 \lstinline!p1 $\rightarrow$ p2! indicates that the point
 \lstinline!p1! must occur before the point \lstinline!p2!. It also
 guarantees that any memory writes which \emph{happen before}
@@ -89,25 +90,25 @@ When an interval executes, it begins by calling the sequential
 execute the task directly or create a number of subintervals to solve
 the task in parallel.
 
-The interval model can be depicted as a graph, as shown in Figure
-\ref{fig:introduction-interval-graph}. The graph contains a single
+The intervals model can be depicted as a graph, as shown in Figure
+\ref{fig:introduction-interval-graph}. The graph pictures a single
 interval with four subintervals, \lstinline!a!, \lstinline!b!,
 \lstinline!c! and \lstinline!d!. The start and end points of each
 interval are drawn as opaque circles. The subintervals of an interval
 are enclosed in a dashed box which is left out for leaf intervals.
 
 The dashed edges connecting different points indicate \emph{happens
-  before} relations added by the programmer. For example, the end of
-\lstinline!a! \emph{happens before} the start of \lstinline!b! and
-\lstinline!c! and the ends of \lstinline!b! and \lstinline!c! both
-\emph{happen before} the start of \lstinline!d!.
+  before} relations added by the programmer. For our example program,
+the end of \lstinline!a! \emph{happens before} the start of
+\lstinline!b! and \lstinline!c!, and the ends of \lstinline!b! and
+\lstinline!c! both \emph{happen before} the start of \lstinline!d!.
 
 \subsection{Java API}
 \label{sec:intro-intervals-java-api}
 
-To create an interval programmers have to subclass the abstract class
+To create an interval, programmers have to subclass the abstract class
 \lstinline!Interval! (Listing \ref{lst:introduction-interval-class})
-and redefine the \lstinline!run()! method. Besides the abstract
+and redefine its \lstinline!run()! method. Besides the abstract
 \lstinline!run()! method, \lstinline!Interval! features final fields
 to access the start and end point as well as the parent interval.
 
@@ -126,7 +127,7 @@ public abstract class Interval {
 \end{lstlisting}
 
 Listing \ref{lst:introduction-interval-graph} shows the code used to
-construct the graph shown in Figure
+construct the graph presented in Figure
 \ref{fig:introduction-interval-graph}.
 
 \begin{lstlisting}[
@@ -171,13 +172,13 @@ intervals execute a task during the current interval and do not return
 until the task has completed.
 
 Lines \ref{lst:introduction-interval-graph-inline-start} --
-\ref{lst:introduction-interval-graph-inline-end} create an inline interval by
-providing an anonymous task class redefining its \lstinline!run()!
-method. The interval has four subintervals, \lstinline!a!,
-\lstinline!b!, \lstinline!c! and \lstinline!d!. They are created on
-Lines \ref{lst:introduction-interval-graph-new-start} --
-\ref{lst:introduction-interval-graph-new-end} and are normal, non-blocking
-intervals.
+\ref{lst:introduction-interval-graph-inline-end} create an inline
+interval by providing an anonymous task class with the redefined
+\lstinline!run()!  method. The interval has four subintervals,
+\lstinline!a!, \lstinline!b!, \lstinline!c! and \lstinline!d!. They
+are created on Lines \ref{lst:introduction-interval-graph-new-start}
+-- \ref{lst:introduction-interval-graph-new-end} and are normal,
+non-blocking intervals.
 
 \subsubsection{Scheduling Intervals}
 \label{sec:intro-intervals-scheduling-intervals}
@@ -194,8 +195,7 @@ initialization. For example, adding the edge
 \lstinline!b.start! had already occurred before the call to
 \lstinline!addHb()! could add the new dependency.
 
-Explicit calls to \lstinline!schedule()! are unusual as the runtime
-automatically invokes \lstinline!schedule()! when the
+The runtime automatically invokes \lstinline!schedule()! when the
 \lstinline!run()! method of an interval returns.
 
 
@@ -212,25 +212,25 @@ support locks and happens before edges.
 A work-stealing scheduler employs a fixed number of threads called
 workers. Each worker has a local double-ended queue, or deque, to
 maintain its own pool of ready tasks from which it obtains work. When
-a worker finds that its pool is empty, it becomes a thief and steals a
-task from the pool of a victim worker chosen at random.
+a worker finds that its pool is empty, it steals a task from the pool
+of a victim worker chosen at random.
 
 To obtain work, a worker takes the ready task from the tail of its
 deque and executes it. If the task terminates, the worker goes back to
-the tail of its deque to take off another task upon which it can
+the tail of its deque to take another task upon which it can
 work. When assigning a new task to a worker, the worker puts the newly
 ready task onto the tail of its deque. Thus, so long as a worker's
 deque is not empty, the worker manipulates its deque in a LIFO
 (stack-like) manner.
 
-When a worker tries to obtain work by taking a task off the tail of
+When a worker tries to obtain work by taking a task from the tail of
 its deque and it finds that it is empty, then the worker becomes a
 thief. It picks a victim worker at random and attempts to obtain work
 by removing the task at the head of the victim worker's deque. If the
 victim worker's deque is empty, then the thief picks another victim
-worker and tries again until it finds a victim whose deque it
-non-empty. At which point the thief continues to work on the stolen
-task as described above. Since steals take place at the head of the
+worker and tries again until it finds a victim whose deque it not
+empty. At which point the thief continues to work on the stolen task
+as described above. Since steals take place at the head of the
 victim's deque, stealing operates in a FIFO manner.
 
 Accessing the run queues at different ends offers several advantages

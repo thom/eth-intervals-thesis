@@ -5,8 +5,9 @@
 \chapter{Approach}
 \label{chap:locality-approach}
 
-As a motivating example we implement a synthetic multi-threaded
-locality-aware benchmark called \emph{Cache Stress Test}. 
+Before starting with the implementation of the new scheduler, we
+implement a synthetic multi-threaded locality-aware benchmark called
+\emph{Cache Stress Test} as a proof of concept.
 
 If a multi-threaded benchmark with best possible locality has better
 performance and fewer last-level cache misses than the same benchmark
@@ -16,10 +17,10 @@ implementation of intervals. Hence, we know whether it makes sense to
 design a locality-aware intervals scheduler.
 
 We wrote our benchmark for the Intel Nehalem system introduced in
-Appendix \ref{sec:experimental-setup-mafushi}. The system has two
-processors with totally 8 cores. While every core has its separate
-level 1 and level 2 caches, the per-processor 8 MB level 3 cache is
-shared between all cores of the same processor.
+Appendix \ref{sec:experimental-setup-mafushi}. The system has 2
+processors with 4 cores each. While every core has its separate level
+1 and level 2 caches, the per-processor 8 MB level 3 cache is shared
+between all cores of the same processor.
 
 \emph{Cache Stress Test} first randomly initializes two integer arrays
 of size \numprint{2097144}. Thus, the size of each array is about 8
@@ -36,7 +37,7 @@ thread adds and multiplies all the elements of its respective array
 100 times.
 
 We implement several different variants of the \emph{Cache Stress
-  Test}:
+  Test}, each having different locality properties:
 
 \begin{itemize}
 \item \emph{Best Locality:} All the threads working on the first array
@@ -52,9 +53,10 @@ We implement several different variants of the \emph{Cache Stress
 \end{itemize}
 
 In the variant with \emph{best locality}, the first threads executing
-warm up the cache by bringing in the elements of the array. Following
-threads can get the array elements from the level 3 cache instead
-from the main memory.
+warm up the cache by bringing in the elements of the array. The
+threads running afterwards can get the array elements from their
+processor's level 3 cache instead from the main memory or the other
+processor's cache.
 
 In the other variants, the elements in the cache might be overwritten
 when a thread tries to access elements of an array which are not
@@ -64,8 +66,8 @@ the other processor.
 Table \ref{tab:locality-approach-cache-stress-test} shows the
 execution times and the speedups over the sequential algorithm for the
 different locality implementations. As expected, the implementation
-with \emph{best locality} is the fastest and provides the best
-speedup. 
+with \emph{best locality} is the fastest and provides the largest
+speedup.
 
 \begin{table}[htb]
   \centering
@@ -90,7 +92,7 @@ significant speedup over the other locality benchmarks of
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=0.7\linewidth]{locality-approach/cache-stress-test}
+  \includegraphics[width=0.65\linewidth]{locality-approach/cache-stress-test}
   \caption{Multi-threaded \emph{Cache Stress Test} with execution
     times normalized to \emph{best locality}}
   \label{fig:locality-approach-cache-stress-test}
@@ -99,7 +101,7 @@ significant speedup over the other locality benchmarks of
 We measure the cache misses with perfmon2 \cite{Eranian2008} to check
 whether our hypothesis is correct. 
 
-Table \ref{tab:locality-approach-cache-stress-test} lists the number
+Table \ref{tab:locality-approach-cache-stress-test-cache-misses} lists the number
 of L3 cache read misses and hits. In Figure
 \ref{fig:locality-approach-cache-stress-test} they are shown
 normalized to the measurements of the \emph{best locality}
@@ -122,7 +124,7 @@ other benchmarks. Compared to the other benchmarks, it has between
   \end{tabular}
   \caption[Multi-threaded \emph{Cache Stress Test} L3 cache read misses and hits]
   {Multi-threaded \emph{Cache Stress Test} L3 cache read misses and hits (rounded to the nearest million)}
-  \label{tab:locality-approach-cache-stress-test}
+  \label{tab:locality-approach-cache-stress-test-cache-misses}
 \end{table}
 
 \begin{figure}[!ht]
