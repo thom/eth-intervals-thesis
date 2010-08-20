@@ -6,20 +6,19 @@
 \label{chap:locality-related-work}
 
 Locality-aware scheduling is a popular area of research. In the
-beginning, most research was done with shared pools of tasks. As
-work-stealing schedulers are gaining in popularity, a lot of research
-on locality-aware scheduling is done with work-stealing schedulers
-nowadays. An alternative scheduling algorithm to work-stealing is
-parallel depth-first designed specifically for constructive cache
-sharing. Related work compares work-stealing to parallel depth-first
-scheduling.
+beginning, most research was done with shared tasks
+pools. Work-stealing schedulers are gaining in popularity, thus a lot
+of research on locality-aware scheduling is done with work-stealing
+schedulers nowadays. An alternative algorithm to work-stealing is
+parallel depth-first scheduling which is designed specifically for
+constructive cache sharing.
 
 \subsubsection{Shared Task Pools}
 
 \textcite{Squillante1993} explore the importance of using
 processor-cache affinity information in shared-memory multiprocessor
 scheduling. They implement and compare several scheduling algorithms
-which trade load balancing off against processor-cache affinity.
+which trade off load balancing against processor-cache affinity.
 
 \textcite{Philbin1996} use fine-grained threads to decompose a
 sequential program. They schedule these threads so as they improve the
@@ -30,72 +29,66 @@ likely to reduce cache misses.
 \subsubsection{Work-Stealing Scheduler}
 
 \textcite{Acar2000} present a theoretical bound for the number of
-cache misses for the work-stealing algorithm and also provide an
-implementation of a work-stealing scheduler using locality information
-for single-core SMP systems. Our locality-aware work-stealing
-scheduler is designed for multi-core SMPs.
+cache misses for the work-stealing algorithm. They also provide an
+implementation of a locality-aware work-stealing scheduler. This
+algorithm is designed for single-core SMP systems, while our
+locality-aware work-stealing scheduler supports multi-core SMPs.
 
 X10 \cite{Charles2005, Saraswat2010} is designed specifically for
 parallel programming using the partitioned global address space model
-and place locality. Like in our locality-aware scheduler, a
-computation is divided among a set of places. Each of those places
-holds some data and hosts one or more activities that operate on those
-data. \textcite{Agarwal2008} present a novel framework for statically
-establishing place locality in X10.
+and place locality. Computations are divided among a set of
+places. Each of those places holds some data and hosts one or more
+activities that operate on those data. \textcite{Agarwal2008} present
+a novel framework for statically establishing place locality in X10.
 
-The Habanero Java \cite{HJ} language derives from initial versions of
-the X10 language. Like X10 it supports locality control with task and
-data distributions using the place construct. \textcite{Yan2009}
-introduce \emph{Hierarchical Place Trees} and implement them into the
-Habanero Java compiler and runtime system. In contrast to our single
-level \emph{Work-Stealing Places}, \emph{Hierarchical Place Trees}
-support co-location of data and computation at multiple levels of a
-memory hierarchy.
+The Habanero Java \cite{HJ} language is based on early versions of the
+X10 language. Like X10, it supports locality control with task and
+data distributions using places. \textcite{Yan2009} introduce
+\emph{Hierarchical Place Trees} and implement them into the Habanero
+Java compiler and runtime system. In contrast to our single level
+\emph{Work-Stealing Places}, \emph{Hierarchical Place Trees} support
+co-location of data and computation at multiple levels of a memory
+hierarchy.
 
 \textcite{Guo2010} introduce SLAW, a scalable locality-aware adaptive
-work-stealing scheduler. The SLAW scheduler is designed for
-programming models where locality hints are provided to the runtime by
-the programmer or compiler. Like our locality-aware scheduler, SLAW
-also groups workers into places. In contrast to our scheduler, their
-implementation disables cross-place steals. SLAW additionally supports
-adaptive scheduling and selects a work-first vs. help-first policy for
-a task at runtime.
+work-stealing scheduler. SLAW also groups workers into places and
+requires locality hints provided by the programmer or compiler. In
+contrast to our scheduler, SLAW disables cross-place steals and
+additionally supports adaptive scheduling and selects a work-first
+vs. help-first policy for a task at runtime.
 
-\textcite{Zeldovich2003} present a new asynchronous programming
-library which allows event-driven applications to take advantage of
-multiprocessors by running code for event handlers in parallel using
-work-stealing scheduling. To control the concurrency between events,
-the programmer can specify a color for each event: events with the
-same color are handled serially; events with different colors can be
-handled in parallel. \textcite{Gaud2010} extend the previous work by
-introducing heuristics aimed at improving the performance of the
-work-stealing algorithm. Like our locality-aware scheduler, the
-locality-aware stealing heuristics aims to preserve cache
-locality. Other heuristics they use are ``time-left stealing'' and
-``penalty-aware stealing''. Unlike the intervals locality-aware
-scheduler, those heuristics only require little involvement from the
-application programmers.
+\textcite{Zeldovich2003} present libasync-smp, an asynchronous
+programming library allowing event-driven applications to run code for
+event handlers in parallel using work-stealing
+scheduling. Event-coloring is used to control the parallelism between
+events: events with the same color are handled serially and events
+with different colors are handled concurrently. \textcite{Gaud2010}
+extend the previous work by introducing heuristics aimed at improving
+the performance of the work-stealing algorithm. Like the
+locality-aware intervals scheduler, the \emph{locality-aware stealing}
+heuristics aims to preserve cache locality. Other heuristics
+introduced are \emph{time-left stealing} and \emph{penalty-aware
+  stealing}. Unlike in our locality-aware scheduler, those heuristics
+only require little involvement from the application programmers.
 
-Threading Building Blocks \cite{Contreras2008, Reinders2007} also use
-a work-stealing scheduler. The implementation is designed with caches
-in mind and tries to limit the unnecessary movement of tasks and
-data. When a task has to be passed to a different processor core for
-execution, Threading Building Blocks moves the task with the least
-likelihood of having data in the cache for the processor core from
-which the task is stolen.
+The implementation of Threading Building Blocks \cite{Contreras2008,
+  Reinders2007} uses a work-stealing scheduler which tries to limit
+unneeded migration of tasks and data. Work-stealing places of our
+intervals scheduler can be modified to do the same.
 
 \subsubsection{Parallel Depth-First Scheduler}
 
 Parallel depth-first scheduling was introduced by
-\textcite{Blelloch1999}. In parallel depth-first, processing cores are
-allocated ready-to-run tasks such that higher scheduling priority is
-given to those tasks the sequential program would have executed
-earlier. As a result, PDF tends to co-schedule threads in a way that
-tracks the sequential execution and employs constructive cache sharing
-\cite{Liaskovitis2006, Chen2007}. Work-stealing scheduling is not
-designed for constructive cache sharing, because the cores tend to
-have disjoint working sets. However, the concept of places can be used
-to enable constructive cache sharing.
+\textcite{Blelloch1999}. In parallel depth-first scheduling, tasks are
+assigned priorities in the same ordering as they would be executed in
+a sequential program. This means, tasks that would be executed earlier
+are given higher priorities than those that would be executed
+later. As a result, parallel depth-first scheduling tends to employ
+constructive cache sharing \cite{Liaskovitis2006, Chen2007} as it
+co-schedules threads in a way that simulates the sequential execution
+order. In work-stealing scheduling cores tend to have disjointed
+working sets. However, the concept of places can be used to enable
+constructive cache sharing in work-stealing schedulers.
 
 
 %%% Local Variables: 
