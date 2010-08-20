@@ -20,6 +20,28 @@ tradeoff between load balancing (assigning tasks to less loaded
 processors) and using locality (assigning tasks to processors with
 high affinity).
 
+\begin{table}[htb]
+  \centering
+  \begin{tabular}{ll}
+    \toprule
+    Data Source & Latency \\\midrule
+    L3 cache hit, line unshared & $\sim 40$ cycles\\
+    L3 cache hit, shared line in another core\hspace{0.5cm} & $\sim 65$ cycles \\
+    L3 cache hit, modified in another core & $\sim 75$ cycles \\
+    Remote L3 cache & $\sim 100 - 300$ cycles \\
+    Local DRAM & $\sim 60$ ns \\
+    Remote DRAM & $\sim 100$ ns \\\bottomrule
+  \end{tabular}
+  \caption[Memory access times on the Intel Nehalem processor]
+  {Memory access times on the Intel Nehalem processor}
+  \label{tab:locality-introduction-memory-access-times}
+\end{table}
+
+Table
+\ref{tab:locality-introduction-memory-access-times}\footnote{\cite{Levinthal2009}:
+  These values are rough approximations. They depend on the core and
+  uncore frequencies, memory speeds, BIOS settings, etc.}
+
 \section{Problem and Motivation}
 \label{sec:locality-intro-problem-and-motivation}
 
