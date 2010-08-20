@@ -5,6 +5,11 @@
 \chapter{Performance Evaluation}
 \label{chap:locality-performance}
 
+\section{Methodology}
+\label{sec:locality-performance-methodology}
+
+\todo{Finish section ``Methodology''}
+
 The performance results in this chapter are obtained on an Intel
 Nehalem system with two processors and eight cores, running Ubuntu
 9.04 64-bit with kernel 2.6.29 and Sun Hotspot JDK 1.6.0\_20 (Appendix
@@ -39,7 +44,15 @@ reduce the impact of JVM overheads in the evaluation, the execution
 time reported is the average of the three best from 10 benchmark
 iterations.
 
-\section{Cache-Stress Test}
+\section{Non-Locality Benchmarks}
+\label{sec:locality-performance-non-locality}
+
+\todo{Finish section ``Non-Locality Benchmarks}
+
+\section{Locality Benchmarks}
+\label{sec:locality-performance-locality}
+
+\subsection{Cache-Stress Test}
 \label{sec:locality-performance-cache-stress-test}
 
 \begin{table}[htb]
@@ -97,15 +110,18 @@ iterations.
   \label{fig:locality-performance-cache-stress-test-cache}
 \end{figure}
 
-\section{Merge Sort}
+\subsection{Merge Sort}
 \label{sec:locality-performance-merge-sort}
 
 \todo{Describe benchmark ``Merge Sort''}
 
-\section{Block Matrix Multiplication}
+\subsection{Block Matrix Multiplication}
 \label{sec:locality-performance-block-matrix-multiplication}
 
 \todo{Describe benchmark ``Block Matrix Multiplication''}
+
+\todo{Finish section ``Locality Benchmarks}
+
 
 \section{References}
 

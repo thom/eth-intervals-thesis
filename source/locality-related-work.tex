@@ -5,51 +5,90 @@
 \chapter{Related Work}
 \label{chap:locality-related-work}
 
-\textcite{Acar2000} present a work-stealing algorithm that uses
-locality information, and thus outperforms the standard work-stealing
-algorithm on benchmarks. Each process maintains a queue of pointers to
-threads that have affinity for it, and attempts to steal these
-first. They also bound the number of cache misses for the
-work-stealing algorithm, using a ``potential function'' argument.
+Locality-aware scheduling is a popular area of research. In the
+beginning, most research was done with shared pools of tasks.
 
-\textcite{Squillante1993} proposes and compares various scheduling
-algorithms which trade off load balancing and processor-cache
-affinity. They use the detailed cache model to examine cache reload
-time, as well as examining the effects of increased bus traffic. No
-work-stealing is used since pool of tasks is shared.
+\textcite{Squillante1993} explore the importance of using
+processor-cache affinity information in shared-memory multiprocessor
+scheduling. Their algorithms a shared pool of tasks and trade off load
+balancing and processor-cache affinity.
 
-\textcite{Philbin1996}: Thread scheduling for cache locality
+\textcite{Philbin1996} use fine-grained threads to decompose a
+sequential program. They schedule these threads so as they improve the
+program's data locality. The algorithm relies upon hints provided at
+the time of thread creation to determine a thread execution order
+likely to reduce cache misses.
 
-Threading Building Blocks \cite{Contreras2008, Reinders2007} is
-designed with caches in mind and works to limit the unnecessary
-movement of tasks and data. When a task has to be passed to a
-different processor core for execution, Threading Building Blocks
-moves the task with the least likelihood of having data in the cache
-for the processor core from which the task is stolen.
+Work-stealing schedulers are gaining in popularity as scheduling
+algorithms for dynamic lightweight task scheduling. Thus, most
+research on locality-aware scheduling is done with work-stealing
+schedulers nowadays.
+
+\textcite{Acar2000} present a theoretical bound for the number of
+cache misses for the work-stealing algorithm and also provide an
+implementation of a work-stealing scheduler using locality information
+for single-core SMP systems. Our locality-aware work-stealing
+scheduler is designed for multi-core SMPs.
+
+\textcite{Guo2010} introduce SLAW, a scalable locality-aware adaptive
+work-stealing scheduler. The SLAW scheduler is designed for
+programming models where locality hints are provided to the runtime by
+the programmer or compiler. Like our locality-aware scheduler, SLAW
+also groups workers into places. In contrast to our scheduler, their
+implementation disables cross-place steals. SLAW additionally supports
+adaptive scheduling and selects a work-first vs. help-first policy for
+a task at runtime.
+
+\textcite{Zeldovich2003} present a new asynchronous programming
+library which allows event-driven applications to take advantage of
+multiprocessors by running code for event handlers in parallel using
+work-stealing scheduling. To control the concurrency between events,
+the programmer can specify a color for each event: events with the
+same color are handled serially; events with different colors can be
+handled in parallel. \textcite{Gaud2010} extend the previous work by
+introducing heuristics aimed at improving the performance of the
+work-stealing algorithm. These heuristics try to preserve cache
+locality and avoid unfavorable stealing attempts, with little
+involvement required from the application programmers.
+
+
+%%%% Industry
 
 X10: \textcite{Charles2005} ``X10: an object-oriented approach to
 non-uniform cluster computing'', \textcite{Saraswat2010} ``Report on
 the programming language X10''
 
-\textcite{Agarwal2008}: Static Detection of Place Locality and
-Elimination of Runtime Checks
-
-\textcite{Barik2009}: Efficient Optimization of Memory Accesses in
-Parallel Programs
-
-\textcite{Dinan2009}: Scalable Work Stealing
-
-\textcite{Tam2007}: Thread clustering: sharing-aware scheduling on
-SMP-CMP-SMT multiprocessors
-
 \textcite{Yan2009}: Hierarchical Place Trees: A Portable Abstraction
 for Task Parallelism and Data Movement
 
-\textcite{Gaud2010}: Mely: Efficient Workstealing for Multicore
-Event-Driven Systems \cite{Gaud2010}
+\textcite{Agarwal2008}: Static Detection of Place Locality and
+Elimination of Runtime Checks
 
-\textcite{Guo2010}: SLAW: a Scalable Locality-aware Adaptive
-Work-stealing Scheduler
+Habanero Java
+
+Threading Building Blocks \cite{Contreras2008, Reinders2007} also use
+a work-stealing scheduler. The implementation is designed with caches
+in mind and tries to limit the unnecessary movement of tasks and
+data. When a task has to be passed to a different processor core for
+execution, Threading Building Blocks moves the task with the least
+likelihood of having data in the cache for the processor core from
+which the task is stolen.
+
+%%%% Parallel Depth First Scheduler
+
+\textcite{Blelloch2004}: Effectively sharing a cache among threads
+
+\textcite{Blelloch2008}: Provably good multicore cache performance for
+divide-and-conquer algorithms
+
+\textcite{Liaskovitis2006}: Brief announcement: parallel depth first
+vs. work stealing schedulers on CMP architectures
+
+\textcite{Chen2007}: Scheduling threads for constructive cache sharing
+on CMPs
+
+\textcite{Tam2007}: Thread clustering: sharing-aware scheduling on
+SMP-CMP-SMT multiprocessors
 
 \todo{Finish chapter ``Related Work''}
 
