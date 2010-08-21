@@ -39,6 +39,14 @@ and \emph{penalty-aware stealing}. Unlike in our locality-aware
 scheduler, those heuristics only require little involvement from the
 application programmers.
 
+We introduce the \lstinline!Config! class to simplify switching to
+another machine as the current scheduler implementation cannot
+discover places automatically. \lstinline!Config! features an instance
+of the \lstinline!Places! class which is described in Section
+\ref{sec:locality-implementation-work-stealing-places}. Programmers
+can use it to get place IDs,
+e.g. \lstinline!Config.places.getPlaceID(0)!.
+
 \subsubsection{Data Affinity}
 
 \textcite{Charles2005, Saraswat2010}: X10
