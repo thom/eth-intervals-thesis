@@ -257,20 +257,14 @@ In \autoref{part:locality} of the thesis we implement and analyze an
 advanced scheduler for intervals. It is designed for locality-aware
 scheduling using locality hints provided by the programmer. Instead of
 using work-stealing workers, our scheduler groups workers into
-\emph{Work-Stealing Places}.  Each work-stealing place has a fixed
-number of workers and a local deque to maintain ready tasks. The
-workers of a place share its local deque from which they obtain
-work. When a worker finds that its place's pool is empty, it becomes a
-thief and steals a task from the pool of a victim place chosen at
-random. When an interval with affinity for a place is ready for
-scheduling, it gets added to the place it has affinity for.
+\emph{Work-Stealing Places}.
 
 In the non-blocking work-stealing algorithm, the deques are
 implemented with non-blocking synchronization \cite{Arora1998}. The
 current deque implementation of intervals however uses mutual
 exclusion when trying to steal. As a separate effort, we design and
 explore alternative non-blocking queue implementations with the aim to
-improve work-stealing performance (\autoref{part:queues}).
+improve work-stealing performance in \autoref{part:queues}.
 
 
 %%% Local Variables: 

@@ -18,14 +18,13 @@ intervals scheduler.
 We implement and analyze an advanced scheduler for intervals. It is
 designed for locality-aware scheduling using locality hints provided
 by the programmer. Instead of employing work-stealing workers, our
-scheduler groups workers into \emph{Work-Stealing Places}.  Each
+scheduler groups workers into \emph{Work-Stealing Places}. Each
 work-stealing place has a fixed number of workers and a local deque to
 maintain ready tasks. The workers of a place share its local deque
 from which they obtain work. When a worker finds that its place's pool
-is empty, it becomes a thief and steals a task from the pool of a
-victim place chosen at random. When an interval with affinity for a
-place is ready for scheduling, it gets added to the place it has
-affinity for.
+is empty, it tries to steal a task from the pool of a victim place
+chosen at random. When an interval with affinity for a place is ready
+for scheduling, it gets added to the place it has affinity for.
 
 \begin{center}
   $\bullet$
