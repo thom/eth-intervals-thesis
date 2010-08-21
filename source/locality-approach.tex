@@ -20,7 +20,10 @@ We wrote our benchmark for the Intel Nehalem system introduced in
 Appendix \ref{sec:experimental-setup-mafushi}. The system has 2
 processors with 4 cores each. While every core has its separate level
 1 and level 2 caches, the per-processor 8 MB level 3 cache is shared
-between all cores of the same processor.
+between all cores of the same processor. Cache miss events are measure
+with perfmon2 \cite{Eranian2008}. The methodology we use to run the
+benchmarks and measure their result is described in Section
+\ref{sec:locality-performance-methodology}.
 
 \emph{Cache Stress Test} first randomly initializes two integer arrays
 of size \numprint{2097144}, i.e. the size of each array is about 8
@@ -39,18 +42,18 @@ thread adds and multiplies all the elements of its respective array
 We implement several different variants of the \emph{Cache Stress
   Test}, each having different locality properties:
 
-\begin{itemize}
-\item \emph{Best Locality:} All the threads working on the first array
-  have affinity for the first processor and all threads working on the
+\begin{description}
+\item[Best Locality:] All the threads working on the first array have
+  affinity for the first processor and all threads working on the
   second array have affinity for the second processor.
-\item \emph{Ignorant Locality:} The threads are not bound to any
-  specific processor, i.e. they are \emph{ignorant} of their locality.
-\item \emph{Random Locality:} The affinity of the threads is set to a
+\item[Ignorant Locality:] The threads are not bound to any specific
+  processor, i.e. they are \emph{ignorant} of their locality.
+\item[Random Locality:] The affinity of the threads is set to a
   \emph{random} processor.
-\item \emph{Worst Locality:} Half the threads with affinity for the
-  first processor work on the first array, and the other half works on
-  the second array and vice versa.
-\end{itemize}
+\item[Worst Locality:] Half the threads with affinity for the first
+  processor work on the first array, and the other half works on the
+  second array and vice versa.
+\end{description}
 
 In the variant with \emph{best locality}, the first threads executing
 warm up the cache by bringing in the elements of the array. The
@@ -92,14 +95,11 @@ significant speedup over the other locality benchmarks of
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=0.65\linewidth]{locality-approach/cache-stress-test}
+  \includegraphics[width=0.8\linewidth]{locality-approach/cache-stress-test}
   \caption{Multi-threaded \emph{Cache Stress Test} with execution
     times normalized to \emph{best locality}}
   \label{fig:locality-approach-cache-stress-test}
 \end{figure}
-
-We measure the cache misses with perfmon2 \cite{Eranian2008} to check
-whether our hypothesis is correct. 
 
 Table \ref{tab:locality-approach-cache-stress-test-cache-misses} lists the number
 of L3 cache read misses and hits. In Figure
@@ -109,8 +109,6 @@ implementation. The \emph{best locality} benchmark has between
 3.6\texttimes\ and 4.5\texttimes\ fewer L3 cache read misses than the
 other benchmarks. Compared to the other benchmarks, it has between
 1.5\texttimes\ and 1.8\texttimes\ more L3 cache read hits.
-
-\todo{Add reference to ``Performance -> Methodology''}
 
 \begin{table}[htb]
   \centering
@@ -142,7 +140,7 @@ other benchmarks. Compared to the other benchmarks, it has between
   \label{fig:locality-approach-cache-stress-test-cache}
 \end{figure}
 
-Our experiment confirmed our hypothesis that locality matters and we
+Our experiments confirmed our hypothesis that locality matters and we
 decided to rewrite the intervals scheduler to support locality hints
 provided by the programmer. Chapter \ref{chap:locality-implementation}
 describes the implementation of the locality-aware scheduler. In
