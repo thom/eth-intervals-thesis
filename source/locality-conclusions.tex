@@ -17,108 +17,56 @@
 Scheduling of lightweight threads is a very broad area of research and
 there are many possible directions we could further extend our work.
 
-\subsubsection{API, online contention awareness, more benchmarks}
+Future work should improve the API of \emph{Work-Stealing Places} and
+locality-aware intervals. In the current implemenation, places have to
+be manually configured for each system. This should be automated by
+making the underlying machine transparent to the user. To make our
+library portable, we could use \emph{Portable Linux Processor Affinity
+  (PLPA)} \cite{OpenMPI2010a} or \emph{Portable Hardware Locality
+  (hwloc)} \cite{OpenMPI2010}. The way programmers have to provide
+locality hints to intervals is not very convenient. Future work should
+make using locality-awareness more intuitive.
 
-While we could show that locality-aware work-stealing is beneficial
-for the runtime of a certain group of applications, we should write
-more benchmarks and come up with heuristics and online feedback to
-automate locality placements.
-
-Work-stealing places have to be manually configured for each
-system. It would be good to automate this task.
-
-\textcite{Mars2010} Contention Aware Execution: Online Contention
-Detection and Response
-
-\textcite{Gaud2010} extend the previous work by introducing heuristics
-aimed at improving the performance of the work-stealing
-algorithm. Like the locality-aware intervals scheduler, the
-\emph{locality-aware stealing} heuristics aims to preserve cache
-locality. Other heuristics introduced are \emph{time-left stealing}
-and \emph{penalty-aware stealing}. Unlike in our locality-aware
-scheduler, those heuristics only require little involvement from the
-application programmers.
-
-We introduce the \lstinline!Config! class to simplify switching to
-another machine as the current scheduler implementation cannot
-discover places automatically. \lstinline!Config! features an instance
-of the \lstinline!Places! class which is described in Section
-\ref{sec:locality-implementation-work-stealing-places}. Programmers
-can use it to get place IDs,
-e.g. \lstinline!Config.places.getPlaceID(0)!.
-
-\subsubsection{Data Affinity}
-
-\textcite{Charles2005, Saraswat2010}: X10
-
-\textcite{Guo2010} SLAW: a Scalable Locality-aware Adaptive
-Work-stealing Scheduler
-
-\subsubsection{Parallel Depth First Scheduler}
-
-\textcite{Liaskovitis2006}: Brief announcement: parallel depth first
-vs. work stealing schedulers on CMP architectures
-
-\textcite{Chen2007} Scheduling threads for constructive cache sharing
-on CMPs
-
-\textcite{Fatourou2001} Low-contention depth-first scheduling of
-parallel computations with write-once synchronization variables
-
-Parallel depth-first scheduling was introduced by
-\textcite{Blelloch1999}. In parallel depth-first scheduling, tasks are
-assigned priorities in the same ordering as they would be executed in
-a sequential program. This means, tasks that would be executed earlier
-are given higher priorities than those that would be executed
-later. As a result, parallel depth-first scheduling tends to employ
-constructive cache sharing \cite{Liaskovitis2006, Chen2007} as it
-co-schedules threads in a way that simulates the sequential execution
-order. In work-stealing scheduling cores tend to have disjointed
-working sets. However, the concept of places can be used to enable
-constructive cache sharing in work-stealing schedulers.
-
-\subsubsection{Avoid counter productive steals}
+Our locality-aware intervals scheduler depends on the heuristics of
+the NUMA-aware allocator implemented in Java HotSpot VM to provide
+automatic memory placement optimizations. Further research should be
+done in extending \emph{Work-Stealing Places} to co-locate tasks and
+data \cite{HJ, Charles2005, Saraswat2010}. It might be interesting to
+see how \emph{Work-Stealing Places} would benefit from supporting
+multiple levels of a memory hierarchy as it is done by
+\textcite{Yan2009}.
 
 Load balancing across work-stealing places could lead to
 counter-productive stealing. One possible direction for future work
-would be to avoid counter-productive steals.
+would be to avoid counter-productive steals. \textcite{Agarwal2008}
+present a novel framework for statically establishing place locality
+in a work-stealing scheduler. The implementation of Threading Building
+Blocks \cite{Contreras2008, Reinders2007} uses a work-stealing
+scheduler which tries to limit unneeded migration of tasks and
+data. \textcite{Gaud2010} introduce heuristics for \emph{time-left
+  stealing} and \emph{penalty-aware stealing} which only require
+little involvement from the application programmers.
 
-\textcite{Gaud2010} extend the previous work by introducing heuristics
-aimed at improving the performance of the work-stealing
-algorithm. Like the locality-aware intervals scheduler, the
-\emph{locality-aware stealing} heuristics aims to preserve cache
-locality. Other heuristics introduced are \emph{time-left stealing}
-and \emph{penalty-aware stealing}. Unlike in our locality-aware
-scheduler, those heuristics only require little involvement from the
-application programmers.
+Every worker threads executes on another core which eliminates direct
+contention between them. But they still share their assigned core with
+other processes in the system. To further enhance our locality-aware
+scheduler, we could use online contention
+detection. \textcite{Mars2010} describe how online contention
+detection can be used to dynamically reduce or increase the number of
+worker threads depending on the system load. \textcite{Agrawal2007}
+develop and analyze \lstinline!A-STEAL!, an adaptive work-stealing
+algorithm with parallelism feedback.
 
-\subsubsection{Adaptive number of workers}
-
-The affinity of the workers is set such that they execute on different
-cores. While this eliminates interference between the worker threads,
-they will nevertheless share their assigned core with other processes
-in the system, subject to standard Linux scheduling policy. 
-
-\textcite{Agrawal2006}: An empirical evaluation of work stealing with
-parallelism feedback
-
-\textcite{Agrawal2007}: Adaptive work-stealing with parallelism
-feedback
-
-\subsubsection{Adaptive scheduling policies}
-
-SLAW additionally supports adaptive scheduling and selects a
-work-first vs. help-first policy for a task at runtime.
-
-\textcite{Guo2009} Work-first and help-first scheduling policies for
-async-finish task parallelism
-
-\textcite{Guo2010} SLAW: a Scalable Locality-aware Adaptive
-Work-stealing Scheduler
-
-\todo{Finish section ``Future Work''}
-
-\todo{Finish chapter ``Conclusions and Future Work''}
+Another possible direction for future research would be exploring
+\emph{Parallel Depth-First Scheduling} as a possible replacement for
+\emph{Work-Stealing Scheduling} in intervals. In parallel depth-first
+scheduling, tasks are assigned priorities in the same ordering as they
+would be executed in a sequential program. This means, tasks that
+would be executed earlier are given higher priorities than those that
+would be executed later. As a result, parallel depth-first scheduling
+tends to employ constructive cache sharing \cite{Liaskovitis2006,
+  Chen2007} as it co-schedules threads in a way that simulates the
+sequential execution order.
 
 
 %%% Local Variables: 
