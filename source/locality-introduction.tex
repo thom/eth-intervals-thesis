@@ -11,17 +11,15 @@
 \section{Motivation}
 \label{sec:locality-intro-motivation}
 
-In a shared-memory multiprocessor system, it may be more efficient to
-schedule a task on one processor than another. One reason for this is
-that the processors, or their associated resources, may be
-heterogeneous; we consider this case in more detail below. Another
-reason is processor-cache affinity: when a task returns for execution
-and is scheduled on a processor, it experiences an initial burst of
-cache misses. However, if a significant portion of the task's working
-set is already in the cache, this penalty is reduced. Thus we have a
-tradeoff between load balancing (assigning tasks to less loaded
-processors) and using locality (assigning tasks to processors with
-high affinity).
+The intervals implementation is ignorant about locality. In
+shared-memory multiprocessor systems locality can play an important
+role. Most modern chip multiprocessors feature a heterogeneous memory
+hierarchy where access times depend on which node an interval is
+running. As an example, Table
+\ref{tab:locality-introduction-memory-access-times}\footnote{\cite{Levinthal2009}:
+  These values are rough approximations. They depend on the core and
+  uncore frequencies, memory speeds, BIOS settings, etc.} presents the
+access times for the Intel Nehalem chip multiprocessor.
 
 \begin{table}[htb]
   \centering
@@ -40,10 +38,12 @@ high affinity).
   \label{tab:locality-introduction-memory-access-times}
 \end{table}
 
-Table
-\ref{tab:locality-introduction-memory-access-times}\footnote{\cite{Levinthal2009}:
-  These values are rough approximations. They depend on the core and
-  uncore frequencies, memory speeds, BIOS settings, etc.}
+It might be beneficial to locate data sharing intervals onto the same
+node so they can help each other to warm up the cache.
+
+On the other hand, non-communicating intervals with high memory
+footprints might be better executed on different nodes to reduce cache
+contention.
 
 We implement and analyze an advanced scheduler for intervals. It is
 designed for locality-aware scheduling using locality hints provided
@@ -52,126 +52,90 @@ scheduler groups workers into \emph{Work-Stealing Places}.  Each
 work-stealing place has a fixed number of workers and a local deque to
 maintain ready tasks. The workers of a place share its local deque
 from which they obtain work. When a worker finds that its place's pool
-is empty, it becomes a thief and steals a task from the pool of a
-victim place chosen at random. When an interval with affinity for a
-place is ready for scheduling, it gets added to the place it has
-affinity for.
+is empty, it tries to steal a task from the pool of a victim place
+chosen at random. When an interval with affinity for a place is ready
+for scheduling, it gets added to the place it has affinity for.
 
-\todo{Finish section ``Motivation''}
+Our experimental results show that \emph{best locality} placement of
+intervals can achieve up to 1.15\texttimes\ speedup over \emph{worst}
+or \emph{ignorant locality} placement. Cache hits can be increased by
+up to 1.5\texttimes\ and cache misses can be reduced by up to
+3.1\texttimes\ for the benchmarks and platform studied in this thesis.
 
-\subsection*{References}
+% In a shared-memory multiprocessor system, it may be more efficient to
+% schedule a task on one processor than another. One reason for this is
+% that the processors, or their associated resources, may be
+% heterogeneous. Another reason is processor-cache affinity: when a task
+% returns for execution and is scheduled on a processor, it experiences
+% an initial burst of cache misses. However, if a significant portion of
+% the task's working set is already in the cache, this penalty is
+% reduced. Thus we have a tradeoff between load balancing (assigning
+% tasks to less loaded processors) and using locality (assigning tasks
+% to processors with high affinity).
 
-\subsubsection{Caches}
+% Multicore-cache model for chip multiprocessors
 
-The speed of processors has grown to be much faster than main
-memory. Making all of memory nearly as fast as a processor would
-simply prove too expensive for most computers. Instead, designers make
-small amounts of memory, known as caches, operate nearly as fast as
-the processor. The main memory can then be slower and more
-affordable. The hardware knows how to move information in and out of
-caches as needed, thereby adding to the number of places where data is
-shuffled on its journey between memory and the processor cores. Caches
-are critical in helping overcome the mismatch between memory speed and
-processor speed.
+% A benefit of localing sharing threads onto the same chip is that they
+% incidentally perform prefetching of shared regions for each
+% other. That is, they help to obtain and maintain frequently used
+% shared regions in the local cache.
 
-Virtually all computers use caches only for a temporary copy of data
-that should eventually reside in memory. Therefore, the function of a
-memory subsystem is to move data needed as input by each processing
-core to caches near that processor core, and to move data produced by
-the processing cores out to main memory. As data is read from memory
-into the caches, some data needs to be evicted from the cache. Cache
-designers work to make the data evicted be approximately the data
-least likely to be used again.
+% Another reason for putting threads on different cores is that
+% non-communicating threads with high memory footprints may be better
+% placed onto different chips, helping reduce potential cache capacity
+% problems.
 
-Once a processor accesses data, it is best to exhaust the program’s
-use of it while it is still in the cache. Continued usage will hold it
-in the cache, whereas prolonged inactivity will likely lead to its
-eviction and future usage will need to do a more expensive (slow)
-access to get the data. Furthermore, every time an additional thread
-runs on a processor core, data is likely to be discarded from the
-cache.
+% Most modern chip multiprocessors feature shared cache on chip. For
+% multithreaded applications, the sharing reduces communication latency
+% among co-running threads, but also results in cache contention.
 
-A subtler cost is cache cooling. Processors keep recently accessed
-data in cache memory, which is very fast, but also relatively small
-compared to main memory. When the processor runs out of cache memory,
-it has to evict items from cache and put them back into main
-memory. Typically, it chooses the least recently-used items in the
-cache. (The reality of set-associative caches is a bit more
-complicated, but this is not a cache primer.)
+% Work-stealing is an attractive scheduling policy because when there is
+% plenty of parallelism, stealing is quite rare. However, work-stealing
+% is not designed for constructive cache sharing, because the cores tend
+% to have disjoint working sets.
 
-When a logical thread gets its time slice, as it references a piece of
-data for the first time, this data is pulled into cache, taking
-hundreds of cycles. If it is referenced frequently enough not to be
-evicted, each subsequent reference will find it in cache, and take
-only a few cycles. Such data is called hot in cache.
+% Locality-awareness can lead to improved performance by increasing
+% temporal data reuse withing a worker and among workers in the same
+% place.
 
-Time slicing undoes this because if Thread A finishes its time slice,
-and subsequently Thread B runs on the same physical thread, B will
-tend to evict data that was hot in cache for A, unless both threads
-need the data. When Thread A gets its next time slice, it will need to
-reload evicted data, at the cost of hundreds of cycles for each cache
-miss. Or worse yet, the next time slice for Thread A may be on a
-different physical thread that has a different cache altogether.
+% Work-stealing has been known to be cache-unfriendly. For tasks that
+% share the same memory footprints, randomized locality-oblivious
+% work-stealing schedulers do nothing to ensure scheduling of these
+% tasks on workers that share a cache. This significantly limits the
+% scalability for some memory-bandwidth bounded applications on machines
+% that have separate caches.
 
-\subsubsection{Brief announcement: parallel depth first vs. work
-  stealing schedulers on CMP architectures \cite{Liaskovitis2006}}
+% Our locality-aware intervals scheduler is designed for programming
+% models in which locality hints are provided by the programmer or the
+% compiler.
 
-In the work-stealing scheduler the interval implementation is using,
-each processing core maintains a local work double-ended queue (deque)
-of ready-to-execute intervals. Whenever its local deque is empty, the
-core steals an interval from the bottom of the first non-empty deque
-it finds. Work-stealing is an attractive scheduling policy because
-when there is plenty of parallelism, stealing is quite rare. However,
-work-stealing is not designed for constructive cache sharing, because
-the cores tend to have disjoint working sets.
+% \emph{Work-Stealing Places} reflect the reality that chip multicores
+% have both small private (L1, L2) caches and large shared (L3) cache on
+% chip.
 
-\subsubsection{Scheduling threads for constructive cache sharing on
-  CMPs \cite{Chen2007}}
+% \subsubsection{Multicore Systems}
 
-Work Stealing (WS) is a popular greedy thread scheduling
-algorithm\footnote{In a greedy schedule, a ready job remains
-  unscheduled only if all processors are already busy.} for programs,
-with proven theoretical properties with regards to memory and cache
-usage \cite{Blumofe1998, Blumofe1999, Acar2000}. The policy maintains
-a work queue for each processor (actually a double-ended queue which
-allows elements to be inserted on one end of the queue, the top, but
-taken from either end). When forking a new thread, this new thread is
-placed on the top of the local queue. When a thread completes on a
-processor, the processor looks for a ready-to-execute thread by first
-looking on the top of the local queue. If it finds a thread, it takes
-the thread off the queue and runs it. If the local queue is empty it
-checks the work queues of the other processors and steals a thread
-from the bottom of the first non-empty queue it finds. WS is an
-attractive scheduling policy because when there is plenty of
-parallelism, stealing is quite rare and, because the threads in a
-queue are related, there is good affinity among the threads executed
-by any one processor. However, WS is not designed for constructive
-cache sharing, because the processors tend to have disjoint working
-sets.
+% \begin{itemize}
+% \item[\textbullet] Analyzing and Resolving multi-core non scaling on
+%   Intel Core 2 processors \cite{Levinthal2007}
+% \item[\textbullet] Memory-Conscious Scheduling for Multicore Systems
+%   \cite{Majo2010}
+% \item[\textbullet] Efficient Data Sharing in Intel
+%   \textsuperscript{\textregistered} Core Microarchitecture Based
+%   Systems \cite{Shemer2007}
+% \item[\textbullet] Scheduling threads for constructive cache sharing
+%   on CMPs \cite{Chen2007}
+% \end{itemize}
 
-\subsubsection{Multicore Systems}
+% \subsubsection{Memory}
+% \label{sec:lr-memory}
 
-\begin{itemize}
-\item[\textbullet] Analyzing and Resolving multi-core non scaling on
-  Intel Core 2 processors \cite{Levinthal2007}
-\item[\textbullet] Memory-Conscious Scheduling for Multicore Systems
-  \cite{Majo2010}
-\item[\textbullet] Efficient Data Sharing in Intel
-  \textsuperscript{\textregistered} Core Microarchitecture Based
-  Systems \cite{Shemer2007}
-\item[\textbullet] Scheduling threads for constructive cache sharing
-  on CMPs \cite{Chen2007}
-\end{itemize}
-
-\subsubsection{Memory}
-\label{sec:lr-memory}
-
-\begin{itemize}
-\item[\textbullet] What every programmer should know about memory
-  \cite{Drepper2007}
-\item[\textbullet] Understanding Application Memory Performance
-  \cite{Drepper2008}
-\end{itemize}
+% \begin{itemize}
+% \item[\textbullet] What every programmer should know about memory
+%   \cite{Drepper2007}
+% \item[\textbullet] Understanding Application Memory Performance
+%   \cite{Drepper2008}
+% \end{itemize}
 
 
 \section{Overview}
