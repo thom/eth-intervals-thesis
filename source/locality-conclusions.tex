@@ -10,71 +10,103 @@
 
 \todo{Finish section ``Conclusions''}
 
-Mention \textcite{Majo2010}: ``Memory-Conscious Scheduling for Multicore Systems''
-
-Our experiments are limited.
-
 
 \section{Future Work}
 \label{sec:locality-conclusions-and-future-work-future-work}
 
-\subsection{Contention With Other Threads}
+Scheduling of lightweight threads is a very broad area of research and
+there are many possible directions we could further extend our work.
+
+\subsubsection{API, online contention awareness, more benchmarks}
+
+While we could show that locality-aware work-stealing is beneficial
+for the runtime of a certain group of applications, we should write
+more benchmarks and come up with heuristics and online feedback to
+automate locality placements.
+
+Work-stealing places have to be manually configured for each
+system. It would be good to automate this task.
+
+\textcite{Mars2010} Contention Aware Execution: Online Contention
+Detection and Response
+
+\textcite{Gaud2010} extend the previous work by introducing heuristics
+aimed at improving the performance of the work-stealing
+algorithm. Like the locality-aware intervals scheduler, the
+\emph{locality-aware stealing} heuristics aims to preserve cache
+locality. Other heuristics introduced are \emph{time-left stealing}
+and \emph{penalty-aware stealing}. Unlike in our locality-aware
+scheduler, those heuristics only require little involvement from the
+application programmers.
+
+\subsubsection{Data Affinity}
+
+\textcite{Charles2005, Saraswat2010}: X10
+
+\textcite{Guo2010} SLAW: a Scalable Locality-aware Adaptive
+Work-stealing Scheduler
+
+\subsubsection{Parallel Depth First Scheduler}
+
+\textcite{Liaskovitis2006}: Brief announcement: parallel depth first
+vs. work stealing schedulers on CMP architectures
+
+\textcite{Chen2007} Scheduling threads for constructive cache sharing
+on CMPs
+
+\textcite{Fatourou2001} Low-contention depth-first scheduling of
+parallel computations with write-once synchronization variables
+
+Parallel depth-first scheduling was introduced by
+\textcite{Blelloch1999}. In parallel depth-first scheduling, tasks are
+assigned priorities in the same ordering as they would be executed in
+a sequential program. This means, tasks that would be executed earlier
+are given higher priorities than those that would be executed
+later. As a result, parallel depth-first scheduling tends to employ
+constructive cache sharing \cite{Liaskovitis2006, Chen2007} as it
+co-schedules threads in a way that simulates the sequential execution
+order. In work-stealing scheduling cores tend to have disjointed
+working sets. However, the concept of places can be used to enable
+constructive cache sharing in work-stealing schedulers.
+
+\subsubsection{Avoid counter productive steals}
+
+Load balancing across work-stealing places could lead to
+counter-productive stealing. One possible direction for future work
+would be to avoid counter-productive steals.
+
+\textcite{Gaud2010} extend the previous work by introducing heuristics
+aimed at improving the performance of the work-stealing
+algorithm. Like the locality-aware intervals scheduler, the
+\emph{locality-aware stealing} heuristics aims to preserve cache
+locality. Other heuristics introduced are \emph{time-left stealing}
+and \emph{penalty-aware stealing}. Unlike in our locality-aware
+scheduler, those heuristics only require little involvement from the
+application programmers.
+
+\subsubsection{Adaptive number of workers}
 
 The affinity of the workers is set such that they execute on different
 cores. While this eliminates interference between the worker threads,
 they will nevertheless share their assigned core with other processes
-in the system, subject to standard Linux scheduling policy.
+in the system, subject to standard Linux scheduling policy. 
 
-Automatically discover cores and memory hierarchy
+\textcite{Agrawal2006}: An empirical evaluation of work stealing with
+parallelism feedback
 
-\subsection{Policies for Work-Stealing Scheduling}
+\textcite{Agrawal2007}: Adaptive work-stealing with parallelism
+feedback
 
-\begin{itemize}
-\item[\textbullet] An empirical evaluation of work stealing with
-  parallelism feedback \cite{Agrawal2006}
-\item[\textbullet] Adaptive work-stealing with parallelism feedback
-  \cite{Agrawal2007}
-\item[\textbullet] Low-contention depth-first scheduling of parallel
-  computations with write-once synchronization variables
-  \cite{Fatourou2001}
-\item[\textbullet] Work-first and help-first scheduling policies for
-  async-finish task parallelism \cite{Guo2009}
-\item[\textbullet] SLAW: a Scalable Locality-aware Adaptive
-  Work-stealing Scheduler \cite{Guo2010}
-\end{itemize}
+\subsubsection{Adaptive scheduling policies}
 
-\subsection{Parallel Depth First Scheduler}
+SLAW additionally supports adaptive scheduling and selects a
+work-first vs. help-first policy for a task at runtime.
 
-\begin{itemize}
-\item[\textbullet] Brief announcement: parallel depth first vs. work
-  stealing schedulers on CMP architectures \cite{Liaskovitis2006}
-\item[\textbullet] Scheduling threads for constructive cache sharing
-  on CMPs \cite{Chen2007}
-\end{itemize}
+\textcite{Guo2009} Work-first and help-first scheduling policies for
+async-finish task parallelism
 
-\subsection{Resource Contention}
-
-\begin{itemize}
-\item[\textbullet] A load balancing framework for adaptive and
-  asynchronous applications \cite{Barker2004}
-\item[\textbullet] Characterizing the TLB Behavior of Emerging
-  Parallel Workloads on Chip Multiprocessors \cite{Bhattacharjee2009}
-\item[\textbullet] Managing contention for shared resources on
-  multicore processors \cite{Fedorova2010}
-\item[\textbullet] Dynamic scheduling strategies for shared-memory
-  multiprocessors \cite{Hamidzadeh1996}
-\item[\textbullet] Contention Aware Execution: Online Contention
-  Detection and Response \cite{Mars2010}
-\item[\textbullet] Feedback-Driven Threading: Power-Efficient and
-  High-Performance Execution of Multi-threaded Workloads on CMPs
-  \cite{Suleman2008}
-\item[\textbullet] Does Cache Sharing on Modern CMP Matter to the
-  Performance of Contemporary Multithreaded Programs? \cite{Zhang2010}
-\item[\textbullet] Addressing shared resource contention in multicore
-  processors via scheduling \cite{Zhuravlev2010}
-\item[\textbullet] Realities of multi-core cpu chips and Memory
-  Contention \cite{Barker2009}
-\end{itemize}
+\textcite{Guo2010} SLAW: a Scalable Locality-aware Adaptive
+Work-stealing Scheduler
 
 \todo{Finish section ``Future Work''}
 

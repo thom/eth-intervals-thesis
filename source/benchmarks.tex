@@ -7,10 +7,9 @@
 
 We evaluate the intervals scheduler implementation with a variety of
 parallel Java Grande Forum benchmarks \cite{Smith2001, Mathew1999,
-  Gregg2003} that have been ported to use intervals.
-
-The following is a summary of the benchmarks described in
-\cite{Smith2001, Mathew1999, Gregg2003}.
+  Daly2003} that have been ported to use intervals. The remainder of
+this chapter is a summary of the benchmarks as described in
+\cite{Smith2001}.
 
 \subsection*{Crypt}
 
@@ -29,7 +28,7 @@ sections.
 
 \subsection*{SOR}
 
-The benchmark performs iterations of successive over-relaxations on a
+The benchmark performs iterations of successive over-relaxations on an
 $N \times N$ grid. It features an outer loop over iterations and two
 inner loops, each looping over the grid. To parallelize the loop over
 array rows, a ``red-black'' ordering mechanism is used. The work is
@@ -38,7 +37,7 @@ point-to-point synchronization.
 
 \subsection*{Series}
 
-This benchmark computes the first $N$ fourier coefficients of the
+This benchmark computes the first $N$ Fourier coefficients of the
 function $f(x) = (x+1)^x$ on the interval $[0,2]$. It uses fork-join
 sections to distribute the loop over the Fourier coefficients between
 intervals.

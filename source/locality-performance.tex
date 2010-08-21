@@ -20,6 +20,16 @@ following parameters:
   -server -Xmx4096M -Xms4096M -Xss8M -XX:+UseNUMA
 \end{lstlisting}
 
+The rest of this chapter evaluates the performance of the new
+intervals scheduler on three different locality-aware benchmarks. To
+reduce the impact of JVM overheads in the evaluation, the execution
+time reported is the average of the three best from 10 benchmark
+iterations.
+
+
+\section{Non-Locality Benchmarks}
+\label{sec:locality-performance-non-locality}
+
 It is important that our new scheduler implementation does not affect
 the performance of existing locality-ignorant intervals
 programs. Thus, we run the locality-ignorant JGF benchmarks (Appendix
@@ -38,16 +48,8 @@ scheduler is comparable to the original implementation.
   \label{fig:locality-evaluation-jgf}
 \end{figure}
 
-The rest of this chapter evaluates the performance of the new
-intervals scheduler on three different locality-aware benchmarks. To
-reduce the impact of JVM overheads in the evaluation, the execution
-time reported is the average of the three best from 10 benchmark
-iterations.
-
-\section{Non-Locality Benchmarks}
-\label{sec:locality-performance-non-locality}
-
 \todo{Finish section ``Non-Locality Benchmarks}
+
 
 \section{Locality Benchmarks}
 \label{sec:locality-performance-locality}
@@ -123,9 +125,9 @@ iterations.
 \todo{Finish section ``Locality Benchmarks}
 
 
-\section{References}
+\section*{References}
 
-\subsection{Profiling}
+\subsection*{Profiling}
 
 \begin{itemize}
 \item[\textbullet] Performance Counters on Linux - The New Tools
@@ -160,7 +162,7 @@ iterations.
   \textsuperscript{\texttrademark} i7 Processors \cite{Intel2009a}
 \end{itemize}
 
-\subsection{Multi-Threaded Algorithms}
+\subsection*{Multi-Threaded Algorithms}
 
 \begin{itemize}
 \item[\textbullet] Cache-oblivious algorithms \cite{Frigo1999}

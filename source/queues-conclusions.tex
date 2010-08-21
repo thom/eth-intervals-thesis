@@ -25,16 +25,16 @@ the equal. The \emph{Dynamic Work-Stealing Deque}, \emph{Idempotent
 \emph{Duplicating Work-Stealing Queue}'s performance is comparable to
 the \emph{Idempotent Work-Stealing Deque}.
 
-Apart from the complexer implementation in comparison to the original
-\emph{Work-Stealing Lazy Deque}, a possible reason for this could be
-the rather small number of cores of our benchmark machines (Appendix
-\ref{chap:experimental-setup}). As \textcite{Saha2007} state, there is
-no noticeable difference between the speedup of work-stealing and a
-global shared work queue when not using more than 8 cores. Our
-experiments confirmed those findings for the JGF benchmarks. There is
-no significant difference between the runtimes of the different
-implementations -- whether we use work-stealing or the single shared
-work queue, we get almost the same results.
+Apart from the more complex implementation in comparison to the
+original \emph{Work-Stealing Lazy Deque}, a possible reason for this
+could be the rather small number of cores of our benchmark machines
+(Appendix \ref{chap:experimental-setup}). As \textcite{Saha2007}
+state, there is no noticeable difference between the speedup of
+work-stealing and a global shared work queue when not using more than
+8 cores. Our experiments confirmed those findings for the JGF
+benchmarks. There is no significant difference between the runtimes of
+the different implementations -- whether we use work-stealing or the
+single shared work queue, we get almost the same results.
 
 
 \section{Future Work}
@@ -50,12 +50,11 @@ benefit from using the steal-half algorithm of \textcite{Hendler2002}.
 
 One disadvantage of the queues using arrays to maintain work items is
 that they do not shrink them again once the queue contains less work
-items. This might result in a big waste of
-memory. \textcite{Chase2005} present a way of shrinking an array
-without copying by keeping the reference to the smaller array when
-expanding. When the queue shrinks back its array to the smaller
-previous array, only the elements that were modified while the larger
-array was active need to be copied.
+items which might lead to a waste of memory. \textcite{Chase2005}
+present a way of shrinking an array without copying by keeping the
+reference to the smaller array when expanding. When the queue shrinks
+back its array to the previous array, only the elements that were
+modified while the larger array was active need to be copied.
 
 Another optimization \textcite{Chase2005} mention is working with a
 shared pool of arrays. With the shared pool implementation, whenever

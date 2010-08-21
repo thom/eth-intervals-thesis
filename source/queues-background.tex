@@ -20,10 +20,9 @@ work-stealing deques \cite{Arora1998, Acar2000, Blumofe1995,
 LIFO or FIFO extraction \cite{Michael2009}.
 
 A work-stealing deque is like a traditional deque \cite{Knuth1997}
-except that only the deque's owner thread puts and takes local work to
-and from the deque's bottom end. Elements are stolen from the top end
-of the deque. This minimizes synchronization overhead for the deque's
-owner.
+except that only the deque's owner thread accesses the deque's bottom
+end to put and take local work. Thiefs steal elements from the deque's
+top. This minimizes synchronization overhead for the deque's owner.
 
 All work-stealing queues provide the following three methods in their
 interface:
@@ -128,13 +127,24 @@ can update our notion of the head of the deque (Line
 
 Listing \ref{lst:work-stealing-lazy-deque-steal} shows the
 implementation of \lstinline!steal()! using a synchronized block to
-make sure there can only be one thief at any given time. If the deque
-is empty, \lstinline!steal()! returns \lstinline!null!. Otherwise, it
-returns the element successfully stolen from the top of the deque, or
-\lstinline!null! if this process loses a race with another process to
-steal the topmost element. \lstinline!null! is also returned if a
-\lstinline!steal()! operation lost a race for the last work item
-caused by a concurrent \lstinline!take()! operation.
+make sure there can only be one thief at any given time (Lines
+\ref{lst:work-stealing-lazy-deque-steal-sync-1} --
+\ref{lst:work-stealing-lazy-deque-steal-sync-2}). 
+
+There are three cases where \lstinline!steal()! returns
+\lstinline!null! (Line \ref{lst:work-stealing-lazy-deque-steal-null}):
+
+\begin{itemize}
+\item The deque is empty.
+\item The thief lost a race with another thief trying to steal the
+  topmost work item.
+\item The thief lost a race for the last work item caused by a
+  concurrent \lstinline!take()! operation.
+\end{itemize}
+
+Otherwise, \lstinline!steal()! increases the head and returns the
+successfully stolen work item (Line
+\ref{lst:work-stealing-lazy-deque-steal-item}).
 
 \lstinputlisting[style=FloatNumbers,
   caption={Work-Stealing Lazy Deque: \lstinline!steal()! method}, 

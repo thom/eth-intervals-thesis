@@ -25,8 +25,8 @@ Both machines invoke the JVM with the following parameters:
   -server -Xmx2048M -Xms2048M -Xss8m
 \end{lstlisting}
 
-The execution time reported is the average of the three best benchmark
-iterations from ten separate invocations.
+The execution time reported is the average of the 3 best benchmark
+iterations from 10 separate invocations.
 
 
 \section{Intervals}
@@ -127,7 +127,7 @@ implementations do. This allows for a simpler implementation.
 The location of the head of the \emph{Work-Stealing Lazy Deque} is
 only lazily updated by its owner. This means the location of the head
 is only updated when its owner tries to take a work item and finds it
-was stolen by a competing thief. As opposed to the methods
+was stolen by a competing thief -- as opposed to the methods
 \lstinline!take()! and \lstinline!steal()!  of the \emph{Work-Stealing
   Deque} which attempt to update the location of the head on every
 execution with a Compare-and-Swap operation. Similarly the methods
@@ -363,7 +363,8 @@ the machines we had to test them with (Appendix
 is no noticeable difference between the speedup of work-stealing and a
 global shared work queue when not using more than 8 cores. If this is
 the case, then the optimizations we did in our work-stealing queue
-implementations most likely will not have a significant effect either.
+implementations most likely will not have any significant effect
+either.
 
 To check this hypothesis, we rewrote the intervals scheduler to use a
 single shared work deque. The shared work deque is implemented with
@@ -401,7 +402,7 @@ almost the same results (Figure
 \end{figure}
 
 To really study the impact of work-stealing queues on the intervals
-implementation we need to do extend our experiments on machines with
+implementation, we need to do extend our experiments to machines with
 more than 8 cores.
 
 
