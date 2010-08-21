@@ -6,7 +6,7 @@
 \label{chap:locality-related-work}
 
 Locality-aware scheduling is a popular area of research. In the
-beginning, most research was done with shared tasks
+beginning, most research was done with shared task
 pools. Work-stealing schedulers are gaining in popularity, thus a lot
 of research on locality-aware scheduling is done with work-stealing
 schedulers nowadays. An alternative algorithm to work-stealing is
@@ -22,9 +22,9 @@ which trade off load balancing against processor-cache affinity.
 
 \textcite{Philbin1996} use fine-grained threads to decompose a
 sequential program. They schedule these threads so as they improve the
-program's data locality. The algorithm relies upon hints provided at
-the time of thread creation to determine a thread execution order
-likely to reduce cache misses.
+program's data locality. Like our locality-aware scheduler, the
+algorithm relies upon hints provided at the time of thread creation to
+determine a thread execution order likely to reduce cache misses.
 
 \subsubsection{Work-Stealing Scheduler}
 
@@ -44,7 +44,7 @@ a novel framework for statically establishing place locality in X10.
 The Habanero Java \cite{HJ} language is based on early versions of the
 X10 language. Like X10, it supports locality control with task and
 data distributions using places. \textcite{Yan2009} introduce
-\emph{Hierarchical Place Trees} and implement them into the Habanero
+\emph{Hierarchical Place Trees} and integrate them into the Habanero
 Java compiler and runtime system. In contrast to our single level
 \emph{Work-Stealing Places}, \emph{Hierarchical Place Trees} support
 co-location of data and computation at multiple levels of a memory
@@ -54,8 +54,8 @@ hierarchy.
 work-stealing scheduler. SLAW also groups workers into places and
 requires locality hints provided by the programmer or compiler. In
 contrast to our scheduler, SLAW disables cross-place steals and
-additionally supports adaptive scheduling and selects a work-first
-vs. help-first policy for a task at runtime.
+additionally supports adaptive scheduling by selecting a work-first or
+help-first policy for a task at runtime.
 
 \textcite{Zeldovich2003} present libasync-smp, an asynchronous
 programming library allowing event-driven applications to run code for

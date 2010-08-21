@@ -23,16 +23,16 @@ processors with 4 cores each. While every core has its separate level
 between all cores of the same processor.
 
 \emph{Cache Stress Test} first randomly initializes two integer arrays
-of size \numprint{2097144}. Thus, the size of each array is about 8
-MB, which is the same as the size of the last level cache per
+of size \numprint{2097144}, i.e. the size of each array is about 8
+MB. This is equal to the size of the last level cache per
 processor. Then the benchmark creates 64 threads with their affinity
 set to a specific processor: 32 have an affinity for the first
 processor and 32 for the second processor. Section describes
 \ref{sec:locality-implementation-core-affinity} our methodology of
 binding Java threads to specific processing units.
 
-One half of the threads operates on the elements of the first array
-and the other half operates on the elements of the second array. Each
+One half of the threads operate on the elements of the first array and
+the other half operate on the elements of the second array. Each
 thread adds and multiplies all the elements of its respective array
 100 times.
 
@@ -55,8 +55,8 @@ We implement several different variants of the \emph{Cache Stress
 In the variant with \emph{best locality}, the first threads executing
 warm up the cache by bringing in the elements of the array. The
 threads running afterwards can get the array elements from their
-processor's level 3 cache instead from the main memory or the other
-processor's cache.
+processor's level 3 cache instead of having to resort to the main
+memory or the other processor's cache.
 
 In the other variants, the elements in the cache might be overwritten
 when a thread tries to access elements of an array which are not
@@ -147,7 +147,7 @@ decided to rewrite the intervals scheduler to support locality hints
 provided by the programmer. Chapter \ref{chap:locality-implementation}
 describes the implementation of the locality-aware scheduler. In
 Chapter \ref{chap:locality-performance} we evaluate the performance of
-the new scheduler implementation.
+the new scheduler implementation with a variety of benchmarks.
 
 
 %%% Local Variables: 
