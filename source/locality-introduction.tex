@@ -8,65 +8,48 @@
 \chapter{Introduction}
 \label{chap:locality-introduction}
 
-In \autoref{part:locality} of the thesis we implement and analyze an
-advanced scheduler for intervals. It is designed for locality-aware
-scheduling using locality hints provided by the programmer. Instead of
-using work-stealing workers, our scheduler groups workers into
-\emph{Work-Stealing Places}. Each work-stealing place has a fixed
-number of workers and a local deque to maintain ready tasks. The
-workers of a place share its local deque from which they obtain
-work. When a worker finds that its place's pool is empty, it becomes a
-thief and steals a task from the pool of a victim place chosen at
-random. When an interval with affinity for a place is ready for
-scheduling, it gets added to the place it has affinity for.
+The current implementation of the intervals library uses a
+locality-ignorant work-stealing scheduler to schedule ready-to-run
+tasks. In this thesis we introduce LASSI, a locality-aware scheduler
+for intervals.\footnote{The correct acronym would be LASI but we chose
+  LASSI instead as we really enjoy drinking refreshing masala lassi
+  \smiley}
 
-\section{Motivation}
-\label{sec:locality-intro-motivation}
+\section{Locality-Aware Intervals Scheduling}
+\label{sec:locality-introduction-locality-aware-intervals-scheduling}
 
-The intervals implementation is ignorant about locality. In
-shared-memory multiprocessor systems locality can play an important
-role. Most modern chip multiprocessors feature a heterogeneous memory
-hierarchy where access times depend on which node an interval is
-running. As an example, Table
-\ref{tab:locality-introduction-memory-access-times}\footnote{\cite{Levinthal2009}:
-  These values are rough approximations. They depend on the core and
-  uncore frequencies, memory speeds, BIOS settings, etc.} presents the
-access times for the Intel Nehalem chip multiprocessor.
+In chip multiprocessor systems it may be more efficient to schedule a
+task on one processor than another. As modern CMPs feature a
+heterogeneous memory hierarchy where access times depend on which
+processor an interval is running, locality-aware intervals can lead to
+improved performance:
 
-\begin{table}[htb]
-  \centering
-  \begin{tabular}{ll}
-    \toprule
-    Data Source & Latency \\\midrule
-    L3 cache hit, line unshared & $\sim 40$ cycles\\
-    L3 cache hit, shared line in another core\hspace{0.5cm} & $\sim 65$ cycles \\
-    L3 cache hit, modified in another core & $\sim 75$ cycles \\
-    Remote L3 cache & $\sim 100 - 300$ cycles \\
-    Local DRAM & $\sim 60$ ns \\
-    Remote DRAM & $\sim 100$ ns \\\bottomrule
-  \end{tabular}
-  \caption[Memory access times on the Intel Nehalem processor]
-  {Memory access times on the Intel Nehalem processor}
-  \label{tab:locality-introduction-memory-access-times}
-\end{table}
+\begin{itemize}
+\item By scheduling data sharing intervals on the same processor they
+  perform prefetching of shared regions for one another.
+\item Scheduling non-communicating intervals with high memory
+  footprints on different processors helps to reduce cache contention
+  and potential cache capacity problems.
+\end{itemize}
 
-It might be beneficial to locate data sharing intervals onto the same
-node so they can help each other to warm up the cache.
+When using locality-ignorant work-stealing we cannot fully exploit the
+heterogeneous memory hierarchy of CMPs for our benefit. Thus, we
+implement and analyze LASSI, a locality-aware scheduler for
+intervals. LASSI is designed for locality-aware scheduling using
+locality hints provided by the programmer. Instead of employing
+work-stealing workers, it groups workers into \emph{Work-Stealing
+  Places}.
 
-On the other hand, non-communicating intervals with high memory
-footprints might be better executed on different nodes to reduce cache
-contention.
+Each work-stealing place has a fixed number of workers and a local
+deque to maintain ready tasks. The workers of a place share its local
+deque from which they obtain work. When a worker finds that the pool
+of its place is empty, it tries to steal a task from the pool of a
+victim place chosen at random. Locality-aware intervals are added to
+their preferred place once they are ready for scheduling.
 
-We implement and analyze an advanced scheduler for intervals. It is
-designed for locality-aware scheduling using locality hints provided
-by the programmer. Instead of using work-stealing workers, our
-scheduler groups workers into \emph{Work-Stealing Places}.  Each
-work-stealing place has a fixed number of workers and a local deque to
-maintain ready tasks. The workers of a place share its local deque
-from which they obtain work. When a worker finds that its place's pool
-is empty, it tries to steal a task from the pool of a victim place
-chosen at random. When an interval with affinity for a place is ready
-for scheduling, it gets added to the place it has affinity for.
+Providing locality hints to intervals is optional and the performance
+of locality-ignorant programs executed with the new scheduler
+implementation is comparable to that of the original scheduler.
 
 Our experimental results show that \emph{best locality} placement of
 intervals can achieve up to 1.15\texttimes\ speedup over \emph{worst}
@@ -74,97 +57,23 @@ or \emph{ignorant locality} placement. Cache hits can be increased by
 up to 1.5\texttimes\ and cache misses can be reduced by up to
 3.1\texttimes\ for the benchmarks and platform studied in this thesis.
 
-% In a shared-memory multiprocessor system, it may be more efficient to
-% schedule a task on one processor than another. One reason for this is
-% that the processors, or their associated resources, may be
-% heterogeneous. Another reason is processor-cache affinity: when a task
-% returns for execution and is scheduled on a processor, it experiences
-% an initial burst of cache misses. However, if a significant portion of
-% the task's working set is already in the cache, this penalty is
-% reduced. Thus we have a tradeoff between load balancing (assigning
-% tasks to less loaded processors) and using locality (assigning tasks
-% to processors with high affinity).
-
-% Multicore-cache model for chip multiprocessors
-
-% A benefit of localing sharing threads onto the same chip is that they
-% incidentally perform prefetching of shared regions for each
-% other. That is, they help to obtain and maintain frequently used
-% shared regions in the local cache.
-
-% Another reason for putting threads on different cores is that
-% non-communicating threads with high memory footprints may be better
-% placed onto different chips, helping reduce potential cache capacity
-% problems.
-
-% Most modern chip multiprocessors feature shared cache on chip. For
-% multithreaded applications, the sharing reduces communication latency
-% among co-running threads, but also results in cache contention.
-
-% Work-stealing is an attractive scheduling policy because when there is
-% plenty of parallelism, stealing is quite rare. However, work-stealing
-% is not designed for constructive cache sharing, because the cores tend
-% to have disjoint working sets.
-
-% Locality-awareness can lead to improved performance by increasing
-% temporal data reuse withing a worker and among workers in the same
-% place.
-
-% Work-stealing has been known to be cache-unfriendly. For tasks that
-% share the same memory footprints, randomized locality-oblivious
-% work-stealing schedulers do nothing to ensure scheduling of these
-% tasks on workers that share a cache. This significantly limits the
-% scalability for some memory-bandwidth bounded applications on machines
-% that have separate caches.
-
-% Our locality-aware intervals scheduler is designed for programming
-% models in which locality hints are provided by the programmer or the
-% compiler.
-
-% \emph{Work-Stealing Places} reflect the reality that chip multicores
-% have both small private (L1, L2) caches and large shared (L3) cache on
-% chip.
-
-% \subsubsection{Multicore Systems}
-
-% \begin{itemize}
-% \item[\textbullet] Analyzing and Resolving multi-core non scaling on
-%   Intel Core 2 processors \cite{Levinthal2007}
-% \item[\textbullet] Memory-Conscious Scheduling for Multicore Systems
-%   \cite{Majo2010}
-% \item[\textbullet] Efficient Data Sharing in Intel
-%   \textsuperscript{\textregistered} Core Microarchitecture Based
-%   Systems \cite{Shemer2007}
-% \item[\textbullet] Scheduling threads for constructive cache sharing
-%   on CMPs \cite{Chen2007}
-% \end{itemize}
-
-% \subsubsection{Memory}
-% \label{sec:lr-memory}
-
-% \begin{itemize}
-% \item[\textbullet] What every programmer should know about memory
-%   \cite{Drepper2007}
-% \item[\textbullet] Understanding Application Memory Performance
-%   \cite{Drepper2008}
-% \end{itemize}
+\todo{Correct speedups, and cache hits and misses}
 
 
 \section{Overview}
-\label{sec:locality-intro-overview}
+\label{sec:locality-introduction-locality-overview}
 
 Chapter \ref{chap:locality-approach} describes our approach in
 evaluating locality-aware scheduling. Chapter
-\ref{chap:locality-implementation} explains the locality-aware
-implementation of the intervals scheduler which uses locality hints
-provided by the programmer. The chapter presents the locality-aware
-intervals API, introduces \emph{Work-Stealing Places}, and shows how
-worker threads are bound to specific processing units, e.g. cores.  In
-Chapter \ref{chap:locality-performance} we describe the locality
-benchmarks and analyze their results. Chapter
-\ref{chap:locality-related-work} puts our research in the context of
-related work. In Chapter \ref{chap:locality-conclusions} we conclude
-and summarize our research, and give some ideas for future work.
+\ref{chap:locality-implementation} explains the implementation of
+LASSI. The chapter presents the locality-aware intervals API,
+introduces \emph{Work-Stealing Places}, and shows how worker threads
+are bound to specific processing units, e.g. cores.  In Chapter
+\ref{chap:locality-performance} we describe the locality benchmarks
+and analyze their results. Chapter \ref{chap:locality-related-work}
+puts our research in the context of related work. In Chapter
+\ref{chap:locality-conclusions-and-future-work} we conclude and
+summarize our research, and give some ideas for future work.
 
 
 %%% Local Variables: 

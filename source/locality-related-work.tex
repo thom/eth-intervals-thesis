@@ -31,8 +31,9 @@ determine a thread execution order likely to reduce cache misses.
 \textcite{Acar2000} present a theoretical bound for the number of
 cache misses for the work-stealing algorithm. They also provide an
 implementation of a locality-aware work-stealing scheduler. This
-algorithm is designed for single-core SMP systems, while our
-locality-aware work-stealing scheduler supports multi-core SMPs.
+algorithm is designed for single-core multiprocessor systems, while
+our locality-aware work-stealing scheduler supports chip
+multiprocessor systems.
 
 X10 \cite{Charles2005, Saraswat2010} is designed specifically for
 parallel programming using the partitioned global address space model
