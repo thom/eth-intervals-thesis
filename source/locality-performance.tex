@@ -11,17 +11,13 @@
 The performance results in this chapter are obtained on an Intel
 Nehalem system with 2 processors and 8 cores, running Ubuntu 9.04
 64-bit with kernel 2.6.29 patched to support perfmon2
-\cite{Eranian2008}.
-
-The JVM used is Sun Hotspot JDK 1.6.0\_20 which is invoked with the
-following parameters:
+\cite{Eranian2008} (Appendix
+\ref{sec:experimental-setup-mafushi}). The JVM used is Sun Hotspot JDK
+1.6.0\_20 which is invoked with the following parameters:
 
 \begin{lstlisting}[style=Listing]
   -server -Xmx4096M -Xms4096M -Xss8M -XX:+UseNUMA
 \end{lstlisting}
-
-Appendix \ref{sec:experimental-setup-mafushi} gives a more detailed
-description of the test machine.
 
 Besides the runtime of the benchmarks, we are mostly interested in the
 count of cache hits and miss events. Since the last level cache is
@@ -97,6 +93,24 @@ of the benchmark, each having different locality properties:
   the second array and vice versa for the intervals with locality for
   \emph{place 1}.
 \end{description}
+
+Figure \ref{fig:locality-performance-cache-stress-test-mafushi}
+illustrates the variants of the \emph{best} and \emph{worst locality}.
+
+\begin{figure}[!ht]
+  \centering
+  \subfloat[Best Locality]{
+    \includegraphics[width=0.5\linewidth]{locality-performance/cache-stress-test-mafushi-best}
+    \label{fig:locality-performance-cache-stress-mafushi-best}
+  }
+  \subfloat[Worst Locality]{
+    \includegraphics[width=0.5\linewidth]{locality-performance/cache-stress-test-mafushi-worst}
+    \label{fig:locality-performance-cache-stress-mafushi-worst}
+  }
+  \caption{\emph{Cache Stress Test} with \emph{best} and \emph{worst
+      locality}}
+  \label{fig:locality-performance-cache-stress-test-mafushi}
+\end{figure}
 
 Table \ref{tab:locality-performance-cache-stress-test} shows the
 execution times and the speedups over the sequential algorithm for the

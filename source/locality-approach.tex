@@ -8,32 +8,30 @@
 Before starting with the implementation of the new scheduler, we
 implement a synthetic multi-threaded locality-aware benchmark called
 \emph{Cache Stress Test}. This benchmark serves as a proof of concept
-for our plan to introduce locality-aware intervals.
-
-If a multi-threaded benchmark with best possible locality has better
+for our plan to introduce locality-aware intervals: If a
+multi-threaded benchmark with best possible locality has better
 performance and fewer last-level cache misses than the same benchmark
 with another or no specific locality, we should be able to see the
 same effect when porting the benchmark to a locality-aware
 implementation of intervals. Hence, we know whether it makes sense to
 design a locality-aware intervals scheduler.
 
-We wrote our benchmark for the Intel Nehalem system introduced in
+We wrote our benchmark for the Intel Nehalem system described in
 Appendix \ref{sec:experimental-setup-mafushi}. The system has 2
-processors with 4 cores each. While every core has its separate level
-1 and level 2 caches, the per-processor 8 MB level 3 cache is shared
-between all cores of the same processor. Cache miss events are measure
-with perfmon2 \cite{Eranian2008}. The methodology we use to run the
-benchmarks and measure their results is described in Section
+processors with 4 cores each. Every core has its separate level 1 and
+2 caches, but the per-processor 8 MB level 3 cache is shared between
+all cores of the same processor. The methodology we use to run the
+benchmarks and measure their results is presented in Section
 \ref{sec:locality-performance-methodology}.
 
 \emph{Cache Stress Test} first randomly initializes two integer arrays
 of size \numprint{2097144}, i.e. the size of each array is about 8
 MB. This is equal to the size of the last level cache per
-processor. Then the benchmark creates 64 threads with their affinity
-set to a specific processor: 32 have an affinity for the first
-processor and 32 for the second processor. To bind threads to specific
-processor, we use the affinity library described in Section
-\ref{sec:locality-implementation-core-affinity}.
+processor. Then the benchmark creates 8 \emph{Cache Stress} threads
+for each core with their affinity set to this specific core. Overall,
+we create 64 threads, bound to the 8 cores in groups of 8 threads. To
+bind threads to a specific core, we use the affinity library
+introduced in Section \ref{sec:locality-implementation-core-affinity}.
 
 One half of the threads operate on the elements of the first array and
 the other half operate on the elements of the second array. Each
@@ -45,19 +43,21 @@ We implement several different variants of the \emph{Cache Stress
 
 \begin{description}
 \item[Best Locality:] All the threads working on the first array have
-  affinity for the first processor and all threads working on the
-  second array have affinity for the second processor.
+  affinity for a core on the first processor and all threads working
+  on the second array have affinity for a core on the second
+  processor.
 \item[Ignorant Locality:] The threads are not bound to any specific
-  processor, i.e. they are \emph{ignorant} of their locality.
+  core, i.e. they are \emph{ignorant} of their locality.
 \item[Random Locality:] The affinity of the threads is set to a
-  \emph{random} processor.
-\item[Worst Locality:] Half the threads with affinity for the first
-  processor work on the first array, and the other half works on the
-  second array and vice versa.
+  \emph{random} core.
+\item[Worst Locality:] Half the threads with affinity for a core on
+  the first processor work on the first array, and the other half
+  works on the second array and vice versa.
 \end{description}
 
 Figure \ref{fig:locality-approach-cache-stress-test-mafushi}
-illustrates the variants of the \emph{best} and \emph{worst locality}.
+illustrates the core affinities of the threads for the \emph{best} and
+\emph{worst locality}.
 
 \begin{figure}[!ht]
   \centering
@@ -69,30 +69,30 @@ illustrates the variants of the \emph{best} and \emph{worst locality}.
     \includegraphics[width=0.5\linewidth]{locality-approach/cache-stress-test-mafushi-worst}
     \label{fig:locality-approach-cache-stress-mafushi-worst}
   }
-  \caption{Multi-threaded \emph{Cache Stress Test} with execution
-    times normalized to \emph{best locality}}
+  \caption{Multi-threaded \emph{Cache Stress Test} with \emph{best}
+    and \emph{worst locality}}
   \label{fig:locality-approach-cache-stress-test-mafushi}
 \end{figure}
 
 As the name already gives away, the main idea behind the \emph{Cache
-  Stress Test} benchmark is to stress the cache and provoke
+  Stress Test} benchmark is to stress the cache and provoke cache
 prefetching and contention.
 
 When we are using the \emph{best locality} benchmark, we move all
 sharing threads onto the same processor which will perform prefetching
 of the array elements for each other. That is, they help to obtain and
-maintain the frequently used array elements in the local cache.
+maintain the frequently used array elements in the local L3 cache.
 
 The exact opposite happens in the other variants: Threads compete for
-the cache and overwrite each other's entries. Instead of reading from
-the processor's local cache, threads either have to read from the
+the L3 caches and overwrite each other's entries. Instead of reading
+from the processor's local cache, threads either have to read from the
 other processor's cache or the memory subsystem. Reading from those
-places is much more expensive than reading from the local cache. Table
-\ref{tab:locality-introduction-memory-access-times} cites
+places is much more expensive than reading from the local L3
+cache. Table \ref{tab:locality-introduction-memory-access-times} cites
 \textcite{Levinthal2009} and gives rough approximations for the memory
-access times on our test system using Intel Nehalem processors. The
-latencies depend on the core and uncore frequencies, memory speeds,
-BIOS settings, number of DIMMs, and so forth.
+access times on our test system. The latencies depend on the core and
+uncore frequencies, memory speeds, BIOS settings, number of DIMMs, and
+so forth.
 
 \begin{table}[htb]
   \centering
@@ -185,12 +185,13 @@ other benchmarks. Compared to the other benchmarks, it has between
   \label{fig:locality-approach-cache-stress-test-cache}
 \end{figure}
 
-Our experiments confirmed our hypothesis that locality matters and we
-decided to rewrite the intervals scheduler to support locality hints
-provided by the programmer. Chapter \ref{chap:locality-implementation}
-describes the implementation of the locality-aware scheduler. In
-Chapter \ref{chap:locality-performance} we evaluate the performance of
-the new scheduler implementation with a variety of benchmarks.
+Our experiments confirmed the hypothesis that the locality of threads
+matters. Thus, we decided to rewrite the intervals scheduler to
+support locality hints provided by the programmer. Chapter
+\ref{chap:locality-implementation} describes the implementation of the
+locality-aware scheduler. In Chapter \ref{chap:locality-performance}
+we evaluate the performance of the new scheduler implementation with a
+variety of benchmarks.
 
 
 %%% Local Variables: 
