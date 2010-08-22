@@ -146,42 +146,44 @@ significant speedup over the other locality benchmarks of
   \label{fig:locality-approach-cache-stress-test}
 \end{figure}
 
-Table \ref{tab:locality-approach-cache-stress-test-cache-misses} lists the number
-of L3 cache read misses and hits. In Figure
+Table \ref{tab:locality-approach-cache-stress-test-cache-hits-misses}
+lists the number of L3 cache read hits and misses. In Figure
 \ref{fig:locality-approach-cache-stress-test} they are shown
 normalized to the measurements of the \emph{best locality}
-implementation. The \emph{best locality} benchmark has between
-3.6\texttimes\ and 4.5\texttimes\ fewer L3 cache read misses than the
-other benchmarks. Compared to the other benchmarks, it has between
-1.5\texttimes\ and 1.8\texttimes\ more L3 cache read hits.
+implementation. 
+
+Compared to the other benchmarks, the \emph{best locality} benchmark
+has between 1.5\texttimes\ and 1.8\texttimes\ more L3 cache read hits,
+and between 3.6\texttimes\ and 4.5\texttimes\ fewer L3 cache read
+misses.
 
 \begin{table}[htb]
   \centering
   \begin{tabular}{ln{4}{0}n{4}{0}}
     \toprule
-    & {L3 Cache Read Misses} & {L3 Cache Read Hits} \\\midrule
-    \emph{Best Locality}\hspace{1cm} & 219 & 2577 \\
-    \emph{Ignorant Locality} & 800 & 1674 \\
-    \emph{Random Locality} & 894 & 1646 \\
-    \emph{Worst Locality} & 1005 & 1387 \\\bottomrule
+    & {L3 Cache Read Hits}  & {L3 Cache Read Misses} \\\midrule
+    \emph{Best Locality}\hspace{1cm} & 2577 & 219\\
+    \emph{Ignorant Locality} & 1674 & 800 \\
+    \emph{Random Locality} & 1646 & 894 \\
+    \emph{Worst Locality} & 1387 & 1005 \\\bottomrule
   \end{tabular}
-  \caption[Multi-threaded \emph{Cache Stress Test} L3 cache read misses and hits]
-  {Multi-threaded \emph{Cache Stress Test} L3 cache read misses and hits (rounded to the nearest million)}
-  \label{tab:locality-approach-cache-stress-test-cache-misses}
+  \caption[Multi-threaded \emph{Cache Stress Test} L3 cache read hits and misses]
+  {Multi-threaded \emph{Cache Stress Test} L3 cache read hits and misses (rounded to the nearest million)}
+  \label{tab:locality-approach-cache-stress-test-cache-hits-misses}
 \end{table}
 
 \begin{figure}[!ht]
   \centering
-  \subfloat[L3 Cache Read Misses]{
-    \includegraphics[width=0.5\linewidth]{locality-approach/cache-stress-test-cache-misses}
-    \label{fig:locality-approach-cache-stress-test-cache-misses}
-  }
   \subfloat[L3 Cache Read Hits]{
     \includegraphics[width=0.5\linewidth]{locality-approach/cache-stress-test-cache-hits}
     \label{fig:locality-approach-cache-stress-test-cache-hits}
   }
+  \subfloat[L3 Cache Read Misses]{
+    \includegraphics[width=0.5\linewidth]{locality-approach/cache-stress-test-cache-misses}
+    \label{fig:locality-approach-cache-stress-test-cache-misses}
+  }
   \caption{Multi-threaded \emph{Cache Stress Test} with L3 cache read
-    misses and hits normalized to \emph{best locality}}
+    hits and misses normalized to \emph{best locality}}
   \label{fig:locality-approach-cache-stress-test-cache}
 \end{figure}
 
