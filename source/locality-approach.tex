@@ -7,7 +7,8 @@
 
 Before starting with the implementation of the new scheduler, we
 implement a synthetic multi-threaded locality-aware benchmark called
-\emph{Cache Stress Test} as a proof of concept.
+\emph{Cache Stress Test}. This benchmark serves as a proof of concept
+for our plan to introduce locality-aware intervals.
 
 If a multi-threaded benchmark with best possible locality has better
 performance and fewer last-level cache misses than the same benchmark
@@ -22,7 +23,7 @@ processors with 4 cores each. While every core has its separate level
 1 and level 2 caches, the per-processor 8 MB level 3 cache is shared
 between all cores of the same processor. Cache miss events are measure
 with perfmon2 \cite{Eranian2008}. The methodology we use to run the
-benchmarks and measure their result is described in Section
+benchmarks and measure their results is described in Section
 \ref{sec:locality-performance-methodology}.
 
 \emph{Cache Stress Test} first randomly initializes two integer arrays
@@ -30,9 +31,9 @@ of size \numprint{2097144}, i.e. the size of each array is about 8
 MB. This is equal to the size of the last level cache per
 processor. Then the benchmark creates 64 threads with their affinity
 set to a specific processor: 32 have an affinity for the first
-processor and 32 for the second processor. Section describes
-\ref{sec:locality-implementation-core-affinity} our methodology of
-binding Java threads to specific processing units.
+processor and 32 for the second processor. To bind threads to specific
+processor, we use the affinity library described in Section
+\ref{sec:locality-implementation-core-affinity}.
 
 One half of the threads operate on the elements of the first array and
 the other half operate on the elements of the second array. Each
@@ -55,16 +56,60 @@ We implement several different variants of the \emph{Cache Stress
   second array and vice versa.
 \end{description}
 
-In the variant with \emph{best locality}, the first threads executing
-warm up the cache by bringing in the elements of the array. The
-threads running afterwards can get the array elements from their
-processor's level 3 cache instead of having to resort to the main
-memory or the other processor's cache.
+Figure \ref{fig:locality-approach-cache-stress-test-mafushi}
+illustrates the variants of the \emph{best} and \emph{worst locality}.
 
-In the other variants, the elements in the cache might be overwritten
-when a thread tries to access elements of an array which are not
-cached already or the thread has to fetch them from the L3 cache of
-the other processor.
+\begin{figure}[!ht]
+  \centering
+  \subfloat[Best Locality]{
+    \includegraphics[width=0.5\linewidth]{locality-approach/cache-stress-test-mafushi-best}
+    \label{fig:locality-approach-cache-stress-mafushi-best}
+  }
+  \subfloat[Worst Locality]{
+    \includegraphics[width=0.5\linewidth]{locality-approach/cache-stress-test-mafushi-worst}
+    \label{fig:locality-approach-cache-stress-mafushi-worst}
+  }
+  \caption{Multi-threaded \emph{Cache Stress Test} with execution
+    times normalized to \emph{best locality}}
+  \label{fig:locality-approach-cache-stress-test-mafushi}
+\end{figure}
+
+As the name already gives away, the main idea behind the \emph{Cache
+  Stress Test} benchmark is to stress the cache and provoke
+prefetching and contention.
+
+When we are using the \emph{best locality} benchmark, we move all
+sharing threads onto the same processor which will perform prefetching
+of the array elements for each other. That is, they help to obtain and
+maintain the frequently used array elements in the local cache.
+
+The exact opposite happens in the other variants: Threads compete for
+the cache and overwrite each other's entries. Instead of reading from
+the processor's local cache, threads either have to read from the
+other processor's cache or the memory subsystem. Reading from those
+places is much more expensive than reading from the local cache. Table
+\ref{tab:locality-introduction-memory-access-times} cites
+\textcite{Levinthal2009} and gives rough approximations for the memory
+access times on our test system using Intel Nehalem processors. The
+latencies depend on the core and uncore frequencies, memory speeds,
+BIOS settings, number of DIMMs, and so forth.
+
+\begin{table}[htb]
+  \centering
+  \begin{tabular}{ll}
+    \toprule
+    Data Source & Latency \\\midrule
+    L3 cache hit, line unshared & $\sim 40$ cycles\\
+    L3 cache hit, shared line in another core\hspace{0.5cm} & $\sim 65$ cycles \\
+    L3 cache hit, modified in another core & $\sim 75$ cycles \\
+    Remote L3 cache & $\sim 100 - 300$ cycles \\
+    Local DRAM & $\sim 60$ ns \\
+    Remote DRAM & $\sim 100$ ns \\\bottomrule
+  \end{tabular}
+  \caption[Memory access times on the Intel Nehalem processor]
+  {Memory access times on the Intel Nehalem processor}
+  \label{tab:locality-introduction-memory-access-times}
+\end{table}
 
 Table \ref{tab:locality-approach-cache-stress-test} shows the
 execution times and the speedups over the sequential algorithm for the
