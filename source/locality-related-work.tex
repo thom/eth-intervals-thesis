@@ -6,12 +6,12 @@
 \label{chap:locality-related-work}
 
 Locality-aware scheduling is a popular area of research. In the
-beginning, most research was done with shared task
-pools. Work-stealing schedulers are gaining in popularity, thus a lot
-of research on locality-aware scheduling is done with work-stealing
-schedulers nowadays. An alternative algorithm to work-stealing is
-parallel depth-first scheduling which is designed specifically for
-constructive cache sharing.
+beginning, most research was done with shared task pools. As
+work-stealing scheduling is gaining in popularity, a lot of research
+on locality-aware scheduling is done with work-stealing schedulers
+nowadays. An alternative algorithm to work-stealing is parallel
+depth-first scheduling which is designed specifically for constructive
+cache sharing.
 
 \subsubsection{Shared Task Pools}
 
@@ -22,9 +22,9 @@ which trade off load balancing against processor-cache affinity.
 
 \textcite{Philbin1996} use fine-grained threads to decompose a
 sequential program. They schedule these threads so as they improve the
-program's data locality. Like our locality-aware scheduler, the
-algorithm relies upon hints provided at the time of thread creation to
-determine a thread execution order likely to reduce cache misses.
+program's data locality. Like LASSI, the algorithm relies upon hints
+provided at the time of thread creation to determine a thread
+execution order likely to reduce cache misses.
 
 \subsubsection{Work-Stealing Scheduler}
 
@@ -32,15 +32,14 @@ determine a thread execution order likely to reduce cache misses.
 cache misses for the work-stealing algorithm. They also provide an
 implementation of a locality-aware work-stealing scheduler. This
 algorithm is designed for single-core multiprocessor systems, while
-our locality-aware work-stealing scheduler supports chip
-multiprocessor systems.
+LASSI supports chip multiprocessor systems.
 
-X10 \cite{Charles2005, Saraswat2010} is designed specifically for
-parallel programming using the partitioned global address space model
-and place locality. Computations are divided among a set of
-places. Each of those places holds some data and hosts one or more
-activities that operate on those data. \textcite{Agarwal2008} present
-a novel framework for statically establishing place locality in X10.
+X10 \cite{Charles2005, Saraswat2010} is designed for parallel
+programming using the partitioned global address space model and place
+locality. Computations are divided among a set of places. Each of
+those places holds some data and hosts one or more activities that
+operate on those data. \textcite{Agarwal2008} present a novel
+framework for statically establishing place locality in X10.
 
 The Habanero Java \cite{HJ} language is based on early versions of the
 X10 language. Like X10, it supports locality control with task and
@@ -52,11 +51,11 @@ co-location of data and computation at multiple levels of a memory
 hierarchy.
 
 \textcite{Guo2010} introduce SLAW, a scalable locality-aware adaptive
-work-stealing scheduler. SLAW also groups workers into places and
-requires locality hints provided by the programmer or compiler. In
-contrast to our scheduler, SLAW disables cross-place steals and
-additionally supports adaptive scheduling by selecting a work-first or
-help-first policy for a task at runtime \cite{Guo2009}.
+work-stealing scheduler. Like LASSI, SLAW groups workers into places
+and requires locality hints provided by the programmer or compiler. In
+contrast to LASSI, SLAW disables cross-place steals and additionally
+supports adaptive scheduling by selecting a work-first or help-first
+policy for a task at runtime \cite{Guo2009}.
 
 \textcite{Zeldovich2003} present libasync-smp, an asynchronous
 programming library allowing event-driven applications to run code for
@@ -65,12 +64,12 @@ scheduling. Event-coloring is used to control the parallelism between
 events: events with the same color are handled serially and events
 with different colors are handled concurrently. \textcite{Gaud2010}
 extend the previous work by introducing heuristics aimed at improving
-the performance of the work-stealing algorithm. Like the
-locality-aware intervals scheduler, the \emph{locality-aware stealing}
-heuristics aims to preserve cache locality. Other heuristics
-introduced are \emph{time-left stealing} and \emph{penalty-aware
-  stealing}. Unlike in our locality-aware scheduler, those heuristics
-only require little involvement from the application programmers.
+the performance of the work-stealing algorithm. Like LASSI, the
+\emph{locality-aware stealing} heuristics aims to preserve cache
+locality. Other heuristics introduced are \emph{time-left stealing}
+and \emph{penalty-aware stealing}. Unlike in our locality-aware
+scheduler, those heuristics only require little involvement from the
+application programmers.
 
 The implementation of Threading Building Blocks \cite{Contreras2008,
   Reinders2007} uses a work-stealing scheduler which tries to limit

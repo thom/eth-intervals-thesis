@@ -128,7 +128,7 @@ speedup.
     \emph{Worst Locality} & 4.389 & 4.94 \\
     \emph{Sequential Implementation}\hspace{0.5cm} & 25.571 & 1 \\\bottomrule
   \end{tabular}
-  \caption{Multi-threaded \emph{Cache Stress Test} execution times and speedups over sequential implementation}
+  \caption{Multi-threaded \emph{Cache Stress Test} execution times and speedups over the sequential implementation}
   \label{tab:locality-approach-cache-stress-test}
 \end{table}
 
@@ -191,9 +191,9 @@ Our experiments confirmed the hypothesis that the locality of threads
 matters. Thus, we decided to rewrite the intervals scheduler to
 support locality hints provided by the programmer. Chapter
 \ref{chap:locality-implementation} describes the implementation of the
-locality-aware scheduler. In Chapter \ref{chap:locality-performance}
-we evaluate the performance of the new scheduler implementation with a
-variety of benchmarks.
+locality-aware scheduler for intervals, LASSI. In Chapter
+\ref{chap:locality-performance} we evaluate the performance of LASSI
+with a variety of benchmarks.
 
 
 %%% Local Variables: 

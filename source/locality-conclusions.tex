@@ -8,12 +8,12 @@
 \section{Conclusions}
 \label{sec:locality-conclusions-and-future-work-conclusions}
 
-In this thesis, we introduced a locality-aware scheduler for
+In this thesis, we introduced LASSI, a locality-aware scheduler for
 intervals. It is designed for locality-aware scheduling using locality
 hints provided by the programmer. Instead of employing work-stealing
-workers, our scheduler uses \emph{Work-Stealing
-  Places}. \emph{Work-Stealing Places} are a novel data structure
-providing locality-awareness to the intervals scheduler.
+workers, LASSI uses \emph{Work-Stealing Places}. \emph{Work-Stealing
+  Places} are a novel data structure providing locality-awareness to
+the intervals scheduler.
 
 Our performance evaluation showed that \emph{best locality} placement
 of intervals can achieve up to 1.15\texttimes\ speedup over the
@@ -22,10 +22,14 @@ increased by up to 1.5\texttimes\ and cache misses can be reduced by
 up to 3.1\texttimes\ for the benchmarks and platform studied in this
 thesis.
 
-While our locality-aware intervals scheduler can improve performance
-of programs written with locality in mind, it is important to note
-that the performance of existing locality-ignorant programs is
-comparable to the original scheduler implementation.
+\todo{Correct speedups, and cache hits and misses}
+
+While LASSI can improve performance of programs written with locality
+in mind, it is important to note that the performance of existing
+locality-ignorant programs is comparable to the original scheduler
+implementation.
+
+\todo{Finish section ``Conclusions''}
 
 
 \section{Future Work}
@@ -44,13 +48,13 @@ transparent to the user. To make our library portable, we could use
 programmers have to provide locality hints to intervals is not very
 convenient and should be made more intuitive.
 
-Our locality-aware intervals scheduler depends on the heuristics of
-the NUMA-aware allocator implemented in Java HotSpot VM to provide
-automatic memory placement optimizations. Further research could be
-done in extending \emph{Work-Stealing Places} to co-locate tasks and
-data \cite{HJ, Charles2005, Saraswat2010}. It might be interesting to
-see how \emph{Work-Stealing Places} would benefit from supporting
-multiple levels of a memory hierarchy as it is done by
+LASSI depends on the heuristics of the NUMA-aware allocator
+implemented in Java HotSpot VM to provide automatic memory placement
+optimizations. Further research could be done in extending
+\emph{Work-Stealing Places} to co-locate tasks and data \cite{HJ,
+  Charles2005, Saraswat2010}. It might be interesting to see how
+\emph{Work-Stealing Places} would benefit from supporting multiple
+levels of a memory hierarchy as it is done by
 \textcite{Yan2009}. \emph{Hierarchical Place Trees} are designed to
 run on both homogeneous (CPU) and heterogeneous (GPU) multicore
 parallel systems.

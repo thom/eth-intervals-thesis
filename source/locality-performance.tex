@@ -45,16 +45,15 @@ the performance of existing locality-ignorant intervals
 applications. Thus, we run the locality-ignorant JGF benchmarks
 (Appendix \ref{chap:benchmarks}) with our new scheduler
 implementation. As Figure \ref{fig:locality-performance-jgf} shows,
-the performance of the locality-ignorant JGF benchmarks run with the
-locality-aware intervals scheduler is comparable to the original
-implementation.
+the performance of the locality-ignorant JGF benchmarks run with LASSI
+is comparable to the original implementation.
 
 \begin{figure}[!ht]
   \centering
   \includegraphics[width=0.8\linewidth]{locality-performance/mafushi-jgf}
-  \caption[Locality-ignorant JGF benchmarks running on locality-aware
-  scheduler]{Locality-ignorant JGF benchmarks using the locality-aware
-    scheduler on our Intel Nehalem (Appendix
+  \caption[Locality-ignorant JGF benchmarks using LASSI on our Intel
+  Nehalem test machine]{Locality-ignorant JGF benchmarks using LASSI
+    on our Intel Nehalem (Appendix
     \ref{sec:experimental-setup-mafushi}) test machine}
   \label{fig:locality-performance-jgf}
 \end{figure}
@@ -135,7 +134,7 @@ speedup.
     \emph{Worst Locality} & 3.982 & 6.42 \\
     \emph{Sequential Implementation}\hspace{0.5cm} & 25.571 & 1 \\\bottomrule
   \end{tabular}
-  \caption{\emph{Cache Stress Test} execution times and speedups over sequential implementation}
+  \caption{\emph{Cache Stress Test} execution times and speedups over the sequential implementation}
   \label{tab:locality-performance-cache-stress-test}
 \end{table}
 
@@ -317,7 +316,7 @@ fastest and provides the largest speedup.
     \emph{Worst Locality} & 5.399 & 3.45 \\
     \emph{Sequential Implementation}\hspace{0.5cm} & 18.632 & 1 \\\bottomrule
   \end{tabular}
-  \caption{\emph{Block Matrix Multiplication} execution times and speedups over sequential implementation}
+  \caption{\emph{Block Matrix Multiplication} execution times and speedups over the sequential implementation}
   \label{tab:locality-performance-block-matrix-multiplication}
 \end{table}
 

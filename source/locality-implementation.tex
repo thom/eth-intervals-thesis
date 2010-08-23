@@ -5,19 +5,19 @@
 \chapter{Implementation}
 \label{chap:locality-implementation}
 
-In this chapter we describe our new implementation of the intervals
-scheduler. It is designed for locality-aware scheduling using locality
-hints provided by the programmer. Instead of using work-stealing
-workers, our scheduler groups workers into \emph{Work-Stealing
+In this chapter we describe LASSI, our new implementation of the
+intervals scheduler. It is designed for locality-aware scheduling
+using locality hints provided by the programmer. Instead of using
+work-stealing workers, LASSI groups workers into \emph{Work-Stealing
   Places}.
 
 The API of locality-aware intervals is introduced in Section
 \ref{sec:locality-implementation-locality-aware-intervals-api}. Section
 \ref{sec:locality-implementation-work-stealing-places} presents the
 idea and implementation of work-stealing places. It also describes the
-locality-aware scheduling policy. Our scheduler implements each worker
-as a separate Java thread. For the locality-aware scheduler we need to
-bind every worker thread to a separate core. In Section
+locality-aware scheduling policy. LASSI implements each worker as a
+separate Java thread. For locality-aware scheduling we need to bind
+every worker thread to a separate core. In Section
 \ref{sec:locality-implementation-core-affinity} we show how we can set
 the core affinity of Java threads.
 
@@ -84,7 +84,7 @@ e.g. \lstinline!Config.places.getPlaceID(0)!.
 A work-stealing scheduler employs a fixed number of threads called
 workers. In traditional work-stealing scheduler designs, every worker
 has a local double-ended queue, or deque, to maintain its own pool of
-ready tasks from which it obtains work. We use \emph{Work-Stealing
+ready tasks from which it obtains work. LASSI uses \emph{Work-Stealing
   Places} instead. Each work-stealing place has a fixed number of
 workers and a local deque to maintain ready tasks. The workers of a
 place share its local deque from which they obtain work. When a worker
