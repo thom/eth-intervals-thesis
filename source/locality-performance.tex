@@ -28,13 +28,14 @@ events. We use perfmon2 to track the following events
 \begin{itemize}
 \item \lstinline!UNC_LLC_HITS.READ!: Number of L3 cache read hits
 \item \lstinline!UNC_LLC_MISS.READ!: Number of L3 cache read misses
-% Other counters?
 \end{itemize}
 
-The execution time reported is the average of the 3 best benchmark
-iterations from 10 separate invocations. The cache events count
-presented is that of the best benchmark execution from the same 10
-invocations used to get the runtime.
+The number of cache read hits and misses can also be determined by
+tracking requests being sent to the uncore's Global Queue, but it is
+simpler with the events listed above.
+
+The execution time and cache events count reported are the average of
+the 3 best benchmark iterations from 10 separate invocations.
 
 
 \section{Non-Locality Benchmarks}
@@ -50,7 +51,7 @@ is comparable to the original implementation.
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=0.8\linewidth]{locality-performance/mafushi-jgf}
+  \includegraphics[width=0.85\linewidth]{locality-performance/mafushi-jgf}
   \caption[Locality-ignorant JGF benchmarks using LASSI on our Intel
   Nehalem test machine]{Locality-ignorant JGF benchmarks using LASSI
     on our Intel Nehalem (Appendix
@@ -123,7 +124,7 @@ versions. As is shown in Table
 with \emph{best locality} is the fastest and provides the largest
 speedup.
 
-\begin{table}[htb]
+\begin{table}[!htb]
   \centering
   \begin{tabular}{ln{2}{3}n{1}{2}}
     \toprule
@@ -145,7 +146,7 @@ implementation. The \emph{best locality} implementation is more than
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=0.8\linewidth]{locality-performance/cache-stress-test}
+  \includegraphics[width=0.85\linewidth]{locality-performance/cache-stress-test}
   \caption{\emph{Cache Stress Test} with execution times normalized to
     \emph{best locality}}
   \label{fig:locality-performance-cache-stress-test}
@@ -208,18 +209,125 @@ benchmarks.
 \subsection{Merge Sort}
 \label{sec:locality-performance-merge-sort}
 
-\emph{Merge Sort} is representative of many programs that use a
-recursive divide-and-conquer paradigm. Our \emph{Merge Sort}
-benchmark...
+The \emph{Merge Sort} benchmark uses divide-and-conquer to recursively
+sort \numprint{4194304} randomly initialized integer values. Those
+integers need about 16 MB of memory which is equal to the size of the
+last level caches of our test machine.
+
+\emph{Merge Sort} first creates \numprint{8192} sorter intervals per
+worker, i.e. $8 \times \numprint{8192}$ sorters overall. Each sorter
+randomly initializes an array of size $\numprint{4194304} / (8 \times
+\numprint{8192})$ and sorts it with \lstinline!Arrays.sort()!.
+
+Merger intervals merge two neighboring sorted arrays into one sorted
+array of doubled size until all subarrays are merged into one large
+array of size \numprint{4194304}.
+
+Figure \ref{fig:locality-performance-mergesort} shows an example of
+the tree-like hierarchy of sorter and merger intervals used to sort a
+randomly initialized list of integers with the help of 8 sorters and 7
+mergers.
+
+We implement several different variants of the benchmark, each having
+different locality properties:
+
+\begin{description}
+\item[Best Locality:] Half the sorter intervals have locality for
+  \emph{place 0} and the other half have their locality set for
+  \emph{place 1}. Merger intervals copy the locality of the interval
+  they get the left array to merge from, i.e. they are scheduled on
+  the same place as their left predecessors in the tree hierarchy.
+\item[Ignorant Locality:] The sorter and merger intervals do not have
+  any locality set, i.e. they are locality-ignorant.
+\item[Worst Locality:] The sorter intervals have the same locality as
+  in the \emph{best locality} implementation. The merger intervals set
+  their locality to the other place as their left predecessor in the
+  tree hierarchy, i.e. if the left predecessor was scheduled on
+  \emph{place 0}, then the merger is scheduled on \emph{place 1} and
+  vice versa.
+\end{description}
+
+Figure \ref{fig:locality-performance-mergesort-best-locality} shows
+the place allocations for the benchmark variant with \emph{best
+  locality}.
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=\linewidth]{locality-performance/mergesort}
+  \includegraphics[width=\linewidth]{locality-performance/mergesort-best-locality}
   \caption{Merge Sort: Best locality}
+  \label{fig:locality-performance-mergesort-best-locality}
+\end{figure}
+
+The \emph{best locality} implementation puts data sharing intervals
+onto the same \emph{place}. They perform prefetching for each other,
+i.e. they help to obtain and maintain the frequently used integers in
+the local L3 cache. With the \emph{worst locality} we try to achieve
+the opposite: Merger intervals compete for the L3 caches and overwrite
+each other's entries.
+
+Table \ref{tab:locality-performance-mergesort} shows the execution
+times and the speedups over the \emph{ignorant locality}
+implementation for the \emph{best} and \emph{worst locality}
+implementations. As expected, the implementation with \emph{best
+  locality} is the fastest and provides the largest speedup.
+
+\begin{table}[!htb]
+  \centering
+  \begin{tabular}{ln{3}{3}n{1}{2}}
+    \toprule
+    & {Runtime (in ms)} & {Speedup (over \emph{worst locality})} \\\midrule
+    \emph{Best Locality} & 672.667 & 1.10 \\
+    \emph{Worst Locality} & 726 & 1.02 \\
+    \emph{Ignorant Locality} & 741.333 & 1 \\\bottomrule
+  \end{tabular}
+  \caption{\emph{Merge Sort} execution times and speedups over the \emph{ignorant locality} implementation}
+  \label{tab:locality-performance-mergesort}
+\end{table}
+
+Figure \ref{fig:locality-performance-mergesort} illustrates the
+execution times normalized to that of the \emph{best locality}
+implementation. The \emph{best locality} implementation provides a
+speedup of up to $1.10\times$ compared to the other locality
+benchmarks.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.8\linewidth]{locality-performance/mergesort}
+  \caption{\emph{Merge Sort} with execution times normalized to
+    \emph{best locality}}
   \label{fig:locality-performance-mergesort}
 \end{figure}
 
-\todo{Finish section ``Merge Sort''}
+In the \emph{best locality} benchmark, the intervals perform
+prefetching of the array elements for one another. In the other
+benchmarks, intervals compete for the L3 cache and overwrite each
+other's entries. This reflects itself in the number of cache hit and
+miss events listed in Table
+\ref{tab:locality-performance-cache-stress-test-cache-hits-misses}.
+
+\begin{table}[!htb]
+  \centering
+  \begin{tabular}{ln{4}{0}n{4}{0}}
+    \toprule
+    & {L3 Cache Read Hits}  & {L3 Cache Read Misses} \\\midrule
+    \emph{Best Locality}\hspace{1cm} & 100 & 39 \\
+    \emph{Worst Locality} & 99 & 41 \\
+    \emph{Ignorant Locality} & 98 & 42 \\\bottomrule
+  \end{tabular}
+  \caption[\emph{Merge Sort} L3 cache read hits and misses]
+  {\emph{Merge Sort} L3 cache read hits and misses (rounded to the nearest million)}
+  \label{tab:locality-performance-cache-stress-test-cache-hits-misses}
+\end{table}
+
+The difference between the number of cache read hits and misses is
+only marginal: The \emph{best locality} variant of the \emph{Merge
+  Sort} benchmark has just about 2\% more cache read hits and 7\% less
+cache read misses than the \emph{worst} and \emph{ignorant locality}
+variants. This is mainly because of the rather small benchmark size
+and limited level of data sharing between the intervals. Still, the
+speedup of $1.1\times$ of the \emph{best locality} variant over the
+\emph{locality ignorant} variant shows that last level cache misses
+can have a significant impact on the runtime.
 
 
 \subsection{Block Matrix Multiplication}
