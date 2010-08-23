@@ -47,8 +47,8 @@ is comparable to the threaded implementation (Figure
     \includegraphics[width=0.89\linewidth]{queues-performance/mafushi-threads}
     \label{fig:queues-performance-mafushi-threads}
   }
-  \caption[Threads and intervals benchmark results]{Threads and
-    intervals benchmarks running on our Intel Core2 Duo (Appendix
+  \caption[Threads and intervals benchmarks]{Threads and intervals
+    benchmarks running on our Intel Core2 Duo (Appendix
     \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
     \ref{sec:experimental-setup-mafushi}) test machines}
   \label{fig:queues-performance-threads}
@@ -92,7 +92,7 @@ expensive. Compared to other benchmarks, workers in \emph{LuFact} and
     \label{tab:queues-performance-mafushi-threads}
   }
   \\[2ex]
-  \caption[Idle workers]{Number of times workers run out of work, become idle, and get woken up again}
+  \caption[Workers run out of work, become idle, and get woken up again]{Number of times workers run out of work, become idle, and get woken up again}
   \label{tab:queues-performance-threads}
 \end{table}
 
@@ -151,8 +151,8 @@ had to test them on. See Section
     \includegraphics[width=0.89\linewidth]{queues-performance/mafushi-deques}
     \label{fig:queues-performance-mafushi-deques}
   }
-  \caption[Work-stealing deques benchmark results]{Work-stealing
-    deques benchmarks running on Intel Core2 Duo (Appendix
+  \caption[Work-stealing deques benchmarks]{Work-stealing deques
+    benchmarks running on Intel Core2 Duo (Appendix
     \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
     \ref{sec:experimental-setup-mafushi})}
   \label{fig:queues-performance-deques}
@@ -189,7 +189,7 @@ the \emph{Dynamic Work-Stealing Deque} in comparison to the
     \includegraphics[width=0.5\linewidth]{queues-performance/mafushi-dynamic}
     \label{fig:queues-performance-mafushi-dynamic}
   }
-  \caption[Dynamic work-stealing deques benchmark results]{Dynamic
+  \caption[Dynamic work-stealing deques benchmarks]{Dynamic
     work-stealing deques benchmarks running on Intel Core2 Duo
     (Appendix \ref{sec:experimental-setup-marvin}) and Intel Nehalem
     (Appendix \ref{sec:experimental-setup-mafushi})}
@@ -233,10 +233,10 @@ ends of the queue.
     \includegraphics[width=0.89\linewidth]{queues-performance/mafushi-idempotent}
     \label{fig:queues-performance-mafushi-idempotent}
   }
-  \caption[Idempotent work-stealing queues]{Idempotent work-stealing
-    queues benchmarks running on Intel Core2 Duo (Appendix
-    \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
-    \ref{sec:experimental-setup-mafushi})}
+  \caption[Idempotent work-stealing queues benchmarks]{Idempotent
+    work-stealing queues benchmarks running on Intel Core2 Duo
+    (Appendix \ref{sec:experimental-setup-marvin}) and Intel Nehalem
+    (Appendix \ref{sec:experimental-setup-mafushi})}
   \label{fig:queues-performance-idempotent}
 \end{figure}
 
@@ -271,7 +271,7 @@ ends of the queue.
     \end{tabular}
     \label{tab:queues-performance-mafushi-idempotent-fifo}
   }
-  \caption[Idempotent Work-Stealing FIFO Queue: Comparing takes and steals]{Comparing take and steal attempts and failures of the \emph{Idempotent Work-Stealing Deque} with the \emph{Idempotent Work-Stealing FIFO Queue}}
+  \caption{Comparing take and steal attempts and failures of the \emph{Idempotent Work-Stealing Deque} with the \emph{Idempotent Work-Stealing FIFO Queue}}
   \label{tab:queues-performance-idempotent-fifo}
 \end{table}
 
@@ -306,7 +306,7 @@ ends of the queue.
     \end{tabular}
     \label{tab:queues-performance-mafushi-idempotent-lifo}
   }
-  \caption[Idempotent Work-Stealing LIFO Queue: Comparing takes and steals]{Comparing take and steal attempts and failures of the \emph{Idempotent Work-Stealing Deque} with the \emph{Idempotent Work-Stealing LIFO Queue}}
+  \caption{Comparing take and steal attempts and failures of the \emph{Idempotent Work-Stealing Deque} with the \emph{Idempotent Work-Stealing LIFO Queue}}
   \label{tab:queues-performance-idempotent-lifo}
 \end{table}
 
@@ -345,10 +345,9 @@ performance difference to the idempotent work-stealing deque (Figure
     \includegraphics[width=0.5\linewidth]{queues-performance/mafushi-duplicating}
     \label{fig:queues-performance-mafushi-duplicating}
   }
-  \caption[Duplicating work-stealing deques benchmark
-  results]{Duplicating benchmarks running on Intel Core2 Duo (Appendix
-    \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
-    \ref{sec:experimental-setup-mafushi})}
+  \caption[Duplicating benchmarks]{Duplicating benchmarks running on
+    Intel Core2 Duo (Appendix \ref{sec:experimental-setup-marvin}) and
+    Intel Nehalem (Appendix \ref{sec:experimental-setup-mafushi})}
   \label{fig:queues-performance-duplicating}
 \end{figure}
 
@@ -394,10 +393,9 @@ almost the same results (Figure
     \includegraphics[width=0.68\linewidth]{queues-performance/mafushi-shared-queue}
     \label{fig:queues-performance-mafushi-shared-queue}
   }
-  \caption[Single shared work queue benchmark results]{Shared queue
-    benchmarks running on Intel Core2 Duo (Appendix
-    \ref{sec:experimental-setup-marvin}) and Intel Nehalem (Appendix
-    \ref{sec:experimental-setup-mafushi})}
+  \caption[Shared queue benchmarks]{Shared queue benchmarks running on
+    Intel Core2 Duo (Appendix \ref{sec:experimental-setup-marvin}) and
+    Intel Nehalem (Appendix \ref{sec:experimental-setup-mafushi})}
   \label{fig:queues-performance-shared-queue}
 \end{figure}
 
