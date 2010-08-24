@@ -92,7 +92,7 @@ finds that the pool of its place is empty, it tries to steal a task
 from the pool of a victim place chosen at random.
 
 Figure \ref{fig:locality-implementation-work-stealing-places} shows
-the work-stealing places used in our Intel Nehalem testing machine
+the work-stealing places used on our Intel Nehalem testing machine
 (Appendix \ref{sec:experimental-setup-mafushi}).
 
 \begin{figure}[!ht]
@@ -106,15 +106,16 @@ the work-stealing places used in our Intel Nehalem testing machine
 
 Other locality-aware work-stealing schedulers use a more complex
 design. \textcite{Acar2000} for example provide each worker with a
-mailbox in addition to the work-stealing deque: A mailbox is a FIFO
+mailbox in addition to the work-stealing deque: ``A mailbox is a FIFO
 queue of pointers to work items that have affinity for the worker. So
 when creating a work item, a worker will push it onto both the deque,
 as in normal work-stealing, and also onto the tail of the mailbox of
 the worker that the interval has affinity for. Now a worker will first
 try to obtain work from its mailbox before attempting to
 steal. Because work items can appear twice, once in a mailbox and once
-in a deque, they have to be idempotent (Section
-\ref{sec:queues-implementation-idempotent-ws-deque}).
+in a deque, they have to be idempotent.'' Idempotent intervals are
+introduced in Section
+\ref{sec:queues-implementation-idempotent-ws-deque}.
 
 However, we have decided to simplify our scheduler implementation by
 using a shared deque per \emph{Work-Stealing Place}. We believe that
@@ -157,7 +158,7 @@ An example of a concrete place mapping is given in Listing
 \ref{lst:locality-implementation-mafushi-places}. The class
 \lstinline!NehalemPlaces! defines the places for our Intel Nehalem
 test machine according to its memory hierarchy. As Figure
-\ref{fig:locality-implemenation-work-stealing-places-mafushi} depicts
+\ref{fig:locality-implemenation-work-stealing-places-mafushi} depicts,
 this system includes two processors with four cores each. The machine
 has 12 GB RAM and both processors have a direct connection to half of
 the memory space. While every core has its separate level 1 and level
@@ -338,8 +339,8 @@ fastest access to the new object, the allocator places it in the
 region local to the allocating thread.
 
 On Linux, the implementation is based on work by
-\textcite{Kleen2004}. To enable the NUMA-aware allocator, we have to
-invoke the JVM with the parameter \verb!-XX:+UseNUMA!.
+\textcite{Kleen2004}. To enable the NUMA-aware allocator, we invoke
+the JVM with the parameter \verb!-XX:+UseNUMA! when using LASSI.
 
 
 %%% Local Variables: 

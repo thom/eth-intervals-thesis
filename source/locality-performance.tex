@@ -6,16 +6,16 @@
 \label{chap:locality-performance}
 
 This chapter presents our performance evaluation of LASSI. First we
-study compare the performance of locality-ignorant benchmarks run with
-LASSI and the original scheduler implementation. It is important that
+compare the performance of locality-ignorant benchmarks run with LASSI
+and the original scheduler implementation. It is important that
 LASSI's performance is comparable to that of the original
 scheduler. Then we study different locality-aware benchmarks. By
 scheduling data sharing intervals on the same processor they perform
 prefetching of shared regions for one another which improves
-performance. Our locality-aware benchmarks only study data sharing
+performance. Our locality-aware benchmarks only explore data sharing
 intervals and do not test how scheduling non-communicating intervals
-with high memory footprints on different processors helps to reduce
-cache contention and potential cache capacity problems.
+with high memory footprints on different processors could help in
+reducing cache contention and potential cache capacity problems.
 
 \section{Methodology}
 \label{sec:locality-performance-methodology}
@@ -32,8 +32,8 @@ Nehalem system with 2 processors and 8 cores, running Ubuntu 9.04
 \end{lstlisting}
 
 Besides the runtime of the benchmarks, we are mostly interested in the
-count of cache hits and miss events. Since the last level cache is
-part of the uncore, we have to use the uncore PMU to count L3 cache
+count of cache hit and miss events. Since the last level cache is part
+of the uncore, we have to use the uncore PMU to count L3 cache
 events. We use perfmon2 to track the following events
 \cite{Levinthal2009}:
 
@@ -46,8 +46,8 @@ The number of cache read hits and misses can also be determined by
 tracking requests being sent to the uncore's Global Queue, but it is
 simpler with the events listed above.
 
-The execution time and cache events count reported are the average of
-the 3 best benchmark iterations from 10 separate invocations.
+The execution times and cache events counts reported are the average
+of the 3 best benchmark iterations from 10 separate invocations.
 
 
 \section{Non-Locality Benchmarks}
@@ -58,8 +58,8 @@ the performance of existing locality-ignorant intervals
 applications. Thus, we run the locality-ignorant JGF benchmarks
 (Appendix \ref{chap:benchmarks}) with our new scheduler
 implementation. As Figure \ref{fig:locality-performance-jgf} shows,
-the performance of the locality-ignorant JGF benchmarks run with LASSI
-is comparable to the original implementation.
+the performance of the locality-ignorant JGF benchmarks executed on
+LASSI is comparable to the original implementation.
 
 \begin{figure}[!ht]
   \centering
@@ -82,7 +82,7 @@ version developed in Chapter \ref{chap:locality-approach} to use
 intervals.
 
 Like the threaded version, it first randomly initializes two integer
-arrays of equal size as the last level cache per processor. Then it
+arrays of equal size to the last level cache per processor. Then it
 creates an inline root interval which produces 64 subintervals with
 their locality set to a specific place: 32 have their locality set for
 \emph{place 0} and 32 for \emph{place 1}.
@@ -104,7 +104,7 @@ of the benchmark, each having different locality properties:
 \item[Random Locality:] The locality of the intervals is set to a
   \emph{random} place.
 \item[Worst Locality:] Half the intervals with locality for
-  \emph{place 0} work on the first array, and the other half works on
+  \emph{place 0} work on the first array, and the other half work on
   the second array and vice versa for the intervals with locality for
   \emph{place 1}.
 \end{description}
@@ -213,8 +213,8 @@ The intervals implementation of the benchmarks with \emph{ignorant},
 multi-threaded benchmark implementations of the same
 localities. 
 
-A reason for this is the use \emph{Work-Stealing Places}. They have a
-positive effect on the runtime due to their load-balancing
+A reason for this is the use of \emph{Work-Stealing Places}. They have
+a positive effect on the runtime due to their load-balancing
 properties. As the number of cache hits and misses shows, they do not
 produce counter-productive steals for the \emph{Cache Stress Test}
 benchmarks.
@@ -232,15 +232,15 @@ worker, i.e. $8 \times \numprint{8192}$ sorters overall. Each sorter
 randomly initializes an array of size $\numprint{4194304} / (8 \times
 \numprint{8192})$ and sorts it with \lstinline!Arrays.sort()!. Merger
 intervals merge two neighboring sorted arrays into one sorted array of
-doubled size until all subarrays are merged into one large array of
-size \numprint{4194304}. Figure
+doubled size until all subarrays are merged into a large array of size
+\numprint{4194304}. Figure
 \ref{fig:locality-performance-mergesort-best-locality} shows an
 example of the tree-like hierarchy of sorter and merger intervals used
 to sort a randomly initialized list of integers with the help of 8
 sorters and 7 mergers.
 
-We implement several different variants of the benchmark, each having
-different locality properties:
+We implement several variants of the benchmark, each having different
+locality properties:
 
 \begin{description}
 \item[Best Locality:] Half the sorter intervals have locality for
@@ -298,7 +298,7 @@ implementations. As expected, the implementation with \emph{best
 Figure \ref{fig:locality-performance-mergesort} illustrates the
 execution times normalized to that of the \emph{best locality}
 implementation. The \emph{best locality} implementation provides a
-speedup of up to $1.10\times$ compared to the other locality
+speedup of up to $1.1\times$ compared to the other locality
 benchmarks.
 
 \begin{figure}[!ht]
@@ -364,7 +364,7 @@ employs the following recursion:
     B_{00} & B_{01} \\
     B_{10} & B_{11}
   \end{pmatrix}
-  \\[0.2cm]
+  \\[0.1cm]
   &
   =
   &
@@ -373,6 +373,8 @@ employs the following recursion:
     A_{10} \cdot B_{00} + A_{11} \cdot B_{10} & A_{10} \cdot B_{01} + A_{11} \cdot B_{11} \\
   \end{pmatrix}
 \end{eqnarray*}
+
+\vspace{0.1cm}
 
 Thus, the $n \times n$ matrix multiplication can be reduced to 8
 multiplications and 4 additions of $(n/2) \times (n/2)$
@@ -464,15 +466,15 @@ implementation shows a speedup over the \emph{worst locality} of about
 \end{figure}
 
 The difference between the number of cache read hits and misses is
-small (Table
+little (Table
 \ref{tab:locality-performance-matmult-cache-hits-misses}): The
 \emph{best locality} variant has just about 2\% more cache read hits
 and 6\% less cache read misses than the \emph{worst locality}
-variant. This is mainly because of the rather small benchmark size and
-limited level of data sharing between the intervals. Still, the
-speedup of $1.07\times$ of the \emph{best locality} variant over the
-\emph{worst locality} variant shows that last level cache misses can
-have a significant impact on the runtime.
+variant. The main reason for this is the rather small benchmark size
+and limited level of data sharing between the intervals. Last level
+cache misses can have a significant impact on the runtime nevertheless
+as is shown by the speedup of $1.07\times$ of the \emph{best locality}
+variant over the \emph{worst locality}.
 
 \begin{table}[!htb]
   \centering

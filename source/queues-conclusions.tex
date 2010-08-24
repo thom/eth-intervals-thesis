@@ -16,7 +16,7 @@ We evaluated the performance of our queue implementations by using the
 intervals implementations of various Java Grande Forum
 benchmarks. None of the work-stealing queues we developed
 significantly improves work-stealing performance on the machines we
-had to test them with: The runtime of the benchmarks using
+had to test them with: The runtimes of the benchmarks using
 \emph{Work-Stealing Deque} and \emph{Idempotent Work-Stealing Deque}
 compared to the original \emph{Work-Stealing Lazy Deque} are almost
 the equal. The \emph{Dynamic Work-Stealing Deque}, \emph{Idempotent
@@ -32,7 +32,7 @@ could be the rather small number of cores of our benchmark machines
 state, there is no noticeable difference between the speedup of
 work-stealing and a global shared work queue when not using more than
 8 cores. Our experiments confirmed those findings for the JGF
-benchmarks. There is no significant difference between the runtimes of
+benchmarks: There is no significant difference between the runtimes of
 the different implementations -- whether we use work-stealing or the
 single shared work queue, we get almost the same results.
 

@@ -21,15 +21,15 @@ Appendix \ref{sec:experimental-setup-mafushi}. The system has 2
 processors with 4 cores each. Every core has its separate level 1 and
 2 caches, but the per-processor 8 MB level 3 cache is shared between
 all cores of the same processor. The methodology we use to run the
-benchmarks and measure their results is presented in Section
+benchmark and measure its results is presented in Section
 \ref{sec:locality-performance-methodology}.
 
 \emph{Cache Stress Test} first randomly initializes two integer arrays
 of size \numprint{2097144}, i.e. the size of each array is about 8
 MB. This is equal to the size of the last level cache per
 processor. Then the benchmark creates 8 \emph{Cache Stress} threads
-for each core with their affinity set to this specific core. Overall,
-we create 64 threads, bound to the 8 cores in groups of 8 threads. To
+per core with their affinity set to this specific core. Overall, we
+create 64 threads, bound to the 8 cores in groups of 8 threads. To
 bind threads to a specific core, we use the affinity library
 introduced in Section \ref{sec:locality-implementation-core-affinity}.
 
@@ -78,7 +78,7 @@ As the name already gives away, the main idea behind the \emph{Cache
   Stress Test} benchmark is to stress the cache and provoke cache
 prefetching and contention.
 
-When we are using the \emph{best locality} benchmark, we move all
+When we are using the \emph{best locality} variant, we move all
 sharing threads onto the same processor which will perform prefetching
 of the array elements for each other. That is, they help to obtain and
 maintain the frequently used array elements in the local L3 cache.
@@ -112,9 +112,8 @@ so forth.
 
 Table \ref{tab:locality-approach-cache-stress-test} shows the
 execution times and the speedups over the sequential algorithm for the
-different locality implementations. As expected, the implementation
-with \emph{best locality} is the fastest and provides the largest
-speedup.
+different locality variants. As expected, the implementation with
+\emph{best locality} is the fastest and provides the largest speedup.
 
 \begin{table}[htb]
   \centering
@@ -131,11 +130,11 @@ speedup.
   \label{tab:locality-approach-cache-stress-test}
 \end{table}
 
-Figure \ref{fig:locality-approach-cache-stress-test} illustrates the
-execution times normalized to that of the \emph{best locality}
+In Figure \ref{fig:locality-approach-cache-stress-test} we illustrate
+the execution times normalized to that of the \emph{best locality}
 implementation. The \emph{best locality} implementation shows a
-significant speedup over the other locality benchmarks of
-$1.2\times$ -- $1.55\times$.
+significant speedup over the other locality benchmarks of $1.2\times$
+-- $1.55\times$.
 
 \begin{figure}[!ht]
   \centering
