@@ -42,8 +42,8 @@ schedule pass.
 The intervals API supports arbitrary \emph{happens before} relations
 making the model very flexible. Intervals can be used to emulate
 existing thread primitives \cite{Matsakis2009a}, but they can also be
-used to create program schedules for which no standard thread
-primitives exist, for example peer-to-peer synchronization.
+used to create program schedules for which no standard primitives
+exist, for example peer-to-peer synchronization.
 
 Intervals can be extended to support both runtime and static checks
 for errors like data race protection \cite{Matsakis2010b} and
@@ -60,8 +60,8 @@ program execution.
 
 The conceptual model for intervals consists of points in time ordered
 by a \emph{happens before} relation. In the model, an interval
-\lstinline!i! consists of a pair of points -- \lstinline!i.start! and
-\lstinline!i.end! -- called the start and end point. Programmers may
+\lstinline!i! consists of a pair of points called the start and end
+point: \lstinline!i.start! and \lstinline!i.end!. Programmers may
 define ordering constraints by adding \emph{happens before} edges in
 between the start or end points of different intervals. An edge
 \lstinline!p1 $\rightarrow$ p2! indicates that the point
@@ -73,7 +73,7 @@ fields and synchronized sections.
 
 \begin{figure}[htb]
   \centering
-  \includegraphics[width=0.96\textwidth]{introduction/interval-graph}
+  \includegraphics[width=\textwidth]{introduction/interval-graph}
   \caption[Example interval graph]{Example interval graph: Showing an
     interval and its subintervals \lstinline!a!, \lstinline!b!,
     \lstinline!c! and \lstinline!d!.}
@@ -219,19 +219,19 @@ To obtain work, a worker takes the ready task from the tail of its
 deque and executes it. If the task terminates, the worker goes back to
 the tail of its deque to take another task upon which it can
 work. When assigning a new task to a worker, the worker puts the newly
-ready task onto the tail of its deque. Thus, so long as a worker's
+ready task onto the tail of its deque. Thus, as long as a worker's
 deque is not empty, the worker manipulates its deque in a LIFO
 (stack-like) manner.
 
 When a worker tries to obtain work by taking a task from the tail of
-its deque and it finds that it is empty, then the worker becomes a
+its deque and it finds that it is empty, the worker becomes a
 thief. It picks a victim worker at random and attempts to obtain work
-by removing the task at the head of the victim worker's deque. If the
-victim worker's deque is empty, then the thief picks another victim
-worker and tries again until it finds a victim whose deque it not
-empty. At which point the thief continues to work on the stolen task
-as described above. Since steals take place at the head of the
-victim's deque, stealing operates in a FIFO manner.
+by removing the task at the head of the victim's deque. If the
+victim's deque is empty, then the thief picks another victim worker
+and tries again until it finds a victim whose deque it not empty. At
+which point the thief continues to work on the stolen task as
+described above. Since steals take place at the head of the victim's
+deque, stealing operates in a FIFO manner.
 
 Accessing the run queues at different ends offers several advantages
 \cite{Frigo1998}:
