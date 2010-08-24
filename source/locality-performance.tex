@@ -185,11 +185,11 @@ miss events listed in Table
   \label{tab:locality-performance-cache-stress-test-cache-hits-misses}
 \end{table}
 
-Figure \ref{fig:locality-performance-cache-stress-test} shows the
-cache hits and misses normalized to the measurements of the \emph{best
-  locality} implementation. The \emph{best locality} benchmark has up
-to 1.5\texttimes\ more L3 cache read hits and 3.1\texttimes\ fewer L3
-cache read misses than the other benchmarks.
+Figure \ref{fig:locality-performance-cache-stress-test-cache} shows
+the cache hits and misses normalized to the measurements of the
+\emph{best locality} implementation. The \emph{best locality}
+benchmark has up to 1.5\texttimes\ more L3 cache read hits and
+3.1\texttimes\ fewer L3 cache read misses than the other benchmarks.
 
 \begin{figure}[!ht]
   \centering
@@ -314,7 +314,7 @@ prefetching of the array elements for one another. In the other
 benchmarks, intervals compete for the L3 cache and overwrite each
 other's entries. This reflects itself in the number of cache hit and
 miss events listed in Table
-\ref{tab:locality-performance-cache-stress-test-cache-hits-misses}.
+\ref{tab:locality-performance-mergesort-cache-hits-misses}.
 
 \begin{table}[!htb]
   \centering
@@ -326,7 +326,7 @@ miss events listed in Table
     \emph{Ignorant Locality} & 98 & 42 \\\bottomrule
   \end{tabular}
   \caption[\emph{Merge Sort} L3 cache read hits and misses]{\emph{Merge Sort} L3 cache read hits and misses (rounded to the nearest million)}
-  \label{tab:locality-performance-cache-stress-test-cache-hits-misses}
+  \label{tab:locality-performance-mergesort-cache-hits-misses}
 \end{table}
 
 The difference between the number of cache read hits and misses is
