@@ -5,6 +5,18 @@
 \chapter{Performance Evaluation}
 \label{chap:locality-performance}
 
+This chapter presents our performance evaluation of LASSI. First we
+study compare the performance of locality-ignorant benchmarks run with
+LASSI and the original scheduler implementation. It is important that
+LASSI's performance is comparable to that of the original
+scheduler. Then we study different locality-aware benchmarks. By
+scheduling data sharing intervals on the same processor they perform
+prefetching of shared regions for one another which improves
+performance. Our locality-aware benchmarks only study data sharing
+intervals and do not test how scheduling non-communicating intervals
+with high memory footprints on different processors helps to reduce
+cache contention and potential cache capacity problems.
+
 \section{Methodology}
 \label{sec:locality-performance-methodology}
 
@@ -51,7 +63,7 @@ is comparable to the original implementation.
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=0.85\linewidth]{locality-performance/mafushi-jgf}
+  \includegraphics[width=0.8\linewidth]{locality-performance/mafushi-jgf}
   \caption[Locality-ignorant JGF benchmarks]{Locality-ignorant JGF
     benchmarks using LASSI on our Intel Nehalem (Appendix
     \ref{sec:experimental-setup-mafushi}) test machine}
@@ -145,7 +157,7 @@ implementation. The \emph{best locality} implementation is more than
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=0.85\linewidth]{locality-performance/cache-stress-test}
+  \includegraphics[width=0.8\linewidth]{locality-performance/cache-stress-test}
   \caption[\emph{Cache Stress Test} execution times]{\emph{Cache
       Stress Test} with execution times normalized to \emph{best
       locality}}
@@ -182,11 +194,12 @@ cache read misses than the other benchmarks.
 \begin{figure}[!ht]
   \centering
   \subfloat[L3 Cache Read Misses]{
-    \includegraphics[width=0.5\linewidth]{locality-performance/cache-stress-test-cache-misses}
+    \includegraphics[width=0.66\linewidth]{locality-performance/cache-stress-test-cache-misses}
     \label{fig:locality-performance-cache-stress-test-cache-misses}
   }
+  \\
   \subfloat[L3 Cache Read Hits]{
-    \includegraphics[width=0.5\linewidth]{locality-performance/cache-stress-test-cache-hits}
+    \includegraphics[width=0.66\linewidth]{locality-performance/cache-stress-test-cache-hits}
     \label{fig:locality-performance-cache-stress-test-cache-hits}
   }
   \caption[\emph{Cache Stress Test} L3 cache read misses and
@@ -217,16 +230,14 @@ last level caches of our test machine.
 \emph{Merge Sort} first creates \numprint{8192} sorter intervals per
 worker, i.e. $8 \times \numprint{8192}$ sorters overall. Each sorter
 randomly initializes an array of size $\numprint{4194304} / (8 \times
-\numprint{8192})$ and sorts it with \lstinline!Arrays.sort()!.
-
-Merger intervals merge two neighboring sorted arrays into one sorted
-array of doubled size until all subarrays are merged into one large
-array of size \numprint{4194304}.
-
-Figure \ref{fig:locality-performance-mergesort} shows an example of
-the tree-like hierarchy of sorter and merger intervals used to sort a
-randomly initialized list of integers with the help of 8 sorters and 7
-mergers.
+\numprint{8192})$ and sorts it with \lstinline!Arrays.sort()!. Merger
+intervals merge two neighboring sorted arrays into one sorted array of
+doubled size until all subarrays are merged into one large array of
+size \numprint{4194304}. Figure
+\ref{fig:locality-performance-mergesort-best-locality} shows an
+example of the tree-like hierarchy of sorter and merger intervals used
+to sort a randomly initialized list of integers with the help of 8
+sorters and 7 mergers.
 
 We implement several different variants of the benchmark, each having
 different locality properties:
@@ -334,7 +345,7 @@ can have a significant impact on the runtime.
 
 The \emph{Block Matrix Multiplication} benchmark multiplies two $n
 \times n$ matrices $A$ and $B$ using intervals. The implementation
-employs the following recursion to calculate the matrix $C$:
+employs the following recursion:
 
 \begin{eqnarray*}
   \begin{pmatrix}
@@ -353,7 +364,7 @@ employs the following recursion to calculate the matrix $C$:
     B_{00} & B_{01} \\
     B_{10} & B_{11}
   \end{pmatrix}
-  \\[0.3cm]
+  \\[0.2cm]
   &
   =
   &
@@ -363,13 +374,10 @@ employs the following recursion to calculate the matrix $C$:
   \end{pmatrix}
 \end{eqnarray*}
 
-\vspace{0.5cm}
-
 Thus, the $n \times n$ matrix multiplication can be reduced to 8
 multiplications and 4 additions of $(n/2) \times (n/2)$
 submatrices. The 8 multiplications can be calculated in parallel and
-when they are done, the 4 additions can be computed in parallel as
-well.
+when they are done, the 4 additions can also be computed in parallel.
 
 We run the \emph{Block Matrix Multiplication} benchmark to multiply
 two random $2048 \times 2048$ matrices. A $2048 \times 2048$ matrix
@@ -377,18 +385,19 @@ needs about 16 MB of memory and should just about fit in the L3 cache
 of the two processors of our test machine. 
 
 The algorithm recursively splits the matrices $A$ and $B$ into
-quadrants until the base case of size $32 \times 32$ is reached. Then
-it multiplies the corresponding $32 \times 32$ submatrices of $A$ and
-$B$ using sequential matrix multiplication to add them up.
+quadrants until the base case of size $32 \times 32$ is reached
+(Figure \ref{fig:locality-performance-matmult-quadrants}). Then it
+multiplies the corresponding $32 \times 32$ submatrices of $A$ and $B$
+using sequential matrix multiplication to add them up.
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=0.9\linewidth]{locality-performance/matmult-quadrants}
+  \includegraphics[width=0.88\linewidth]{locality-performance/matmult-quadrants}
   \caption{Splitting matrix $A$ into quadrants}
   \label{fig:locality-performance-matmult-quadrants}
 \end{figure}
 
-We implement two variants of the benchmark: \emph{best locality} and
+We implement two variants of the benchmark, \emph{best locality} and
 \emph{worst locality}:
 
 \begin{description}
@@ -408,12 +417,12 @@ division of matrix quadrants between places for both variants.
 \begin{figure}[!ht]
   \centering
   \subfloat[Best Locality]{
-    \includegraphics[width=0.9\linewidth]{locality-performance/matmult-best-locality}
+    \includegraphics[width=0.55\linewidth]{locality-performance/matmult-best-locality}
     \label{fig:locality-performance-matmult-best-locality}
   }
   \\
   \subfloat[Worst Locality]{
-    \includegraphics[width=\linewidth]{locality-performance/matmult-worst-locality}
+    \includegraphics[width=0.6\linewidth]{locality-performance/matmult-worst-locality}
     \label{fig:locality-performance-matmult-worst-locality}
   }
   \caption{\emph{Block Matrix Multiplication} quadrants with \emph{best} and \emph{worst locality}}
@@ -447,17 +456,25 @@ implementation shows a speedup over the \emph{worst locality} of about
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=0.6\linewidth]{locality-performance/matmult}
+  \includegraphics[width=0.7\linewidth]{locality-performance/matmult}
   \caption[\emph{Block Matrix Multiplication} execution
   times]{\emph{Block Matrix Multiplication} with execution times
     normalized to \emph{best locality}}
   \label{fig:locality-performance-matmult}
 \end{figure}
 
-Table \ref{tab:locality-performance-matmult-cache-hits-misses} lists
-the number of L3 cache read hits and misses.
+The difference between the number of cache read hits and misses is
+small (Table
+\ref{tab:locality-performance-matmult-cache-hits-misses}): The
+\emph{best locality} variant has just about 2\% more cache read hits
+and 6\% less cache read misses than the \emph{worst locality}
+variant. This is mainly because of the rather small benchmark size and
+limited level of data sharing between the intervals. Still, the
+speedup of $1.07\times$ of the \emph{best locality} variant over the
+\emph{worst locality} variant shows that last level cache misses can
+have a significant impact on the runtime.
 
-\begin{table}[htb]
+\begin{table}[!htb]
   \centering
   \begin{tabular}{ln{4}{0}n{4}{0}}
     \toprule
@@ -468,16 +485,6 @@ the number of L3 cache read hits and misses.
   \caption[\emph{Merge Sort} L3 cache read hits and misses]{\emph{Block Matrix Multiplication} L3 cache read hits and misses (rounded to the nearest million)}
   \label{tab:locality-performance-matmult-cache-hits-misses}
 \end{table}
-
-The difference between the number of cache read hits and misses is
-small: The \emph{best locality} variant has just about 2\% more cache
-read hits and 6\% less cache read misses than the \emph{worst
-  locality} variant. This is mainly because of the rather small
-benchmark size and limited level of data sharing between the
-intervals. Still, the speedup of $1.07\times$ of the \emph{best
-  locality} variant over the \emph{worst locality} variant shows that
-last level cache misses can have a significant impact on the runtime.
-
 
 %%% Local Variables: 
 %%% mode: latex
