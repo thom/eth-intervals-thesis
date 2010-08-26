@@ -329,14 +329,14 @@ DRAM access takes $\sim 60$ ns, while remote DRAM access takes $\sim
 
 In the Java HotSpot VM, the NUMA-aware allocator has been implemented
 to provide automatic memory placement optimizations for Java
-applications \cite{Masamitsu2008, Oracle2010, Humble2010}: The
+applications \cite{Masamitsu2008, Oracle2010, Humble2010}: ``The
 allocator controls the eden space of the young generation of the heap,
 where most of the new objects are created. It divides the space into
 regions each of which is placed in the memory of a specific node. The
 allocator relies on a hypothesis that a thread that allocates the
 object will be the most likely to use the object. To ensure the
 fastest access to the new object, the allocator places it in the
-region local to the allocating thread.
+region local to the allocating thread.''
 
 On Linux, the implementation is based on work by
 \textcite{Kleen2004}. To enable the NUMA-aware allocator, we invoke
