@@ -59,7 +59,7 @@
 # tree trunk and the dripping gum is collected in small bags. Locals
 # who collect chicle are called chicleros. This is then boiled till it
 # reaches the correct thickness. Widespread tapping has lead to the
-# tree becoming scarce and other sources like the related Balatá
+# tree becoming scarce and other sources like the related Balata
 # (Manilkara bidentata) are being increasingly used. Many modern
 # chewing gums use petroleum based plastic instead of chicle.
 #
@@ -83,7 +83,7 @@
 #
 # =item * latexmk
 #
-# Version 4.13a is provided in the F<bin/> directory.
+# Version 4.64a is provided in the F<bin/> directory.
 #
 # =item * ps2pdf, epstopdf, pdftops and pdfnup
 #
@@ -844,7 +844,7 @@ preview: $(dirs) $(build-dir)/latexmk.rc $(texfiles) $(bibfiles)
 	@echo --- Previewing $(document-name).$(default-preview-format) ---
 	@cd $(build-dir); \
 	  TEXINPUTS=../$(source-dir):../$(styles-dir):$$TEXINPUTS; export TEXINPUTS; \
-	  BIBINPUTS=../$(source-dir):$$BIBINPUTS;           export BIBINPUTS; \
+	  BIBINPUTS=../$(bib-dir):$$BIBINPUTS;           export BIBINPUTS; \
 	  BSTINPUTS=../$(styles-dir):$$BSTINPUTS;           export BSTINPUTS; \
 	  ../$(latexmk-call) -r latexmk.rc -pvc -$(default-preview-format) ../$(mainfile)
 
@@ -1058,9 +1058,9 @@ $(pdffile): $(dirs) $(build-dir)/latexmk.rc $(texfiles) $(bibfiles)
 	@echo --- Making $@ ---
 	@cd $(build-dir); \
 	  TEXINPUTS=../$(source-dir):../$(styles-dir):$$TEXINPUTS; export TEXINPUTS; \
-	  BIBINPUTS=../$(source-dir):$$BIBINPUTS;           export BIBINPUTS; \
+	  BIBINPUTS=../$(bib-dir):$$BIBINPUTS;           export BIBINPUTS; \
 	  BSTINPUTS=../$(styles-dir):$$BSTINPUTS;           export BSTINPUTS; \
-	  ../$(latexmk-call) -r latexmk.rc -pdf ../$(mainfile)
+	  ../$(latexmk-call) -bibtex -r latexmk.rc -pdf ../$(mainfile)
 endif
 
 ifeq "$(pdf-creation)" "ps2pdf"
@@ -1068,7 +1068,7 @@ $(pdffile): $(dirs) $(build-dir)/latexmk.rc $(texfiles) $(bibfiles)
 	@echo --- Making $@ ---
 	@cd $(build-dir); \
 	  TEXINPUTS=../$(source-dir):../$(styles-dir):$$TEXINPUTS; export TEXINPUTS; \
-	  BIBINPUTS=../$(source-dir):$$BIBINPUTS;           export BIBINPUTS; \
+	  BIBINPUTS=../$(bib-dir):$$BIBINPUTS;           export BIBINPUTS; \
 	  BSTINPUTS=../$(styles-dir):$$BSTINPUTS;           export BSTINPUTS; \
 	  ../$(latexmk-call) -r latexmk.rc -pdfps ../$(mainfile)
 endif
@@ -1078,7 +1078,7 @@ $(pdffile): $(dirs) $(build-dir)/latexmk.rc $(texfiles) $(bibfiles)
 	@echo --- Making $@ ---
 	@cd $(build-dir); \
 	  TEXINPUTS=../$(source-dir):../$(styles-dir):$$TEXINPUTS; export TEXINPUTS; \
-	  BIBINPUTS=../$(source-dir):$$BIBINPUTS;           export BIBINPUTS; \
+	  BIBINPUTS=../$(bib-dir):$$BIBINPUTS;           export BIBINPUTS; \
 	  BSTINPUTS=../$(styles-dir):$$BSTINPUTS;           export BSTINPUTS; \
 	  ../$(latexmk-call) -r latexmk.rc -pdfdvi ../$(mainfile)
 endif
@@ -1087,7 +1087,7 @@ $(psfile): $(dirs) $(build-dir)/latexmk.rc $(texfiles) $(bibfiles)
 	@echo --- Making $@ ---
 	@cd $(build-dir); \
 	  TEXINPUTS=../$(source-dir):../$(styles-dir):$$TEXINPUTS; export TEXINPUTS; \
-	  BIBINPUTS=../$(source-dir):$$BIBINPUTS;           export BIBINPUTS; \
+	  BIBINPUTS=../$(bib-dir):$$BIBINPUTS;           export BIBINPUTS; \
 	  BSTINPUTS=../$(styles-dir):$$BSTINPUTS;           export BSTINPUTS; \
 	  ../$(latexmk-call) -r latexmk.rc -ps ../$(mainfile)
 
@@ -1095,7 +1095,7 @@ $(dvifile): $(dirs) $(build-dir)/latexmk.rc $(texfiles) $(bibfiles)
 	@echo --- Making $@ ---
 	@cd $(build-dir); \
 	  TEXINPUTS=../$(source-dir):../$(styles-dir):$$TEXINPUTS; export TEXINPUTS; \
-	  BIBINPUTS=../$(source-dir):$$BIBINPUTS;           export BIBINPUTS; \
+	  BIBINPUTS=../$(bib-dir):$$BIBINPUTS;           export BIBINPUTS; \
 	  BSTINPUTS=../$(styles-dir):$$BSTINPUTS;           export BSTINPUTS; \
 	  ../$(latexmk-call) -r latexmk.rc ../$(mainfile)
 
