@@ -1,0 +1,721 @@
+=head1 NAME
+
+B<Chicle> - a simple framework for writing and publishing LaTeX documents
+
+
+=head1 SYNOPSIS
+
+make [B<default>|B<all>|B<pdf>|B<ps>|B<dvi>|B<print>|B<view>|B<preview>|...]
+
+make B<help>|B<man>
+
+
+=head1 DESCRIPTION
+
+B<Chicle> is a simple framework for writing and publishing LaTeX documents.
+
+=head2 What does chicle mean?
+
+Chicle is the gum from Manilkara chicle, a species of sapodilla
+tree. It is a tropical evergreen tree, native to in Central America
+and South America. It is the traditional material used in chewing
+gum.
+
+The tree is also grown for its fruit which is plum-sized and has a
+translucent brown flesh. The tapping of the gum is similar to the
+tapping of latex from the rubber tree. Zigzag gashes are made in the
+tree trunk and the dripping gum is collected in small bags. Locals
+who collect chicle are called chicleros. This is then boiled till it
+reaches the correct thickness. Widespread tapping has lead to the
+tree becoming scarce and other sources like the related Balata
+(Manilkara bidentata) are being increasingly used. Many modern
+chewing gums use petroleum based plastic instead of chicle.
+
+Chicle was well known to the Aztec and Maya Indians and the early
+European settlers prized it for its subtle flavour and high sugar
+content.
+
+(Source: L<http://en.wikipedia.org/wiki/Chicle>)
+
+=head2 Requirements
+
+B<Chicle> needs some external programs to work. Most of them are
+configurable (see L<"CONFIGURATION"> for more information like
+default values and how to change them).
+
+=over 10
+
+=item * GNU make
+
+=item * LaTeX, pdfTeX and BibTeX
+
+=item * latexmk
+
+Version 4.64a is provided in the F<bin/> directory.
+
+=item * ps2pdf, epstopdf, pdftops and pdfnup
+
+=item * PDF viewer (e.g. I<xpdf>)
+
+=item * PS viewer (e.g. I<gv>)
+
+=item * DVI viewer (e.g. I<xdvi>)
+
+=item * LaTeX checker (e.g. I<lacheck>)
+
+=item * Perl and I<perl-doc>
+
+Only used to create and recreate documentation. Not needed for
+normal use.
+
+=back
+
+=head2 Compatibility Note
+
+The main test platform of B<Chicle> is GNU Make 3.80 and teTeX 2.0.2 on
+Debian and Ubuntu GNU/Linux.
+
+
+=head1 CONFIGURATION
+
+=head2 Main configuration
+
+=over 10
+
+=item project-name
+
+Sets the name of the project as used by the C<archive> target.
+
+=item document-name
+
+Sets the name of the main LaTeX file. This must be equal to the base
+name (without the F<.tex> ending) of a LaTeX file in the F<source/>
+directory.
+
+=item version 
+
+Sets the version number as used by the C<archive> target.
+
+=item archive-type
+
+Sets the file type as used by the C<archive> target. Possible values 
+are I<tar.gz> and I<zip>.
+
+The default value is I<tar.gz>.
+
+=item archive-format
+
+Sets the version format as used by the C<archive> target. Possible
+values are I<version>, I<date> and I<version-date>. 
+
+The default value is I<version>.
+
+=item paper-format
+
+Sets the default paper format used by C<dvips> and C<pdfnup>. 
+
+The default value is I<a4>.
+
+=item quiet
+
+Sets whether latexmk should be run with option I<-quiet> or
+not. 
+
+Possible values are I<yes> and I<no>. The default value is I<yes>.
+
+=item force
+
+Sets whether latexmk should be run with option I<-f> or
+not. 
+
+Possible values are I<yes> and I<no>. The default value is I<yes>.
+
+=item pdf-creation
+
+Sets the command used to create a PDF version of the LaTeX
+document. 
+
+Possible values are I<pdflatex>, I<dvipdf> and I<ps2pdf>. The
+default value is I<pdflatex>.
+
+=back
+
+=head2 Defaults
+
+=over 10
+
+=item default-format
+
+Sets the default format used by C<make default> or C<make>.
+
+Possible values are I<pdf>, I<ps> and I<dvi>. The default value is
+I<pdf>.
+
+=item default-nup-format
+
+Sets the default format used by the C<nup> targets. 
+
+Possible values are I<pdf> and I<ps>. The default value is I<pdf>.
+
+=item default-view-format
+
+Sets the default format used by the C<view> targets. 
+
+Possible values are I<pdf>, I<ps> and I<dvi>. The default value is
+I<pdf>.
+
+=item default-preview-format
+
+Sets the default format used by the C<preview> target. 
+
+Possible values are I<pdf>, I<ps> and I<dvi>. The default value is
+I<pdf>.
+
+=item default-print-format
+
+Sets the default format used by the C<print> targets. 
+
+Possible values are I<pdf>, I<ps> and I<dvi>. The default value is
+I<pdf>.
+
+=back
+
+=head2 File names
+
+=over 10
+
+=item readme-file
+
+Sets the name of the 'Read me' file.
+
+The default value is I<README.chicle>.
+
+=item make-file
+
+Sets the name of the Makefile.
+
+The default value is I<Makefile>.
+
+=back
+
+=head2 Directory names
+
+=over 10
+
+=item bib-dir
+
+Sets the name of the directory containing the BibTeX files.
+
+The default value is I<bib>.
+
+=item bin-dir
+
+Sets the name of the directory containing additional programs used
+by B<Chicle>, like latexmk.
+
+The default value is I<bin>.
+
+=item build-dir
+
+Sets the name of the directory used to build the document. This is
+where all the intermediate files are saved to. The build directory
+gets automatically created if needed.
+
+The default value is I<build>.
+
+=item doc-dir
+
+Sets the name of the documentation directory. This directory is used
+by the C<docs> target.
+
+The default value is I<doc>.
+
+=item output-dir
+
+Sets the name of the directory used to save the output files. This
+is where all the generated files are saved to. The output directory
+gets automatically created if needed.
+
+The default value is I<output>.
+
+=item source-dir
+
+Sets the name of the directory containing the LaTeX sources.
+
+The default value is I<source>.
+
+=item styles-dir
+
+Sets the name of the directory containing additional LaTeX styles,
+e.g. F<.bst>, F<.cls> and F<.sty> files.
+
+The default value is I<styles>.
+
+=back
+
+=head2 Documentation
+
+=over 10
+
+=item doc-style
+
+Sets the name of the CSS file used by I<pod2html>. The path of the
+file is relative to C<doc-dir>.
+
+The default value is I<style.css>.
+
+=item doc-backlink
+
+Sets the text used as backlink by I<pod2html>.
+
+The default value is I<[ back to top ]>.
+
+=back
+
+=head2 Programs
+
+=over 10
+
+=item pdf-viewer
+
+Sets the viewer used to view PDF files.
+
+The default value is I<xpdf>.
+
+=item ps-viewer
+
+Sets the viewer used to view PS files.
+
+The default value is I<gv>.
+
+=item dvi-viewer
+
+Sets the viewer used to view DVI files.
+
+The default value is I<xdvi>.
+
+=item dia
+
+Sets the command used to convert F<.dia> files to F<.eps> files.
+
+The default value is I<dia -e>.
+
+=item figtodev
+
+Sets the program used to convert F<.fig> files.
+
+The default value is I<fig2dev>.
+
+=item giftopnm
+
+Sets the program used to convert F<.gif> files.
+
+The default value is I<giftopnm>.
+
+=item pnmtopng
+
+Sets the program used to convert F<.pnm> files.
+
+The default value is I<pnmtopng>.
+
+=item syntax-check
+
+Sets the command used to check the syntax of LaTeX files.
+
+The default value is I<lacheck>.
+
+=item latexmk
+
+Sets the location of the latexmk script.
+
+The default value is I<$(bin-dir)/latexmk>.
+
+=item latex
+
+Sets the command used to process LaTeX files.
+
+The default value is I<latex>.
+
+=item pdflatex
+
+Sets the command used to create PDF files from LaTeX files.
+
+The default value is I<pdflatex>.
+
+=item bibtex
+
+Sets the command used to process BibTeX files.
+
+The default value is I<bibtex>.
+
+=item makeindex
+
+Sets the command used to process index files.
+
+The default value is I<makeindex>.
+
+=item dvips
+
+Sets the command used to process DVI files. 
+
+The default value is I<dvips -Ppdf -Z -t$(paper-format)>. This helps
+to generate PostScript which converts better to PDF.
+
+=item epstopdf
+
+Sets the command used to convert EPS files to PDF.
+
+The default value is I<epstopdf>.
+
+=item ps2pdf
+
+Sets the command used to convert PS files to PDF.
+
+The default value is I<ps2pdf>.
+
+=item pdftops
+
+Sets the command used to convert PDF files to PS.
+
+The default value is I<pdftops>.
+
+=item pdfnup
+
+Sets the command used to convert a PDF document to a PDF file
+containing multiple pages per sheet.
+
+The default value is I<pdfnup --paper$(paper-format)>.
+
+=item pdf-print
+
+Sets the command used to print PDF files.
+
+The default value is I<lpr>.
+
+=item ps-print
+
+Sets the command used to print PS files.
+
+The default value is I<lpr>.
+
+=item dvi-print
+
+Sets the command used to print DVI files.
+
+The default value is I<lpr>.
+
+=back
+
+
+=head1 GENERAL TARGETS
+
+
+=head2 PDF, PS and DVI creation
+
+=over 10
+
+=item default
+
+Calls either the C<pdf>, C<ps> or C<dvi> target, depending on the
+value of the variable C<default-format>.
+
+=item all
+
+Creates PDF, DVI and PS output.
+
+=item pdf
+
+Creates PDF output.
+
+=item ps
+
+Creates PS output.
+
+=item dvi
+
+Creates DVI output.
+
+=back
+
+=head2 Multiple pages per sheet
+
+=over 10
+
+=item '2up'
+
+Creates PS or PDF output containing 2 pages per sheet.
+
+To determine which output format to use, the variable
+C<default-nup-format> gets evaluated.
+
+=item '4up'
+
+Creates PS or PDF output containing 4 pages per sheet. 
+
+To determine which output format to use, the variable
+C<default-nup-format> gets evaluated.
+
+=item '8up'
+
+Creates PS or PDF output containing 8 pages per sheet. 
+
+To determine which output format to use, the variable
+C<default-nup-format> gets evaluated.
+
+=back
+
+=head2 Print
+
+=over 10
+
+=item print
+
+Prints the translated LaTeX document as PDF, PS or DVI. 
+
+To determine which format should be used, the variable
+C<default-print-format> gets evaluated.
+
+=item print-2up
+
+Prints the translated LaTeX document as PDF or PS containing 2 pages
+per sheet. 
+
+To determine which format should be used, the variable
+C<default-print-format> gets evaluated.
+
+=item print-4up
+
+Prints the translated LaTeX document as PDF or PS containing 4 pages
+per sheet. 
+
+To determine which format should be used, the variable
+C<default-print-format> gets evaluated.
+
+=item print-8up
+
+Prints the translated LaTeX document as PDF or PS containing 8 pages
+per sheet. 
+
+To determine which format should be used, the variable
+C<default-print-format> gets evaluated.
+
+=back
+
+=head2 View
+
+=over 10
+
+=item view
+
+Opens the translated LaTeX document in C<pdf-viewer>, C<ps-viewer>
+or C<dvi-viewer>. 
+
+To determine which format should be used, the variable
+C<default-view-format> gets evaluated.
+
+=item view-2up
+
+Opens the translated LaTeX document in C<pdf-viewer>, C<ps-viewer>
+or C<dvi-viewer> containing 2 pages per sheet. 
+
+To determine which format should be used, the variable
+C<default-view-format> gets evaluated.
+
+=item view-4up
+
+Opens the translated LaTeX document in C<pdf-viewer>, C<ps-viewer>
+or C<dvi-viewer> containing 4 pages per sheet. 
+
+To determine which format should be used, the variable
+C<default-view-format> gets evaluated.
+
+=item view-8up
+
+Opens the translated LaTeX document in C<pdf-viewer>, C<ps-viewer>
+or C<dvi-viewer> containing 8 pages per sheet. 
+
+To determine which format should be used, the variable
+C<default-view-format> gets evaluated.
+
+=back
+
+=head2 Preview
+
+=over 10
+
+=item preview
+
+Previews the translatex LaTeX document and continuously updates. 
+
+To determine which format should be used, the variable
+C<default-preview-format> gets evaluated.
+
+=back
+
+=head2 Check
+
+=over 10
+
+=item check
+
+Checks the LaTeX source with C<syntax-check>.
+
+=back
+
+=head2 Distribution
+
+=over 10
+
+=item archive
+
+Calls C<tidy> and creates an archive version of all distribution
+files.
+
+=back
+
+=head2 Cleaning
+
+=over 10
+
+=item clean
+
+Removes intermediate and temporary files.
+
+=item tidy
+
+Removes intermediate, temporary and output files.
+
+=back
+
+=head1 PSEUDO FILE TARGETS
+
+
+=head2 Conversion
+
+=over 10
+
+=item %.pdf: %.eps
+
+Converts F<.eps> files to F<.pdf> with C<epstopdf>.
+
+=item %.eps: %.fig
+
+Converts F<.fig> files to F<.eps> with C<figtodev>.
+
+=item %.eps: %.dia
+
+Converts F<.dia> files to F<.eps> with C<dia>.
+
+=item %.pdf: %.fig
+
+Converts F<.fig> files to F<.pdf> with C<figtodev>.
+
+=item %.png: %.gif
+
+Converts F<.gif> files to F<.png> with C<giftopnm> and
+C<pnmtopng>.
+
+=back
+
+=head2 Miscellaneous
+
+=over 10
+
+=item %.check: %.tex
+
+Checks F<.tex> files with C<syntax-check>.
+
+=back
+
+=head1 DOCUMENTATION TARGETS
+
+
+=head2 Help
+
+=over 10
+
+=item help
+
+Prints a short help message. Use the target C<man> to view the
+complete manual.
+
+=item man
+
+Shows the complete manual.
+
+=back
+
+=head2 Documentation
+
+=over 10
+
+=item docs-clean
+
+Cleans the documentation directory.
+
+=item docs
+
+Creates documentation. This target needs Perl and and I<perl-doc> to
+generate the different documentation formats.
+
+=back
+
+
+=head1 SUPPORT
+
+Contact the L</"AUTHOR">.
+
+
+=head1 BUGS
+
+Unknown
+
+
+=head1 ACKNOWLEDGEMENTS
+
+B<Chicle> is based on
+
+=over
+
+=item Makefile.latex 
+
+by Thorsten Vitt <thvitt@gmx.de>, revision 1.16 from 2005/04/19. See
+L<http://www.informatik.hu-berlin.de/~vitt/latex/make> for the
+newest version.
+
+=item Dissertation Template
+
+by David Coppit, version 0.23. See
+L<http://www.coppit.org/code/> for the newest version.
+
+=back
+
+
+=head1 VERSION
+
+B<Chicle> 2.1
+
+
+=head1 AUTHOR
+
+Thomas Weibel, <thom@beeblebrox.net>
+
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008-2010 Thomas Weibel, <thom@beeblebrox.net>
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+

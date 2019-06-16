@@ -1,0 +1,5 @@
+Usage:
+    make [default|all|pdf|ps|dvi|print|view|preview|...]
+
+    make help|man
+

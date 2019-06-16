@@ -1,0 +1,873 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Chicle 1.0</title>
+<link rel="stylesheet" href="style.css" type="text/css" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body id="_podtop_">
+
+
+
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
+  <li><a href="#DESCRIPTION">DESCRIPTION</a>
+    <ul>
+      <li><a href="#What-does-chicle-mean">What does chicle mean?</a></li>
+      <li><a href="#Requirements">Requirements</a></li>
+      <li><a href="#Compatibility-Note">Compatibility Note</a></li>
+    </ul>
+  </li>
+  <li><a href="#CONFIGURATION">CONFIGURATION</a>
+    <ul>
+      <li><a href="#Main-configuration">Main configuration</a></li>
+      <li><a href="#Defaults">Defaults</a></li>
+      <li><a href="#File-names">File names</a></li>
+      <li><a href="#Directory-names">Directory names</a></li>
+      <li><a href="#Documentation">Documentation</a></li>
+      <li><a href="#Programs">Programs</a></li>
+    </ul>
+  </li>
+  <li><a href="#GENERAL-TARGETS">GENERAL TARGETS</a>
+    <ul>
+      <li><a href="#PDF-PS-and-DVI-creation">PDF, PS and DVI creation</a></li>
+      <li><a href="#Multiple-pages-per-sheet">Multiple pages per sheet</a></li>
+      <li><a href="#Print">Print</a></li>
+      <li><a href="#View">View</a></li>
+      <li><a href="#Preview">Preview</a></li>
+      <li><a href="#Check">Check</a></li>
+      <li><a href="#Distribution">Distribution</a></li>
+      <li><a href="#Cleaning">Cleaning</a></li>
+    </ul>
+  </li>
+  <li><a href="#PSEUDO-FILE-TARGETS">PSEUDO FILE TARGETS</a>
+    <ul>
+      <li><a href="#Conversion">Conversion</a></li>
+      <li><a href="#Miscellaneous">Miscellaneous</a></li>
+    </ul>
+  </li>
+  <li><a href="#DOCUMENTATION-TARGETS">DOCUMENTATION TARGETS</a>
+    <ul>
+      <li><a href="#Help">Help</a></li>
+      <li><a href="#Documentation1">Documentation</a></li>
+    </ul>
+  </li>
+  <li><a href="#SUPPORT">SUPPORT</a></li>
+  <li><a href="#BUGS">BUGS</a></li>
+  <li><a href="#ACKNOWLEDGEMENTS">ACKNOWLEDGEMENTS</a></li>
+  <li><a href="#VERSION">VERSION</a></li>
+  <li><a href="#AUTHOR">AUTHOR</a></li>
+  <li><a href="#COPYRIGHT">COPYRIGHT</a></li>
+</ul>
+
+<a href="#_podtop_"><h1 id="NAME">NAME</h1></a>
+
+<p><b>Chicle</b> - a simple framework for writing and publishing LaTeX documents</p>
+
+<a href="#_podtop_"><h1 id="SYNOPSIS">SYNOPSIS</h1></a>
+
+<p>make [<b>default</b>|<b>all</b>|<b>pdf</b>|<b>ps</b>|<b>dvi</b>|<b>print</b>|<b>view</b>|<b>preview</b>|...]</p>
+
+<p>make <b>help</b>|<b>man</b></p>
+
+<a href="#_podtop_"><h1 id="DESCRIPTION">DESCRIPTION</h1></a>
+
+<p><b>Chicle</b> is a simple framework for writing and publishing LaTeX documents.</p>
+
+<h2 id="What-does-chicle-mean">What does chicle mean?</h2>
+
+<p>Chicle is the gum from Manilkara chicle, a species of sapodilla tree. It is a tropical evergreen tree, native to in Central America and South America. It is the traditional material used in chewing gum.</p>
+
+<p>The tree is also grown for its fruit which is plum-sized and has a translucent brown flesh. The tapping of the gum is similar to the tapping of latex from the rubber tree. Zigzag gashes are made in the tree trunk and the dripping gum is collected in small bags. Locals who collect chicle are called chicleros. This is then boiled till it reaches the correct thickness. Widespread tapping has lead to the tree becoming scarce and other sources like the related Balata (Manilkara bidentata) are being increasingly used. Many modern chewing gums use petroleum based plastic instead of chicle.</p>
+
+<p>Chicle was well known to the Aztec and Maya Indians and the early European settlers prized it for its subtle flavour and high sugar content.</p>
+
+<p>(Source: <a href="http://en.wikipedia.org/wiki/Chicle">http://en.wikipedia.org/wiki/Chicle</a>)</p>
+
+<h2 id="Requirements">Requirements</h2>
+
+<p><b>Chicle</b> needs some external programs to work. Most of them are configurable (see <a href="#CONFIGURATION">&quot;CONFIGURATION&quot;</a> for more information like default values and how to change them).</p>
+
+<ul>
+
+<li><p>GNU make</p>
+
+</li>
+<li><p>LaTeX, pdfTeX and BibTeX</p>
+
+</li>
+<li><p>latexmk</p>
+
+<p>Version 4.64a is provided in the <i>bin/</i> directory.</p>
+
+</li>
+<li><p>ps2pdf, epstopdf, pdftops and pdfnup</p>
+
+</li>
+<li><p>PDF viewer (e.g. <i>xpdf</i>)</p>
+
+</li>
+<li><p>PS viewer (e.g. <i>gv</i>)</p>
+
+</li>
+<li><p>DVI viewer (e.g. <i>xdvi</i>)</p>
+
+</li>
+<li><p>LaTeX checker (e.g. <i>lacheck</i>)</p>
+
+</li>
+<li><p>Perl and <i>perl-doc</i></p>
+
+<p>Only used to create and recreate documentation. Not needed for normal use.</p>
+
+</li>
+</ul>
+
+<h2 id="Compatibility-Note">Compatibility Note</h2>
+
+<p>The main test platform of <b>Chicle</b> is GNU Make 3.80 and teTeX 2.0.2 on Debian and Ubuntu GNU/Linux.</p>
+
+<a href="#_podtop_"><h1 id="CONFIGURATION">CONFIGURATION</h1></a>
+
+<h2 id="Main-configuration">Main configuration</h2>
+
+<dl>
+
+<dt id="project-name">project-name</dt>
+<dd>
+
+<p>Sets the name of the project as used by the <code>archive</code> target.</p>
+
+</dd>
+<dt id="document-name">document-name</dt>
+<dd>
+
+<p>Sets the name of the main LaTeX file. This must be equal to the base name (without the <i>.tex</i> ending) of a LaTeX file in the <i>source/</i> directory.</p>
+
+</dd>
+<dt id="version">version</dt>
+<dd>
+
+<p>Sets the version number as used by the <code>archive</code> target.</p>
+
+</dd>
+<dt id="archive-type">archive-type</dt>
+<dd>
+
+<p>Sets the file type as used by the <code>archive</code> target. Possible values are <i>tar.gz</i> and <i>zip</i>.</p>
+
+<p>The default value is <i>tar.gz</i>.</p>
+
+</dd>
+<dt id="archive-format">archive-format</dt>
+<dd>
+
+<p>Sets the version format as used by the <code>archive</code> target. Possible values are <i>version</i>, <i>date</i> and <i>version-date</i>.</p>
+
+<p>The default value is <i>version</i>.</p>
+
+</dd>
+<dt id="paper-format">paper-format</dt>
+<dd>
+
+<p>Sets the default paper format used by <code>dvips</code> and <code>pdfnup</code>.</p>
+
+<p>The default value is <i>a4</i>.</p>
+
+</dd>
+<dt id="quiet">quiet</dt>
+<dd>
+
+<p>Sets whether latexmk should be run with option <i>-quiet</i> or not.</p>
+
+<p>Possible values are <i>yes</i> and <i>no</i>. The default value is <i>yes</i>.</p>
+
+</dd>
+<dt id="force">force</dt>
+<dd>
+
+<p>Sets whether latexmk should be run with option <i>-f</i> or not.</p>
+
+<p>Possible values are <i>yes</i> and <i>no</i>. The default value is <i>yes</i>.</p>
+
+</dd>
+<dt id="pdf-creation">pdf-creation</dt>
+<dd>
+
+<p>Sets the command used to create a PDF version of the LaTeX document.</p>
+
+<p>Possible values are <i>pdflatex</i>, <i>dvipdf</i> and <i>ps2pdf</i>. The default value is <i>pdflatex</i>.</p>
+
+</dd>
+</dl>
+
+<h2 id="Defaults">Defaults</h2>
+
+<dl>
+
+<dt id="default-format">default-format</dt>
+<dd>
+
+<p>Sets the default format used by <code>make default</code> or <code>make</code>.</p>
+
+<p>Possible values are <i>pdf</i>, <i>ps</i> and <i>dvi</i>. The default value is <i>pdf</i>.</p>
+
+</dd>
+<dt id="default-nup-format">default-nup-format</dt>
+<dd>
+
+<p>Sets the default format used by the <code>nup</code> targets.</p>
+
+<p>Possible values are <i>pdf</i> and <i>ps</i>. The default value is <i>pdf</i>.</p>
+
+</dd>
+<dt id="default-view-format">default-view-format</dt>
+<dd>
+
+<p>Sets the default format used by the <code>view</code> targets.</p>
+
+<p>Possible values are <i>pdf</i>, <i>ps</i> and <i>dvi</i>. The default value is <i>pdf</i>.</p>
+
+</dd>
+<dt id="default-preview-format">default-preview-format</dt>
+<dd>
+
+<p>Sets the default format used by the <code>preview</code> target.</p>
+
+<p>Possible values are <i>pdf</i>, <i>ps</i> and <i>dvi</i>. The default value is <i>pdf</i>.</p>
+
+</dd>
+<dt id="default-print-format">default-print-format</dt>
+<dd>
+
+<p>Sets the default format used by the <code>print</code> targets.</p>
+
+<p>Possible values are <i>pdf</i>, <i>ps</i> and <i>dvi</i>. The default value is <i>pdf</i>.</p>
+
+</dd>
+</dl>
+
+<h2 id="File-names">File names</h2>
+
+<dl>
+
+<dt id="readme-file">readme-file</dt>
+<dd>
+
+<p>Sets the name of the &#39;Read me&#39; file.</p>
+
+<p>The default value is <i>README.chicle</i>.</p>
+
+</dd>
+<dt id="make-file">make-file</dt>
+<dd>
+
+<p>Sets the name of the Makefile.</p>
+
+<p>The default value is <i>Makefile</i>.</p>
+
+</dd>
+</dl>
+
+<h2 id="Directory-names">Directory names</h2>
+
+<dl>
+
+<dt id="bib-dir">bib-dir</dt>
+<dd>
+
+<p>Sets the name of the directory containing the BibTeX files.</p>
+
+<p>The default value is <i>bib</i>.</p>
+
+</dd>
+<dt id="bin-dir">bin-dir</dt>
+<dd>
+
+<p>Sets the name of the directory containing additional programs used by <b>Chicle</b>, like latexmk.</p>
+
+<p>The default value is <i>bin</i>.</p>
+
+</dd>
+<dt id="build-dir">build-dir</dt>
+<dd>
+
+<p>Sets the name of the directory used to build the document. This is where all the intermediate files are saved to. The build directory gets automatically created if needed.</p>
+
+<p>The default value is <i>build</i>.</p>
+
+</dd>
+<dt id="doc-dir">doc-dir</dt>
+<dd>
+
+<p>Sets the name of the documentation directory. This directory is used by the <code>docs</code> target.</p>
+
+<p>The default value is <i>doc</i>.</p>
+
+</dd>
+<dt id="output-dir">output-dir</dt>
+<dd>
+
+<p>Sets the name of the directory used to save the output files. This is where all the generated files are saved to. The output directory gets automatically created if needed.</p>
+
+<p>The default value is <i>output</i>.</p>
+
+</dd>
+<dt id="source-dir">source-dir</dt>
+<dd>
+
+<p>Sets the name of the directory containing the LaTeX sources.</p>
+
+<p>The default value is <i>source</i>.</p>
+
+</dd>
+<dt id="styles-dir">styles-dir</dt>
+<dd>
+
+<p>Sets the name of the directory containing additional LaTeX styles, e.g. <i>.bst</i>, <i>.cls</i> and <i>.sty</i> files.</p>
+
+<p>The default value is <i>styles</i>.</p>
+
+</dd>
+</dl>
+
+<h2 id="Documentation">Documentation</h2>
+
+<dl>
+
+<dt id="doc-style">doc-style</dt>
+<dd>
+
+<p>Sets the name of the CSS file used by <i>pod2html</i>. The path of the file is relative to <code>doc-dir</code>.</p>
+
+<p>The default value is <i>style.css</i>.</p>
+
+</dd>
+<dt id="doc-backlink">doc-backlink</dt>
+<dd>
+
+<p>Sets the text used as backlink by <i>pod2html</i>.</p>
+
+<p>The default value is <i>[ back to top ]</i>.</p>
+
+</dd>
+</dl>
+
+<h2 id="Programs">Programs</h2>
+
+<dl>
+
+<dt id="pdf-viewer">pdf-viewer</dt>
+<dd>
+
+<p>Sets the viewer used to view PDF files.</p>
+
+<p>The default value is <i>xpdf</i>.</p>
+
+</dd>
+<dt id="ps-viewer">ps-viewer</dt>
+<dd>
+
+<p>Sets the viewer used to view PS files.</p>
+
+<p>The default value is <i>gv</i>.</p>
+
+</dd>
+<dt id="dvi-viewer">dvi-viewer</dt>
+<dd>
+
+<p>Sets the viewer used to view DVI files.</p>
+
+<p>The default value is <i>xdvi</i>.</p>
+
+</dd>
+<dt id="dia">dia</dt>
+<dd>
+
+<p>Sets the command used to convert <i>.dia</i> files to <i>.eps</i> files.</p>
+
+<p>The default value is <i>dia -e</i>.</p>
+
+</dd>
+<dt id="figtodev">figtodev</dt>
+<dd>
+
+<p>Sets the program used to convert <i>.fig</i> files.</p>
+
+<p>The default value is <i>fig2dev</i>.</p>
+
+</dd>
+<dt id="giftopnm">giftopnm</dt>
+<dd>
+
+<p>Sets the program used to convert <i>.gif</i> files.</p>
+
+<p>The default value is <i>giftopnm</i>.</p>
+
+</dd>
+<dt id="pnmtopng">pnmtopng</dt>
+<dd>
+
+<p>Sets the program used to convert <i>.pnm</i> files.</p>
+
+<p>The default value is <i>pnmtopng</i>.</p>
+
+</dd>
+<dt id="syntax-check">syntax-check</dt>
+<dd>
+
+<p>Sets the command used to check the syntax of LaTeX files.</p>
+
+<p>The default value is <i>lacheck</i>.</p>
+
+</dd>
+<dt id="latexmk">latexmk</dt>
+<dd>
+
+<p>Sets the location of the latexmk script.</p>
+
+<p>The default value is <i>$(bin-dir)/latexmk</i>.</p>
+
+</dd>
+<dt id="latex">latex</dt>
+<dd>
+
+<p>Sets the command used to process LaTeX files.</p>
+
+<p>The default value is <i>latex</i>.</p>
+
+</dd>
+<dt id="pdflatex">pdflatex</dt>
+<dd>
+
+<p>Sets the command used to create PDF files from LaTeX files.</p>
+
+<p>The default value is <i>pdflatex</i>.</p>
+
+</dd>
+<dt id="bibtex">bibtex</dt>
+<dd>
+
+<p>Sets the command used to process BibTeX files.</p>
+
+<p>The default value is <i>bibtex</i>.</p>
+
+</dd>
+<dt id="makeindex">makeindex</dt>
+<dd>
+
+<p>Sets the command used to process index files.</p>
+
+<p>The default value is <i>makeindex</i>.</p>
+
+</dd>
+<dt id="dvips">dvips</dt>
+<dd>
+
+<p>Sets the command used to process DVI files.</p>
+
+<p>The default value is <i>dvips -Ppdf -Z -t$(paper-format)</i>. This helps to generate PostScript which converts better to PDF.</p>
+
+</dd>
+<dt id="epstopdf">epstopdf</dt>
+<dd>
+
+<p>Sets the command used to convert EPS files to PDF.</p>
+
+<p>The default value is <i>epstopdf</i>.</p>
+
+</dd>
+<dt id="ps2pdf">ps2pdf</dt>
+<dd>
+
+<p>Sets the command used to convert PS files to PDF.</p>
+
+<p>The default value is <i>ps2pdf</i>.</p>
+
+</dd>
+<dt id="pdftops">pdftops</dt>
+<dd>
+
+<p>Sets the command used to convert PDF files to PS.</p>
+
+<p>The default value is <i>pdftops</i>.</p>
+
+</dd>
+<dt id="pdfnup">pdfnup</dt>
+<dd>
+
+<p>Sets the command used to convert a PDF document to a PDF file containing multiple pages per sheet.</p>
+
+<p>The default value is <i>pdfnup --paper$(paper-format)</i>.</p>
+
+</dd>
+<dt id="pdf-print">pdf-print</dt>
+<dd>
+
+<p>Sets the command used to print PDF files.</p>
+
+<p>The default value is <i>lpr</i>.</p>
+
+</dd>
+<dt id="ps-print">ps-print</dt>
+<dd>
+
+<p>Sets the command used to print PS files.</p>
+
+<p>The default value is <i>lpr</i>.</p>
+
+</dd>
+<dt id="dvi-print">dvi-print</dt>
+<dd>
+
+<p>Sets the command used to print DVI files.</p>
+
+<p>The default value is <i>lpr</i>.</p>
+
+</dd>
+</dl>
+
+<a href="#_podtop_"><h1 id="GENERAL-TARGETS">GENERAL TARGETS</h1></a>
+
+<h2 id="PDF-PS-and-DVI-creation">PDF, PS and DVI creation</h2>
+
+<dl>
+
+<dt id="default">default</dt>
+<dd>
+
+<p>Calls either the <code>pdf</code>, <code>ps</code> or <code>dvi</code> target, depending on the value of the variable <code>default-format</code>.</p>
+
+</dd>
+<dt id="all">all</dt>
+<dd>
+
+<p>Creates PDF, DVI and PS output.</p>
+
+</dd>
+<dt id="pdf">pdf</dt>
+<dd>
+
+<p>Creates PDF output.</p>
+
+</dd>
+<dt id="ps">ps</dt>
+<dd>
+
+<p>Creates PS output.</p>
+
+</dd>
+<dt id="dvi">dvi</dt>
+<dd>
+
+<p>Creates DVI output.</p>
+
+</dd>
+</dl>
+
+<h2 id="Multiple-pages-per-sheet">Multiple pages per sheet</h2>
+
+<dl>
+
+<dt id="up">&#39;2up&#39;</dt>
+<dd>
+
+<p>Creates PS or PDF output containing 2 pages per sheet.</p>
+
+<p>To determine which output format to use, the variable <code>default-nup-format</code> gets evaluated.</p>
+
+</dd>
+<dt id="up1">&#39;4up&#39;</dt>
+<dd>
+
+<p>Creates PS or PDF output containing 4 pages per sheet.</p>
+
+<p>To determine which output format to use, the variable <code>default-nup-format</code> gets evaluated.</p>
+
+</dd>
+<dt id="up2">&#39;8up&#39;</dt>
+<dd>
+
+<p>Creates PS or PDF output containing 8 pages per sheet.</p>
+
+<p>To determine which output format to use, the variable <code>default-nup-format</code> gets evaluated.</p>
+
+</dd>
+</dl>
+
+<h2 id="Print">Print</h2>
+
+<dl>
+
+<dt id="print">print</dt>
+<dd>
+
+<p>Prints the translated LaTeX document as PDF, PS or DVI.</p>
+
+<p>To determine which format should be used, the variable <code>default-print-format</code> gets evaluated.</p>
+
+</dd>
+<dt id="print-2up">print-2up</dt>
+<dd>
+
+<p>Prints the translated LaTeX document as PDF or PS containing 2 pages per sheet.</p>
+
+<p>To determine which format should be used, the variable <code>default-print-format</code> gets evaluated.</p>
+
+</dd>
+<dt id="print-4up">print-4up</dt>
+<dd>
+
+<p>Prints the translated LaTeX document as PDF or PS containing 4 pages per sheet.</p>
+
+<p>To determine which format should be used, the variable <code>default-print-format</code> gets evaluated.</p>
+
+</dd>
+<dt id="print-8up">print-8up</dt>
+<dd>
+
+<p>Prints the translated LaTeX document as PDF or PS containing 8 pages per sheet.</p>
+
+<p>To determine which format should be used, the variable <code>default-print-format</code> gets evaluated.</p>
+
+</dd>
+</dl>
+
+<h2 id="View">View</h2>
+
+<dl>
+
+<dt id="view">view</dt>
+<dd>
+
+<p>Opens the translated LaTeX document in <code>pdf-viewer</code>, <code>ps-viewer</code> or <code>dvi-viewer</code>.</p>
+
+<p>To determine which format should be used, the variable <code>default-view-format</code> gets evaluated.</p>
+
+</dd>
+<dt id="view-2up">view-2up</dt>
+<dd>
+
+<p>Opens the translated LaTeX document in <code>pdf-viewer</code>, <code>ps-viewer</code> or <code>dvi-viewer</code> containing 2 pages per sheet.</p>
+
+<p>To determine which format should be used, the variable <code>default-view-format</code> gets evaluated.</p>
+
+</dd>
+<dt id="view-4up">view-4up</dt>
+<dd>
+
+<p>Opens the translated LaTeX document in <code>pdf-viewer</code>, <code>ps-viewer</code> or <code>dvi-viewer</code> containing 4 pages per sheet.</p>
+
+<p>To determine which format should be used, the variable <code>default-view-format</code> gets evaluated.</p>
+
+</dd>
+<dt id="view-8up">view-8up</dt>
+<dd>
+
+<p>Opens the translated LaTeX document in <code>pdf-viewer</code>, <code>ps-viewer</code> or <code>dvi-viewer</code> containing 8 pages per sheet.</p>
+
+<p>To determine which format should be used, the variable <code>default-view-format</code> gets evaluated.</p>
+
+</dd>
+</dl>
+
+<h2 id="Preview">Preview</h2>
+
+<dl>
+
+<dt id="preview">preview</dt>
+<dd>
+
+<p>Previews the translatex LaTeX document and continuously updates.</p>
+
+<p>To determine which format should be used, the variable <code>default-preview-format</code> gets evaluated.</p>
+
+</dd>
+</dl>
+
+<h2 id="Check">Check</h2>
+
+<dl>
+
+<dt id="check">check</dt>
+<dd>
+
+<p>Checks the LaTeX source with <code>syntax-check</code>.</p>
+
+</dd>
+</dl>
+
+<h2 id="Distribution">Distribution</h2>
+
+<dl>
+
+<dt id="archive">archive</dt>
+<dd>
+
+<p>Calls <code>tidy</code> and creates an archive version of all distribution files.</p>
+
+</dd>
+</dl>
+
+<h2 id="Cleaning">Cleaning</h2>
+
+<dl>
+
+<dt id="clean">clean</dt>
+<dd>
+
+<p>Removes intermediate and temporary files.</p>
+
+</dd>
+<dt id="tidy">tidy</dt>
+<dd>
+
+<p>Removes intermediate, temporary and output files.</p>
+
+</dd>
+</dl>
+
+<a href="#_podtop_"><h1 id="PSEUDO-FILE-TARGETS">PSEUDO FILE TARGETS</h1></a>
+
+<h2 id="Conversion">Conversion</h2>
+
+<dl>
+
+<dt id="pdf:-.eps">%.pdf: %.eps</dt>
+<dd>
+
+<p>Converts <i>.eps</i> files to <i>.pdf</i> with <code>epstopdf</code>.</p>
+
+</dd>
+<dt id="eps:-.fig">%.eps: %.fig</dt>
+<dd>
+
+<p>Converts <i>.fig</i> files to <i>.eps</i> with <code>figtodev</code>.</p>
+
+</dd>
+<dt id="eps:-.dia">%.eps: %.dia</dt>
+<dd>
+
+<p>Converts <i>.dia</i> files to <i>.eps</i> with <code>dia</code>.</p>
+
+</dd>
+<dt id="pdf:-.fig">%.pdf: %.fig</dt>
+<dd>
+
+<p>Converts <i>.fig</i> files to <i>.pdf</i> with <code>figtodev</code>.</p>
+
+</dd>
+<dt id="png:-.gif">%.png: %.gif</dt>
+<dd>
+
+<p>Converts <i>.gif</i> files to <i>.png</i> with <code>giftopnm</code> and <code>pnmtopng</code>.</p>
+
+</dd>
+</dl>
+
+<h2 id="Miscellaneous">Miscellaneous</h2>
+
+<dl>
+
+<dt id="check:-.tex">%.check: %.tex</dt>
+<dd>
+
+<p>Checks <i>.tex</i> files with <code>syntax-check</code>.</p>
+
+</dd>
+</dl>
+
+<a href="#_podtop_"><h1 id="DOCUMENTATION-TARGETS">DOCUMENTATION TARGETS</h1></a>
+
+<h2 id="Help">Help</h2>
+
+<dl>
+
+<dt id="help">help</dt>
+<dd>
+
+<p>Prints a short help message. Use the target <code>man</code> to view the complete manual.</p>
+
+</dd>
+<dt id="man">man</dt>
+<dd>
+
+<p>Shows the complete manual.</p>
+
+</dd>
+</dl>
+
+<h2 id="Documentation1">Documentation</h2>
+
+<dl>
+
+<dt id="docs-clean">docs-clean</dt>
+<dd>
+
+<p>Cleans the documentation directory.</p>
+
+</dd>
+<dt id="docs">docs</dt>
+<dd>
+
+<p>Creates documentation. This target needs Perl and and <i>perl-doc</i> to generate the different documentation formats.</p>
+
+</dd>
+</dl>
+
+<a href="#_podtop_"><h1 id="SUPPORT">SUPPORT</h1></a>
+
+<p>Contact the <a href="#AUTHOR">&quot;AUTHOR&quot;</a>.</p>
+
+<a href="#_podtop_"><h1 id="BUGS">BUGS</h1></a>
+
+<p>Unknown</p>
+
+<a href="#_podtop_"><h1 id="ACKNOWLEDGEMENTS">ACKNOWLEDGEMENTS</h1></a>
+
+<p><b>Chicle</b> is based on</p>
+
+<dl>
+
+<dt id="Makefile.latex">Makefile.latex</dt>
+<dd>
+
+<p>by Thorsten Vitt &lt;thvitt@gmx.de&gt;, revision 1.16 from 2005/04/19. See <a href="http://www.informatik.hu-berlin.de/~vitt/latex/make">http://www.informatik.hu-berlin.de/~vitt/latex/make</a> for the newest version.</p>
+
+</dd>
+<dt id="Dissertation-Template">Dissertation Template</dt>
+<dd>
+
+<p>by David Coppit, version 0.23. See <a href="http://www.coppit.org/code/">http://www.coppit.org/code/</a> for the newest version.</p>
+
+</dd>
+</dl>
+
+<a href="#_podtop_"><h1 id="VERSION">VERSION</h1></a>
+
+<p><b>Chicle</b> 2.1</p>
+
+<a href="#_podtop_"><h1 id="AUTHOR">AUTHOR</h1></a>
+
+<p>Thomas Weibel, &lt;thom@beeblebrox.net&gt;</p>
+
+<a href="#_podtop_"><h1 id="COPYRIGHT">COPYRIGHT</h1></a>
+
+<p>Copyright (c) 2008-2010 Thomas Weibel, &lt;thom@beeblebrox.net&gt;</p>
+
+<p>This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.</p>
+
+<p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</p>
+
+<p>You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA</p>
+
+
+</body>
+
+</html>
+
+
